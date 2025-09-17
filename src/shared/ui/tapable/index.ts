@@ -1,1 +1,0 @@
-export { Tapable, type TapableProps } from './Tapable';

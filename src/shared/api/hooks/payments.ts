@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { paymentsClient } from '../clients/payments';
 import { bookingsKeys } from './bookings';
-import { telegramUtils } from '@/shared/lib/telegram-sdk';
+
 import type {
   Payment,
   PaymentMethodRequest,
@@ -115,17 +115,7 @@ export const usePaymentActions = () => {
     switch (payment.nextAction.type) {
       case 'openInvoice':
         // For Telegram Mini App
-        try {
-          const isTelegram = await telegramUtils.isTelegramEnv();
-          if (isTelegram) {
-            const result = await telegramUtils.openInvoice(payment.nextAction.slugOrUrl);
-            console.log('Invoice result:', result);
-          } else {
-            console.warn('Not in Telegram environment, cannot open invoice');
-          }
-        } catch (error) {
-          console.error('Failed to open invoice:', error);
-        }
+        console.warn('Not in Telegram environment, cannot open invoice');
         break;
 
       case 'redirect':

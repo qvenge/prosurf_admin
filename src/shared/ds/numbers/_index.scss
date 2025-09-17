@@ -1,0 +1,12 @@
+@use 'sass:map';
+@use 'number-tokens' as *;
+
+@function number($token-name) {
+  $number: map.get($tokens, $token-name);
+
+  @if $number == null {
+    @error "Number token `#{$token-name}` does not exist";
+  }
+
+  @return $number;
+}

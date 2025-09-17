@@ -1,0 +1,21 @@
+.root {
+  padding: 20px 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  /* header/h1/bold */
+  font-family: var(--family-Inter, Inter);
+  font-size: 38px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 50px; /* 131.579% */
+}
+
+.rightContent {
+  display: flex;
+  gap: 8px;
+}

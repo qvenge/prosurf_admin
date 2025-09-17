@@ -1,1 +1,0 @@
-export { MyBookings } from './ui/MyBookings';

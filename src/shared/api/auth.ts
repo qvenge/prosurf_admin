@@ -1,13 +1,11 @@
 import { createContext, useContext } from 'react';
 import { apiClient, tokenStorage, STORAGE_KEYS } from './config';
-import { LoginRequestSchema, LoginResponseSchema, RefreshRequestSchema, RefreshResponseSchema, UserSchema } from './schemas';
+import { RefreshRequestSchema, RefreshResponseSchema, UserSchema } from './schemas';
 import { validateResponse } from './config';
-import { telegramUtils } from '@/shared/lib/telegram-sdk';
-import type { AuthState, LoginRequest, LoginResponse, RefreshRequest, RefreshResponse, User } from './types';
+import type { AuthState, AuthResponse, RefreshRequest, RefreshResponse, User } from './types';
 
 // Authentication context
 export const AuthContext = createContext<AuthState & {
-  login: (request: LoginRequest) => Promise<LoginResponse>;
   logout: () => Promise<void>;
   refreshTokens: () => Promise<void>;
   updateUser: (user: User) => void;
@@ -17,7 +15,6 @@ export const AuthContext = createContext<AuthState & {
   refreshToken: null,
   isAuthenticated: false,
   isLoading: true,
-  login: async () => { throw new Error('AuthContext not initialized'); },
   logout: async () => { throw new Error('AuthContext not initialized'); },
   refreshTokens: async () => { throw new Error('AuthContext not initialized'); },
   updateUser: () => { throw new Error('AuthContext not initialized'); },
@@ -25,16 +22,6 @@ export const AuthContext = createContext<AuthState & {
 
 // Auth API functions
 export const authApi = {
-  /**
-   * Login with Telegram init data
-   */
-  async login(request: LoginRequest): Promise<LoginResponse> {
-    const validatedRequest = LoginRequestSchema.parse(request);
-    
-    const response = await apiClient.post('/auth/login', validatedRequest);
-    return validateResponse(response.data, LoginResponseSchema);
-  },
-
   /**
    * Refresh access token using refresh token
    */
@@ -103,10 +90,10 @@ export const authUtils = {
   /**
    * Save auth data to localStorage
    */
-  saveAuthData(loginResponse: LoginResponse): void {
-    tokenStorage.setAccessToken(loginResponse.accessToken);
-    tokenStorage.setRefreshToken(loginResponse.refreshToken);
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(loginResponse.user));
+  saveAuthData(authResponse: AuthResponse): void {
+    tokenStorage.setAccessToken(authResponse.accessToken);
+    tokenStorage.setRefreshToken(authResponse.refreshToken);
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(authResponse.user));
   },
 
   /**
@@ -145,47 +132,6 @@ export const authUtils = {
       };
     } catch (error) {
       console.error('Error parsing token payload:', error);
-      return null;
-    }
-  },
-
-  /**
-   * Get init data from Telegram SDK
-   */
-  getTelegramInitData(): string | null {
-    return telegramUtils.getInitDataRaw();
-  },
-
-  /**
-   * Validate if running in Telegram Mini App environment
-   */
-  async isTelegramMiniApp(): Promise<boolean> {
-    return await telegramUtils.isTelegramEnv();
-  },
-
-  /**
-   * Get Telegram user data if available
-   */
-  getTelegramUser() {
-    return telegramUtils.getUser();
-  },
-
-  /**
-   * Auto-login using Telegram Mini App init data
-   */
-  async autoLoginWithTelegram(initDataString?: string): Promise<LoginResponse | null> {
-    try {
-      // Use provided init data or try to get it from SDK
-      const initData = initDataString || this.getTelegramInitData();
-
-      if (!initData) {
-        console.warn('No init data available for authentication');
-        return null;
-      }
-
-      return await authApi.login({ initData });
-    } catch (error) {
-      console.error('Auto-login with Telegram failed:', error);
       return null;
     }
   },

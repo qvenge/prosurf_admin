@@ -1,392 +1,192 @@
 $tokens: (
-  'Roboto/Large Title/Regular': (
-    'font-size': 34px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 400,
-    'line-height': 42px,
-    'letter-spacing': 0.25px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Large Title/Semibold': (
-    'font-size': 34px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 600,
-    'line-height': 42px,
-    'letter-spacing': 0.25px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Large Title/Bold': (
-    'font-size': 34px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 700,
-    'line-height': 42px,
-    'letter-spacing': 0.25px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Large Title/Bold Caps': (
-    'font-size': 34px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 700,
-    'line-height': 42px,
-    'letter-spacing': 0.25px,
-    'text-transform': uppercase,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Title 1/Regular': (
-    'font-size': 28px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 400,
-    'line-height': 36px,
-    'letter-spacing': 0.1px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Title 1/Semibold': (
-    'font-size': 28px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 600,
-    'line-height': 36px,
-    'letter-spacing': 0.1px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Title 1/Bold': (
-    'font-size': 28px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 700,
-    'line-height': 36px,
-    'letter-spacing': 0.1px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Title 2/Regular': (
-    'font-size': 24px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 400,
-    'line-height': 32px,
-    'letter-spacing': 0px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Title 2/Semibold': (
-    'font-size': 24px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 600,
-    'line-height': 32px,
-    'letter-spacing': 0px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Title 2/Bold': (
-    'font-size': 24px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 700,
-    'line-height': 32px,
-    'letter-spacing': 0px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Title 3/Regular': (
-    'font-size': 20px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 400,
-    'line-height': 24px,
-    'letter-spacing': 0.15px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Title 3/Semibold': (
-    'font-size': 20px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 600,
-    'line-height': 24px,
-    'letter-spacing': 0.15px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Title 3/Bold': (
-    'font-size': 20px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 700,
-    'line-height': 24px,
-    'letter-spacing': 0.15px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Title 3/Bold Caps': (
-    'font-size': 20px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 700,
-    'line-height': 24px,
-    'letter-spacing': 0.15px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Headline/Regular': (
-    'font-size': 19px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 400,
-    'line-height': 28px,
-    'letter-spacing': 0.15px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Headline/Semibold': (
-    'font-size': 19px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 600,
-    'line-height': 28px,
-    'letter-spacing': 0.15px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Headline/Bold': (
-    'font-size': 19px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 700,
-    'line-height': 28px,
-    'letter-spacing': 0.15px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Text/Regular': (
-    'font-size': 17px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 400,
-    'line-height': 26px,
-    'letter-spacing': 0.1px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Text/Medium': (
-    'font-size': 17px,
-    'font-family': 'Roboto, sans-serif',
+  'header/h1/medium': (
+    'font-family': Inter,
     'font-weight': 500,
-    'line-height': 26px,
-    'letter-spacing': 0.1px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
+    'font-style': normal,
+    'font-size': 38px,
+    'line-height': 50px
   ),
-  'Roboto/Text/Semibold': (
+  'header/h1/semibold': (
+    'font-family': Inter,
+    'font-weight': 600,
+    'font-style': normal,
+    'font-size': 38px,
+    'line-height': 50px
+  ),
+  'header/h1/bold': (
+    'font-family': Inter,
+    'font-weight': 700,
+    'font-style': normal,
+    'font-size': 38px,
+    'line-height': 50px
+  ),
+  'header/h2/medium': (
+    'font-family': Inter,
+    'font-weight': 500,
+    'font-style': normal,
+    'font-size': 30px,
+    'line-height': 40px
+  ),
+  'header/h2/semibold': (
+    'font-family': Inter,
+    'font-weight': 600,
+    'font-style': normal,
+    'font-size': 30px,
+    'line-height': 40px
+  ),
+  'header/h2/bold': (
+    'font-family': Inter,
+    'font-weight': 700,
+    'font-style': normal,
+    'font-size': 30px,
+    'line-height': 40px
+  ),
+  'header/h3/medium': (
+    'font-family': Inter,
+    'font-weight': 500,
+    'font-style': normal,
+    'font-size': 24px,
+    'line-height': 32px
+  ),
+  'header/h3/semibold': (
+    'font-family': Inter,
+    'font-weight': 600,
+    'font-style': normal,
+    'font-size': 24px,
+    'line-height': 32px
+  ),
+  'header/h3/bold': (
+    'font-family': Inter,
+    'font-weight': 700,
+    'font-style': normal,
+    'font-size': 24px,
+    'line-height': 32px
+  ),
+  'header/h4/medium': (
+    'font-family': Inter,
+    'font-weight': 500,
+    'font-style': normal,
+    'font-size': 21px,
+    'line-height': 28px
+  ),
+  'header/h4/semibold': (
+    'font-family': Inter,
+    'font-weight': 600,
+    'font-style': normal,
+    'font-size': 21px,
+    'line-height': 28px
+  ),
+  'header/h4/bold': (
+    'font-family': Inter,
+    'font-weight': 700,
+    'font-style': normal,
+    'font-size': 21px,
+    'line-height': 28px
+  ),
+
+  'body/b1/regular': (
+    'font-family': Inter,
+    'font-weight': 400,
+    'font-style': normal,
+    'font-size': 19px,
+    'line-height': 28px
+  ),
+  'body/b1/medium': (
+    'font-family': Inter,
+    'font-weight': 500,
+    'font-style': normal,
+    'font-size': 19px,
+    'line-height': 28px
+  ),
+  'body/b1/semibold': (
+    'font-family': Inter,
+    'font-weight': 600,
+    'font-style': normal,
+    'font-size': 19px,
+    'line-height': 28px
+  ),
+  'body/b2/regular': (
+    'font-family': Inter,
+    'font-weight': 400,
+    'font-style': normal,
     'font-size': 17px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 600,
-    'line-height': 26px,
-    'letter-spacing': 0.1px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
+    'line-height': 28px
   ),
-  'Roboto/Text/Bold': (
+  'body/b2/medium': (
+    'font-family': Inter,
+    'font-weight': 500,
+    'font-style': normal,
     'font-size': 17px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 700,
-    'line-height': 26px,
-    'letter-spacing': 0.1px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
+    'line-height': 28px
   ),
-  'Roboto/Subheadline 1/Regular': (
-    'font-size': 16px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 400,
-    'line-height': 24px,
-    'letter-spacing': 0.15px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Subheadline 1/Regular Mono': (
-    'font-size': 16px,
-    'font-family': 'Roboto Mono',
-    'font-weight': 400,
-    'line-height': 24px,
-    'letter-spacing': 0.15px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Subheadline 1/Semibold': (
-    'font-size': 16px,
-    'font-family': 'Roboto, sans-serif',
+  'body/b2/semibold': (
+    'font-family': Inter,
     'font-weight': 600,
-    'line-height': 24px,
-    'letter-spacing': 0.15px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
+    'font-style': normal,
+    'font-size': 17px,
+    'line-height': 28px
   ),
-  'Roboto/Subheadline 1/Bold': (
-    'font-size': 16px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 700,
-    'line-height': 24px,
-    'letter-spacing': 0.15px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Subheadline 2/Regular': (
-    'font-size': 15px,
-    'font-family': 'Roboto, sans-serif',
+  'body/b3/regular': (
+    'font-family': Inter,
     'font-weight': 400,
-    'line-height': 22px,
-    'letter-spacing': 0.15px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Subheadline 2/Semibold': (
+    'font-style': normal,
     'font-size': 15px,
-    'font-family': 'Roboto, sans-serif',
+    'line-height': 24px
+  ),
+  'body/b3/medium': (
+    'font-family': Inter,
+    'font-weight': 500,
+    'font-style': normal,
+    'font-size': 15px,
+    'line-height': 24px
+  ),
+  'body/b3/semibold': (
+    'font-family': Inter,
     'font-weight': 600,
-    'line-height': 22px,
-    'letter-spacing': 0.15px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Subheadline 2/Semibold Caps': (
+    'font-style': normal,
     'font-size': 15px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 600,
-    'line-height': 22px,
-    'letter-spacing': 0.15px,
-    'text-transform': uppercase,
-    'text-decoration': none,
-    'font-style': normal
+    'line-height': 24px
   ),
-  'Roboto/Subheadline 2/Bold': (
-    'font-size': 15px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 700,
-    'line-height': 22px,
-    'letter-spacing': 0.15px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Subheadline 2/Bold Caps': (
-    'font-size': 15px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 700,
-    'line-height': 22px,
-    'letter-spacing': 0.15px,
-    'text-transform': uppercase,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Subheadline 2/Regular Mono': (
-    'font-size': 15px,
-    'font-family': 'Roboto Mono',
+  'body/b4/regular': (
+    'font-family': Inter,
     'font-weight': 400,
-    'line-height': 22px,
-    'letter-spacing': 0.15px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Caption 1/Regular': (
+    'font-style': normal,
     'font-size': 13px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 400,
-    'line-height': 20px,
-    'letter-spacing': 0.1px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
+    'line-height': 20px
   ),
-  'Roboto/Caption 1/Semibold': (
+  'body/b4/medium': (
+    'font-family': Inter,
+    'font-weight': 500,
+    'font-style': normal,
     'font-size': 13px,
-    'font-family': 'Roboto, sans-serif',
+    'line-height': 20px
+  ),
+  'body/b4/semibold': (
+    'font-family': Inter,
     'font-weight': 600,
-    'line-height': 20px,
-    'letter-spacing': 0.1px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Caption 1/Bold': (
+    'font-style': normal,
     'font-size': 13px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 700,
-    'line-height': 20px,
-    'letter-spacing': 0.1px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
+    'line-height': 20px
   ),
-  'Roboto/Caption 1/Bold Caps': (
-    'font-size': 13px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 700,
-    'line-height': 20px,
-    'letter-spacing': 0.1px,
-    'text-transform': uppercase,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Caption 2/Regular': (
-    'font-size': 10px,
-    'font-family': 'Roboto, sans-serif',
+  'body/b5/regular': (
+    'font-family': Inter,
     'font-weight': 400,
-    'line-height': 16px,
-    'letter-spacing': 0.1px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
+    'font-style': normal,
+    'font-size': 11px,
+    'line-height': 16px
   ),
-  'Roboto/Caption 2/Semibold': (
-    'font-size': 10px,
-    'font-family': 'Roboto, sans-serif',
+  'body/b5/medium': (
+    'font-family': Inter,
+    'font-weight': 500,
+    'font-style': normal,
+    'font-size': 11px,
+    'line-height': 16px
+  ),
+  'body/b5/semibold': (
+    'font-family': Inter,
     'font-weight': 600,
-    'line-height': 16px,
-    'letter-spacing': 0.1px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Caption 2/Bold': (
-    'font-size': 10px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 700,
-    'line-height': 16px,
-    'letter-spacing': 0.1px,
-    'text-transform': none,
-    'text-decoration': none,
-    'font-style': normal
-  ),
-  'Roboto/Caption 2/Bold Caps': (
-    'font-size': 10px,
-    'font-family': 'Roboto, sans-serif',
-    'font-weight': 700,
-    'line-height': 16px,
-    'letter-spacing': 0.1px,
-    'text-transform': uppercase,
-    'text-decoration': none,
-    'font-style': normal
-  ),
+    'font-style': normal,
+    'font-size': 11px,
+    'line-height': 16px
+  )
 );

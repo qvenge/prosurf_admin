@@ -1,0 +1,45 @@
+.checkboxRoot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input {
+  width: 20px;
+  height: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: ds.color('graphic/alternative/primary');
+  border-radius: ds.number('radius/XS');
+  border: 1px solid ds.color('border/primary');
+}
+
+.inputReal {
+  display: none;
+  appearance: none;
+  position: relative;
+  // width: 90px;
+  // height: 40px;
+  // border-radius: 20px;
+  // border: 1px solid #FFFFFF;
+}
+
+.inputReal:checked + .input {
+  border: none;
+  // background-color: ds.color('graphic/primary');
+  background-color: var(--check-bg-color, ds.color('graphic/primary'));
+  // color: ds.color('text/primary');
+}
+
+.inputReal:disabled + .input {
+  // background-color: ds.color('background/alternative/primary');
+  color: ds.color('text/alternative/primary');
+}
+
+.text {
+  @include ds.typo('body/b3/regular');
+}

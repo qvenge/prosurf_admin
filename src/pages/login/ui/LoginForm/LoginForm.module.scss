@@ -1,0 +1,38 @@
+.root {
+  width: 100%;
+  max-width: 480px;
+  padding: ds.number('paddings & gaps/3XL') ds.number('paddings & gaps/XL') ds.number('paddings & gaps/XL');
+
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/3XL');
+
+  border-radius: ds.number('radius/L');
+  background: ds.color('background/primary');
+}
+
+.title {
+  @include ds.typo('header/h4/bold');
+  color: ds.color('text/primary');
+  text-align: center;
+}
+
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/S');
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/M');
+  align-items: stretch;
+}
+
+.errorMessage {
+  padding: 0;
+  margin: 0;
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/error/primary');
+}

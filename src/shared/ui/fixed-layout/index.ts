@@ -1,1 +1,0 @@
-export { FixedLayout, type FixedLayoutProps } from './FixedLayout';

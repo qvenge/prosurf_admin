@@ -1,0 +1,46 @@
+.root {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  width: 44px;
+  height: 44px;
+  padding: ds.number('paddings & gaps/XXS');
+
+  border-radius: ds.number('radius/round');
+  background: ds.color('background/button-main/default');
+
+  overflow: hidden;
+
+  transition: width 0.2s ease-in-out;
+}
+
+
+.text {
+  @include ds.typo('body/b4/semibold');
+
+  flex-shrink: 1;
+  flex-grow: 1;
+  padding: 0 ds.number('paddings & gaps/3XS') 0 ds.number('paddings & gaps/XXS');
+  overflow: hidden;
+
+  color: ds.color('text/alternative/primary');
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.root:hover {
+  width: 156px;
+
+  & .text {
+    opacity: 1;
+  }
+}
+
+.icon {
+  flex-shrink: 0;
+  flex-grow: 0;
+  color: ds.color('graphic/alternative/primary');
+}

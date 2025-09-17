@@ -1,0 +1,130 @@
+.root {
+  // width: 100%;
+  // height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: ds.number('paddings & gaps/3XS');
+  align-self: stretch;
+  // background: ds.color('background/secondary');
+}
+
+.inputWrapper {
+  width: 100%;
+  position: relative;
+}
+
+.showPasswordButton {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+
+  color: ds.color('graphic/secondary');
+}
+
+.label {
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/primary');
+}
+
+.input {
+  @include utils.ellipsis(1);
+
+  // height: 48px;
+  width: 100%;
+  margin: 0;
+
+  display: flex;
+  align-items: center;
+  gap: ds.number('paddings & gaps/XXS');
+  align-self: stretch;
+
+  border: 1px solid ds.color('border/primary');
+
+  color: ds.color('text/primary');
+
+  &::placeholder {
+    color: ds.color('text/secondary');
+  }
+}
+
+.input:focus,
+.input:focus-visible {
+  outline: none;
+  border: 1px solid ds.color('border/accent');
+}
+
+.hint {
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/secondary');
+}
+
+.root:not(.disabled):not(.readOnly):not(.error):hover {
+  & .input:not(:focus) {
+    border: 1px solid ds.color('border/secondary');
+  }
+}
+
+.error {
+  & .input {
+    border: 1px solid ds.color('border/error');
+  }
+
+  & .hint {
+    color: ds.color('text/error/primary');
+  }
+}
+
+.readOnly,
+.disabled {
+  & .label {
+    color: ds.color('text/secondary'); 
+  }
+
+  & .input {
+    border: 1px solid ds.color('border/primary');
+    color: ds.color('text/tertiary');
+    background: inherit;
+  }
+
+  & .input::placeholder {
+    color: ds.color('text/tertiary');
+  }
+
+  & .hint {
+    color: ds.color('text/tertiary');
+  }
+}
+
+.sizeLarge .input {
+  @include ds.typo('body/b3/regular');
+  height: 48px;
+  padding: 0px ds.number('paddings & gaps/S');
+  border-radius: ds.number('radius/M');
+
+  &[type=password] {
+    padding-right: calc(ds.number('paddings & gaps/S') + 24px);
+  }
+}
+
+.sizeMedium .input {
+  @include ds.typo('body/b3/regular');
+  padding: ds.number('paddings & gaps/XXS') ds.number('paddings & gaps/S');
+  border-radius: ds.number('radius/M');
+
+  &[type=password] {
+    padding-right: calc(ds.number('paddings & gaps/S') + 24px);
+  }
+}
+
+.sizeSmall .input {
+  @include ds.typo('body/b4/regular');
+  padding: 6px ds.number('paddings & gaps/XS');
+  border-radius: ds.number('radius/S');
+
+  &[type=password] {
+    padding-right: calc(ds.number('paddings & gaps/XS') + 24px);
+  }
+}

@@ -1,1 +1,0 @@
-export { CompactPagination, type CompactPaginationProps } from './CompactPagination';

@@ -1,124 +1,149 @@
-.wrapper {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  border: none;
-  border-radius: 99px;
-  text-decoration: none;
-  box-sizing: border-box;
-
-  max-inline-size: 100%;
-  min-inline-size: 80px;
+.button {
+  position: relative;
 }
 
-.wrapper--stretched {
-  inline-size: 100%;
-  flex-grow: 1;
-}
-
-.wrapper::after {
-  content: '';
+.loader {
+  display: none;
   position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity .15s ease-out;
-  background: ds.color('Background/Secondary')
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
-.before,
-.after {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.loading {
+  pointer-events: none;
+
+  & .loader {
+    display: block;
+  }
+
+  & .content {
+    opacity: 0;
+  }
 }
 
 .content {
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  z-index: var(--tgui--z-index--simple);
-}
+  @include ds.typo('body/b3/medium');
 
-.spinner.spinner {
-  position: absolute;
   width: 100%;
   height: 100%;
 
   display: flex;
   align-items: center;
   justify-content: center;
-
-  cursor: auto;
-  background: inherit;
-  border-radius: inherit;
-  color: var(--tgui--button--spinner-color);
+  gap: ds.number('paddings & gaps/XXS');
 }
 
-.wrapper--s {
-  height: 36px;
-  min-width: 34px;
-  gap: 6px;
-
-  padding: 8px 12px;
-  border-radius: 20px;
+.streched {
+  width: 100%;
 }
 
-.wrapper--m {
-  @include ds.typo('Roboto/Subheadline 2/Semibold');
+.buttonSize {
+  &L  {
+    padding: ds.number('paddings & gaps/XS') ds.number('paddings & gaps/M');
+    border-radius: ds.number('radius/M');
+  }
 
-  height: 42px;
-  min-width: 42px;
-  gap: 8px;
-  padding: 12px 16px;
+  &M  {
+    padding: ds.number('paddings & gaps/XXS') ds.number('paddings & gaps/S');
+    border-radius: ds.number('radius/M');
+  }
+
+  &S  {
+    @include ds.typo('body/b4/medium');
+
+    padding: 6px ds.number('paddings & gaps/XS');
+    gap: ds.number('paddings & gaps/3XS');
+    border-radius: ds.number('radius/S');
+  }
 }
 
-.wrapper--l {
-  @include ds.typo('Roboto/Text/Semibold');
+.buttonType {
+  &Primary {
+    background: ds.color('background/button-main/default');
+    color: ds.color('text/primary');
 
-  height: 50px;
-  gap: 10px;
-  padding: 15px 12px;
+    & .icon {
+      color: ds.color('graphic/alternative/primary');
+    }
+
+    &:hover {
+      background: ds.color('background/button-main/hover');
+    }
+
+    &:active {
+      background: ds.color('background/button-main/pressed');
+    }
+
+    &[disabled] {
+      background: ds.color('background/button-main/disabled');
+      color: ds.color('text/secondary');
+
+      & .icon {
+        color: ds.color('text/secondary');
+      }
+    }
+  }
+
+  &Secondary {
+    background: ds.color('background/button-tertiary/default');
+    color: ds.color('text/primary');
+
+    & .icon {
+      color: ds.color('graphic/alternative/primary');
+    }
+
+    &:hover {
+      background: ds.color('background/button-tertiary/hover');
+    }
+
+    &:active {
+      background: ds.color('background/button-tertiary/pressed');
+    }
+
+    &[disabled] {
+      background: ds.color('background/button-tertiary/disabled');
+      color: ds.color('text/secondary');
+
+      & .icon {
+        color: ds.color('text/secondary');
+      }
+    }
+  }
+
+  &Elevated {
+    background: ds.color('background/button-alternative/default');
+    color: ds.color('text/primary');
+
+    & .icon {
+      color: ds.color('graphic/primary');
+    }
+
+    &:hover {
+      background: ds.color('background/button-alternative/hover');
+    }
+
+    &:active {
+      background: ds.color('background/button-alternative/pressed');
+    }
+
+    &[disabled] {
+      background: ds.color('background/button-alternative/disabled');
+      color: ds.color('text/secondary');
+
+      & .icon {
+        color: ds.color('graphic/secondary');
+      }
+    }
+  }
 }
 
-.wrapper--primary {
-  --tgui--button--hovered-opacity: .15;
-  --tgui--button--spinner-color: ds.color('Text/Alternative');
-  color: ds.color('Text/Alternative');
-  background: ds.color('Background/Brand');
+.icon {
+  animation: spin 1s linear infinite;
 }
 
-.wrapper--secondary {
-  --tgui--button--hovered-opacity: .15;
-  --tgui--button--spinner-color: ds.color('Text/Primary');
-  color: ds.color('Text/Primary');
-  background: ds.color('Background/Teritary');
-}
-
-.wrapper--outline {
-  --tgui--button--hovered-opacity: .5;
-  --tgui--button--spinner-color: var(--tgui--plain_foreground);
-  color: var(--tgui--plain_foreground);
-  background: inherit;
-  box-shadow: 0 0 0 1px var(--tgui--outline);
-}
-
-.wrapper--ios.wrapper--m {
-  border-radius: 12px;
-}
-
-.wrapper--ios::after {
-  content: unset;
-}
-
-.wrapper--loading .before,
-.wrapper--loading .after,
-.wrapper--loading .content {
-  opacity: 0;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .wrapper:hover::after {
-    opacity: var(--tgui--button--hovered-opacity);
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }

@@ -1,1 +1,0 @@
-export { ImageSlider, type ImageSliderProps } from './ImageSlider';

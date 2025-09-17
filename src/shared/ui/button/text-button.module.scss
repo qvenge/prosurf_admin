@@ -1,0 +1,81 @@
+.textButton {
+  @include utils.button-reset;
+  @include ds.typo('body/b3/medium');
+
+  display: flex;
+  align-items: center;
+}
+
+.textButtonSize {
+  &M {
+    @include ds.typo('body/b3/medium');
+    gap: ds.number('paddings & gaps/XXS');
+  }
+
+  &S  {
+    @include ds.typo('body/b4/medium');
+    gap: ds.number('paddings & gaps/3XS');
+  }
+}
+
+.textButtonType {
+  &Primary {
+    color: ds.color('text/brand/primary');
+
+    &:hover {
+      color: ds.color('text/brand/secondary');
+    }
+
+    &[disabled] {
+      color: ds.color('text/tertiary');
+    }
+  }
+
+  &Secondary {
+    color: ds.color('text/primary');
+
+    &:hover {
+      color: ds.color('text/secondary');
+    }
+
+    &[disabled] {
+      color: ds.color('text/tertiary');
+    }
+  }
+
+  &Teritary {
+    color: ds.color('text/secondary');
+
+    &:hover {
+      color: ds.color('text/primary');
+    }
+
+    &[disabled] {
+      color: ds.color('text/tertiary');
+    }
+  }
+
+  &Negative {
+    color: ds.color('text/error/primary');
+
+    &:hover {
+      color: ds.color('text/error/secondary');
+    }
+
+    &[disabled] {
+      color: ds.color('text/error/tertiary');
+    }
+  }
+
+  &Alternative {
+    color: ds.color('text/alternative/primary');
+
+    &:hover {
+      color: ds.color('text/alternative/secondary');
+    }
+
+    &[disabled] {
+      color: ds.color('text/alternative/tertiary');
+    }
+  }
+}

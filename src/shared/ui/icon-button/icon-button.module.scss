@@ -1,0 +1,89 @@
+.root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.size {
+  &L  {
+    padding: 14px;
+    border-radius: ds.number('radius/M');
+  }
+
+  &M  {
+    padding: 14px;
+    border-radius: ds.number('radius/M');
+  }
+
+  &S  {
+    padding: ds.number('paddings & gaps/XXS');
+    border-radius: ds.number('radius/S');
+  }
+}
+
+
+.type {
+  &Primary {
+    background: ds.color('background/button-main/default');
+    color: ds.color('text/primary');
+
+    &:hover {
+      background: ds.color('background/button-main/hover');
+    }
+
+    &:active {
+      background: ds.color('background/button-main/pressed');
+    }
+
+    &[disabled] {
+      background: ds.color('background/button-main/disabled');
+      color: ds.color('text/secondary');
+    }
+  }
+
+  &Secondary {
+    background: ds.color('background/button-tertiary/default');
+    color: ds.color('text/primary');
+
+    &:hover {
+      background: ds.color('background/button-tertiary/hover');
+    }
+
+    &:active {
+      background: ds.color('background/button-tertiary/pressed');
+    }
+
+    &[disabled] {
+      background: ds.color('background/button-tertiary/disabled');
+      color: ds.color('text/secondary');
+    }
+  }
+
+  &Elevated {
+    background: ds.color('background/button-alternative/default');
+    color: ds.color('text/primary');
+
+    &:hover {
+      background: ds.color('background/button-alternative/hover');
+    }
+
+    &:active {
+      background: ds.color('background/button-alternative/pressed');
+    }
+
+    &[disabled] {
+      background: ds.color('background/button-alternative/disabled');
+      color: ds.color('text/secondary');
+    }
+  }
+}
+
+.loading .icon {
+ animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

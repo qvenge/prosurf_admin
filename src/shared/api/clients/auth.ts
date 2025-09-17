@@ -1,15 +1,19 @@
 import { apiClient, validateResponse } from '../config';
-import { 
-  LoginRequestSchema, 
-  LoginResponseSchema, 
-  RefreshRequestSchema, 
-  RefreshResponseSchema 
+import {
+  TelegramLoginDtoSchema,
+  LoginDtoSchema,
+  RegisterDtoSchema,
+  AuthResponseSchema,
+  RefreshRequestSchema,
+  RefreshResponseSchema
 } from '../schemas';
-import type { 
-  LoginRequest, 
-  LoginResponse, 
-  RefreshRequest, 
-  RefreshResponse 
+import type {
+  TelegramLoginDto,
+  LoginDto,
+  RegisterDto,
+  AuthResponse,
+  RefreshRequest,
+  RefreshResponse
 } from '../types';
 
 /**
@@ -21,22 +25,74 @@ import type {
 export const authClient = {
   /**
    * Login with Telegram init data
-   * POST /auth/login
-   * 
-   * @param request - Login request with Telegram initData
-   * @returns Promise resolving to login response with tokens and user data
+   * POST /auth/telegram
+   *
+   * @param request - Telegram login request with initData
+   * @returns Promise resolving to auth response with tokens and user data
    * @example
    * ```ts
-   * const response = await authClient.login({ 
-   *   initData: 'telegram_init_data_string' 
+   * const response = await authClient.loginWithTelegram({
+   *   initData: 'telegram_init_data_string'
    * });
    * console.log(response.user.id);
    * ```
    */
-  async login(request: LoginRequest): Promise<LoginResponse> {
-    const validatedRequest = LoginRequestSchema.parse(request);
+  async loginWithTelegram(request: TelegramLoginDto): Promise<AuthResponse> {
+    const validatedRequest = TelegramLoginDtoSchema.parse(request);
+    const response = await apiClient.post('/auth/telegram', validatedRequest);
+    return validateResponse(response.data, AuthResponseSchema);
+  },
+
+  /**
+   * Login with email/username and password
+   * POST /auth/login
+   *
+   * @param request - Login request with email/username and password
+   * @returns Promise resolving to auth response with tokens and user data
+   * @example
+   * ```ts
+   * const response = await authClient.loginWithCredentials({
+   *   login: 'user@example.com',
+   *   password: 'password123'
+   * });
+   * console.log(response.user.id);
+   * ```
+   */
+  async loginWithCredentials(request: LoginDto): Promise<AuthResponse> {
+    const validatedRequest = LoginDtoSchema.parse(request);
     const response = await apiClient.post('/auth/login', validatedRequest);
-    return validateResponse(response.data, LoginResponseSchema);
+    return validateResponse(response.data, AuthResponseSchema);
+  },
+
+  /**
+   * Register a new user
+   * POST /auth/register
+   *
+   * @param request - Registration request with user details
+   * @returns Promise resolving to auth response with tokens and user data
+   * @example
+   * ```ts
+   * const response = await authClient.register({
+   *   email: 'newuser@example.com',
+   *   password: 'password123',
+   *   firstName: 'John',
+   *   lastName: 'Doe'
+   * });
+   * console.log(response.user.id);
+   * ```
+   */
+  async register(request: RegisterDto): Promise<AuthResponse> {
+    const validatedRequest = RegisterDtoSchema.parse(request);
+    const response = await apiClient.post('/auth/register', validatedRequest);
+    return validateResponse(response.data, AuthResponseSchema);
+  },
+
+  /**
+   * Legacy login method for backward compatibility
+   * @deprecated Use loginWithTelegram instead
+   */
+  async login(request: TelegramLoginDto): Promise<AuthResponse> {
+    return this.loginWithTelegram(request);
   },
 
   /**

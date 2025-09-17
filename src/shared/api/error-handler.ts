@@ -55,6 +55,22 @@ export const isProviderUnavailableError = (error: unknown): boolean => {
   return isApiError(error) && error.error.code === 'PROVIDER_UNAVAILABLE';
 };
 
+export const isInvalidCredentialsError = (error: unknown): boolean => {
+  return isApiError(error) && error.error.code === 'INVALID_CREDENTIALS';
+};
+
+export const isUserExistsError = (error: unknown): boolean => {
+  return isApiError(error) && error.error.code === 'USER_EXISTS';
+};
+
+export const isWeakPasswordError = (error: unknown): boolean => {
+  return isApiError(error) && error.error.code === 'WEAK_PASSWORD';
+};
+
+export const isInvalidEmailError = (error: unknown): boolean => {
+  return isApiError(error) && error.error.code === 'INVALID_EMAIL';
+};
+
 // Error message extraction
 export const getErrorMessage = (error: unknown): string => {
   if (isApiError(error)) {
@@ -91,6 +107,10 @@ const ERROR_MESSAGES: Record<ApiError['code'], string> = {
   AMOUNT_MISMATCH: 'Сумма платежа не совпадает. Попробуйте снова.',
   DUPLICATE_PAYMENT: 'Этот платеж уже был обработан.',
   PROVIDER_UNAVAILABLE: 'Сервис временно недоступен. Попробуйте позже.',
+  INVALID_CREDENTIALS: 'Неверные учетные данные. Проверьте email/username и пароль.',
+  USER_EXISTS: 'Пользователь с таким email или username уже существует.',
+  WEAK_PASSWORD: 'Пароль должен содержать минимум 6 символов.',
+  INVALID_EMAIL: 'Некорректный формат email.',
 };
 
 export const getUserFriendlyErrorMessage = (error: unknown): string => {
@@ -217,6 +237,10 @@ export const useErrorHandler = () => {
     isAmountMismatchError,
     isDuplicatePaymentError,
     isProviderUnavailableError,
+    isInvalidCredentialsError,
+    isUserExistsError,
+    isWeakPasswordError,
+    isInvalidEmailError,
     getErrorMessage,
     getUserFriendlyErrorMessage,
     shouldRetry,

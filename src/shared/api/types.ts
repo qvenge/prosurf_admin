@@ -86,6 +86,12 @@ export type AuditLog = z.infer<typeof schemas.AuditLogSchema>;
 export type JobExecutionResult = z.infer<typeof schemas.JobExecutionResultSchema>;
 
 // Auth types
+export type TelegramLoginDto = z.infer<typeof schemas.TelegramLoginDtoSchema>;
+export type LoginDto = z.infer<typeof schemas.LoginDtoSchema>;
+export type RegisterDto = z.infer<typeof schemas.RegisterDtoSchema>;
+export type AuthResponse = z.infer<typeof schemas.AuthResponseSchema>;
+
+// Legacy types for backward compatibility
 export type LoginRequest = z.infer<typeof schemas.LoginRequestSchema>;
 export type LoginResponse = z.infer<typeof schemas.LoginResponseSchema>;
 export type RefreshRequest = z.infer<typeof schemas.RefreshRequestSchema>;

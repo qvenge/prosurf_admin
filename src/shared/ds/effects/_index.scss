@@ -1,0 +1,16 @@
+@use 'sass:map';
+
+$tokens: (
+  'Shadow/L': 0px 0px 20px 2px var(--black-overlay-20, rgba(25, 31, 46, 0.2)),
+  'Shadow/M': 0px 0px 20px 2px var(--black-overlay-10, rgba(25, 31, 46, 0.10))
+);
+
+@function effect($token-name) {
+  $value: map.get($tokens, $token-name);
+
+  @if $value == null {
+    @error "Effect token `#{$token-name}` does not exist";
+  }
+
+  @return $value;
+}

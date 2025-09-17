@@ -1,0 +1,40 @@
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #f3f4f6;    // bg-gray-100
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); // shadow-sm
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    animation: shimmer 2s infinite;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255,255,255,0.6) 50%,
+      transparent 100%
+    );
+    z-index: 2;
+  }
+}
+
+.skeletonText,
+.skeletonItem {
+  position: relative;
+  z-index: 1;
+  background: #e5e7eb; // bg-gray-200
+  overflow: hidden;
+}
+
+.skeletonText {
+  width: 100%;
+  border-radius: ds.number('radius/S');
+}

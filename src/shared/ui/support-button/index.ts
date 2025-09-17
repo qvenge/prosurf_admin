@@ -1,0 +1,1 @@
+export { SupportButton } from './support-button';

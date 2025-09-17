@@ -1,0 +1,92 @@
+.root {
+  width: 80px;
+  height: 80px;
+  position: relative;
+}
+
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.previewButton {
+}
+
+.preview {
+  display: flex;
+  width: 80px;
+  height: 80px;
+
+  overflow: hidden;
+
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1/1;
+
+  border-radius: 50%;
+  border: 1px solid ds.color('border/primary');
+
+  color: ds.color('graphic/secondary');
+}
+
+.previewImg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  aspect-ratio: 1/1;
+}
+
+.menu {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: calc(100% + 8px);
+
+  display: flex;
+  width: 120px;
+  padding: ds.number('paddings & gaps/XXS');
+  flex-direction: column;
+  align-items: stretch;
+  gap: ds.number('paddings & gaps/3XS');
+  z-index: 100;
+
+  border-radius: ds.number('radius/M');
+  background: ds.color('background/primary');
+
+  /* Shadow/L */
+  box-shadow: ds.effect('Shadow/L');
+}
+
+.menuButton {
+  @include ds.typo('body/b3/regular');
+
+  display: flex;
+  padding: 6px ds.number('paddings & gaps/XXS');
+  align-items: center;
+  gap: ds.number('paddings & gaps/XXS');
+
+  border-radius: ds.number('radius/S');
+  background: ds.color('background/primary');
+  color: ds.color('text/primary');
+
+  &:hover {
+    background: ds.color('background/secondary');
+  }
+
+  &:active {
+    background: ds.color('background/accent');
+  }
+}
+
+.menuButtonRed {
+  color: ds.color('text/error/primary');
+}
+
+.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}

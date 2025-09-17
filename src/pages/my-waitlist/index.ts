@@ -1,1 +1,0 @@
-export { MyWaitlist } from './ui/MyWaitlist';
