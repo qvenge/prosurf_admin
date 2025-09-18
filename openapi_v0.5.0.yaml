@@ -1668,6 +1668,15 @@ paths:
       - $ref: '#/components/parameters/EndsBeforeParam'
       - $ref: '#/components/parameters/CursorParam'
       - $ref: '#/components/parameters/LimitParam'
+      - $ref: '#/components/parameters/LabelsAnyParam'
+      - $ref: '#/components/parameters/LabelsAllParam'
+      - $ref: '#/components/parameters/LabelsNoneParam'
+      - $ref: '#/components/parameters/AttrEqParam'
+      - $ref: '#/components/parameters/AttrInParam'
+      - $ref: '#/components/parameters/AttrGteParam'
+      - $ref: '#/components/parameters/AttrLteParam'
+      - $ref: '#/components/parameters/AttrBoolParam'
+      - $ref: '#/components/parameters/AttrExistsParam'
       responses:
         '200':
           description: OK

@@ -1,0 +1,83 @@
+.tableContainer {
+  height: 600px;
+  overflow: auto;
+  border: 1px solid ds.color('border/primary');
+  border-radius: ds.number('radius/M');
+  background: ds.color('background/primary');
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.thead {
+  position: sticky;
+  top: 0;
+  background: ds.color('background/secondary');
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.th {
+  @include ds.typo('body/b2/medium');
+
+  padding: ds.number('paddings & gaps/S') ds.number('paddings & gaps/M');
+  text-align: left;
+  color: ds.color('text/primary');
+  border-bottom: 1px solid ds.color('border/primary');
+  user-select: none;
+
+  &:hover {
+    background: ds.color('background/tertiary');
+  }
+}
+
+.tbody {
+  position: relative;
+}
+
+.sortIndicator {
+  color: ds.color('text/primary');
+  margin-left: 4px;
+}
+
+.virtualRow {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid ds.color('border/primary');
+
+  &:hover {
+    background: ds.color('background/secondary');
+  }
+}
+
+.virtualCell {
+  padding: ds.number('paddings & gaps/S') ds.number('paddings & gaps/M');
+  color: ds.color('text/primary');
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: ds.color('text/secondary');
+}
+
+.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: ds.color('text/error/primary');
+  background: ds.color('background/error');
+  border-radius: ds.number('radius/M');
+  padding: ds.number('paddings & gaps/S') ds.number('paddings & gaps/M');
+}
