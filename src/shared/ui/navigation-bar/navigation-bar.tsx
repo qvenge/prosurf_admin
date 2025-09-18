@@ -25,9 +25,7 @@ export interface NavigationBarProps {
 export function NavigationBar({items, className}: NavigationBarProps) {
   return (
     <aside className={clsx(className, styles.root)}>
-      <div className={styles.logo}>
-        <Logotype />
-      </div>
+      <Logotype className={styles.logo} />
       <nav className={styles.nav}>
         <ul className={styles.navList}>
           {items.map((item) => (
@@ -42,15 +40,15 @@ export function NavigationBar({items, className}: NavigationBarProps) {
                   }
                   to={item.path}
                 >
-
-                  {// @ts-ignore
-                  ({ isActive }) => (
-                    <Icon
-                      src={isActive ? item.iconActive : item.iconDefault}
-                      className={styles.navItemIcon}
-                    />
+                  {({ isActive }) => (
+                    <>
+                      <Icon
+                        src={isActive ? item.iconActive : item.iconDefault}
+                        className={styles.navItemIcon}
+                      />
+                      <div className={styles.navItemIconTitle}>{item.title}</div>
+                    </>
                   )}
-                  <div className={styles.navItemIconTitle}>{item.title}</div>
                 </NavLink>
               </Suspense>
             </li>

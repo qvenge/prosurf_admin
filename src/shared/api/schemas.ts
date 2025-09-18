@@ -36,7 +36,7 @@ export const UserSchema = z.object({
   photoUrl: z.string().nullable(),
   role: RoleSchema,
   createdAt: z.string().datetime(),
-  authMethod: z.enum(['telegram', 'email', 'username']),
+  authMethod: z.enum(['TELEGRAM', 'EMAIL', 'USERNAME']),
 });
 
 export const UserUpdateDtoSchema = z.object({

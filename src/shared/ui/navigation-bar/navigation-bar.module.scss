@@ -6,6 +6,8 @@
 }
 
 .logo {
+  width: 92px;
+  height: 32px;
   margin-bottom: 28px;
 }
 
@@ -20,6 +22,7 @@
 }
 
 .navItem {
+  @include ds.typo('body/b3/medium');
   margin: 0;
   padding: 8px 16px 8px 8px;
 
@@ -30,14 +33,7 @@
 
   text-decoration: none;
 
-  color: var(--text-primary, #191F2E);
-
-  /* body/b3/medium */
-  font-family: var(--family-Inter, Inter);
-  font-size: 15px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 24px; /* 160% */
+  color: ds.color('text/primary');
 
   border-radius: var(--radius-S, 8px);
 }
@@ -52,6 +48,6 @@
 }
 
 .navItemActive {
-  background: ds.color('background/accent');
-  color: ds.color('text/accent');
+  background: ds.color('background/alternative');
+  color: ds.color('text/brand/primary');
 }

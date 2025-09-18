@@ -74,3 +74,23 @@ export { default as QuestionFill } from '@/shared/ds/icons/20/question_fill.svg'
 
 export { default as BrainRegular } from '@/shared/ds/icons/20/brain_regular.svg';
 export { default as BrainFill } from '@/shared/ds/icons/20/brain_fill.svg';
+
+
+
+
+export { default as CalendarBlankRegular } from '@/shared/ds/icons/20/calendar-blank_regular.svg';
+export { default as CalendarBlankFill } from '@/shared/ds/icons/20/calendar-blank_fill.svg';
+export { default as ListChecksRegular } from '@/shared/ds/icons/20/list-checks_regular.svg';
+export { default as ListChecksFill } from '@/shared/ds/icons/20/list-checks_fill.svg';
+export { default as UserRegular } from '@/shared/ds/icons/20/user_regular.svg';
+export { default as UserFill } from '@/shared/ds/icons/20/user_fill.svg';
+export { default as UsersRegular } from '@/shared/ds/icons/20/users_regular.svg';
+export { default as UsersFill } from '@/shared/ds/icons/20/users_fill.svg';
+export { default as BarbellRegular } from '@/shared/ds/icons/20/barbell_regular.svg';
+export { default as BarbellFill } from '@/shared/ds/icons/20/barbell_fill.svg';
+export { default as TicketRegular } from '@/shared/ds/icons/20/ticket_regular.svg';
+export { default as TicketFill } from '@/shared/ds/icons/20/ticket_fill.svg';
+export { default as CertificateRegular } from '@/shared/ds/icons/20/certificate_regular.svg';
+export { default as CertificateFill } from '@/shared/ds/icons/20/certificate_fill.svg';
+export { default as ConfettiRegular } from '@/shared/ds/icons/20/confetti_regular.svg';
+export { default as ConfettiFill } from '@/shared/ds/icons/20/confetti_fill.svg';

@@ -1,5 +1,6 @@
 .root {
   padding: 20px 28px;
+  min-height: 88px;
 
   display: flex;
   align-items: center;
@@ -7,12 +8,7 @@
 }
 
 .title {
-  /* header/h1/bold */
-  font-family: var(--family-Inter, Inter);
-  font-size: 38px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 50px; /* 131.579% */
+  @include ds.typo('header/h2/bold');
 }
 
 .rightContent {
