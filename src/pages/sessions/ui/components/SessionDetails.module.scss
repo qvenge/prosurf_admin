@@ -1,10 +1,18 @@
+.container {
+  display: flex;
+  padding: 28px;
+  min-height: 100%;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 40px;
+}
+
 .header,
-.bookings,
-.bookingsHeader {
+.bookings {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: stretch;
+  align-items: stretch;
+  justify-content: flex-start;
   gap: 12px;
   align-self: stretch;
 }
@@ -29,5 +37,58 @@
 }
 
 .bookingsHeader {
+  @include ds.typo('body/b4/semibold');
+  display: flex;
+  justify-content: space-between;
   gap: 24px;
+}
+
+.addBookingForm {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  // flex: 1 0 0;
+}
+
+.bookingsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bookingItem {
+  padding: 16px;
+  border: 1px solid ds.color('border/secondary');
+  border-radius: 8px;
+  background: ds.color('background/primary');
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bookingUser {
+  @include ds.typo('body/b3/semibold');
+  color: ds.color('text/primary');
+}
+
+.bookingDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bookingQuantity,
+.bookingStatus,
+.bookingPayment {
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/secondary');
+}
+
+.emptyBookings {
+  @include ds.typo('body/b3/regular');
+  color: ds.color('text/secondary');
+  text-align: center;
+  padding: 24px;
 }

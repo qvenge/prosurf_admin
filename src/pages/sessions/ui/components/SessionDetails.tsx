@@ -1,30 +1,43 @@
+import { useState } from 'react';
 import styles from './SessionDetails.module.scss';
 import { Button } from '@/shared/ui';
-import { useSession, type Booking } from '@/shared/api';
-import { formatDate, formatTime, formatPrice } from '@/shared/lib/format-utils';
+import { useSession, useBookings } from '@/shared/api';
+import { formatDate, formatTime } from '@/shared/lib/format-utils';
+
+import { AddBookingForm } from './AddBookingForm'
 
 export interface SessionDetailsProps {
   sessionId: string;
 }
 
-interface TempBooking extends Booking {
-  user?: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-  };
-}
 
 export function SessionDetails({ sessionId }: SessionDetailsProps) {
   const { data } = useSession(sessionId);
-
-  const bookings: TempBooking[] = [];
+  const { data: bookingsData, isLoading: bookingsLoading, error: bookingsError } = useBookings({
+    sessionId,
+    includeGuestContact: true,
+    includeUser: true,
+    includePaymentInfo: true,
+    limit: 100,
+  });
+  const [isAddBookingOpen, setIsAddBookingOpen] = useState(false);
 
   if (!data) return null;
 
+  if (isAddBookingOpen) {
+    return (
+      <AddBookingForm
+        sessionId={sessionId}
+        onBack={() => setIsAddBookingOpen(false)}
+        onSuccess={() => {
+          console.log('Booking created successfully');
+        }}
+      />
+    );
+  }
+
   return (
-    <div className={styles.contrainer}>
+    <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.datetime}>{formatDate(data.startsAt)} в {formatTime(data.startsAt)}</div>
         <div className={styles.title}>{data.event.title}</div>
@@ -32,35 +45,42 @@ export function SessionDetails({ sessionId }: SessionDetailsProps) {
       </div>
       <div className={styles.bookings}>
         <div className={styles.bookingsHeader}>
-          <div className={styles.bookingsCount}>Записей: {bookings.length}</div>
-          <div className={styles.spacer} />
-          <Button type="primary" size="s" onClick={() => { /* TODO: Add functionality */ }}>
+          <div className={styles.bookingsCount}>Записи: {`${data.capacity - data.remainingSeats} из ${data.capacity}`}</div>
+          <Button
+            className={styles.addBookingButton}
+            type="primary"
+            size="s"
+            onClick={() => { setIsAddBookingOpen(true); }}
+          >
             Добавить запись
           </Button>
         </div>
         <div className={styles.bookingsList}>
-          {bookings.map(booking => (
-            <div key={booking.id} className={styles.booking}>
-              <div className={styles.bookingUser}>
-                {booking.user?.firstName} {booking.user?.lastName}
+          {bookingsLoading && <div>Загрузка записей...</div>}
+          {bookingsError && <div>Ошибка загрузки записей</div>}
+          {bookingsData?.items.map((booking) => {
+            const userName = booking.user
+              ? `${booking.user.firstName || ''} ${booking.user.lastName || ''}`.trim() || booking.user.username || booking.user.email
+              : booking.guestContact
+                ? `${booking.guestContact.firstName || ''} ${booking.guestContact.lastName || ''}`.trim() || booking.guestContact.phone
+                : 'Неизвестный пользователь';
+
+            const paymentMethod = booking.paymentInfo?.method || 'Не указан';
+
+            return (
+              <div key={booking.id} className={styles.bookingItem}>
+                <div className={styles.bookingUser}>{userName}</div>
+                <div className={styles.bookingDetails}>
+                  <span className={styles.bookingQuantity}>Мест: {booking.quantity}</span>
+                  <span className={styles.bookingStatus}>Статус: {booking.status}</span>
+                  <span className={styles.bookingPayment}>Оплата: {paymentMethod}</span>
+                </div>
               </div>
-              <div className={styles.bookingTicket}>
-                Количество мест: {booking.quantity} | Статус: {booking.status}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div className={styles.footer}>
-        <div className={styles.capacity}>
-          Вместимость: {data.capacity} чел.
-        </div>
-        <div className={styles.price}>
-          Цена от: {data.event.tickets.length > 0
-            ? formatPrice(data.event.tickets.map(ticket => ticket.full.price).reduce((minPrice, price) => {
-                return price.amountMinor < minPrice.amountMinor ? price : minPrice;
-              }))
-            : 'Бесплатно'}
+            );
+          })}
+          {bookingsData?.items.length === 0 && !bookingsLoading && (
+            <div className={styles.emptyBookings}>Нет записей</div>
+          )}
         </div>
       </div>
     </div>

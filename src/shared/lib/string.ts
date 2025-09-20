@@ -53,3 +53,27 @@ export function camelize(value: string): string {
 export const getAbbr = (name: string) =>
   name.split(' ').slice(0, 2).map((word) =>
     word[0].toUpperCase()).join('');
+
+export function generateIdempotencyKey(): string {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 15);
+  return `booking-${timestamp}-${random}`;
+}
+
+export function formatPhoneNumber(phone: string): string {
+  // Remove all non-digit characters except leading +
+  let cleaned = phone.replace(/[^\d+]/g, '');
+
+  // If it starts with +, keep it, otherwise remove any + characters
+  if (cleaned.startsWith('+')) {
+    cleaned = '+' + cleaned.substring(1).replace(/\+/g, '');
+  } else {
+    cleaned = cleaned.replace(/\+/g, '');
+    // Add + prefix if the number looks international (starts with country code)
+    if (cleaned.length > 10) {
+      cleaned = '+' + cleaned;
+    }
+  }
+
+  return cleaned;
+}
