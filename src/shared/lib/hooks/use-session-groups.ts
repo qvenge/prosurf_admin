@@ -1,7 +1,20 @@
 import { useMemo } from 'react';
 import { formatDuration, formatAvailability, formatPrice } from '../format-utils';
-import type { SessionGroupProps } from '../../ui/session-group';
 import type { Session } from '@/shared/api';
+
+interface SessionItem {
+  id: string;
+  time: string;
+  duration: string;
+  title: string;
+  location: string;
+  price: string;
+  availability: string;
+}
+
+interface SessionGroupProps {
+  sessions: SessionItem[];
+}
 
 export const useSessionGroups = (sessions: Session[]) => {
   return useMemo(() => {
@@ -28,11 +41,11 @@ export const useSessionGroups = (sessions: Session[]) => {
           hour: '2-digit', 
           minute: '2-digit' 
         }),
-        duration: formatDuration(session.startsAt, endsAt),
+        duration: formatDuration(session.startsAt, endsAt) ?? 'Не указано',
         title: session.event.title,
-        location: session.event.location || 'Не указано',
+        location: session.event.location ?? 'Не указано',
         price: formatPrice(price),
-        availability: formatAvailability(session.remainingSeats)
+        availability: formatAvailability(session.remainingSeats).text
       });
 
       return groups;

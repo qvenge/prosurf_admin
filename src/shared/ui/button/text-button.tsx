@@ -2,7 +2,8 @@ import clsx from 'clsx';
 
 import { camelize } from '@/shared/lib/string';
 
-import { ButtonContainer, ButtonContainerProps } from './button-container';
+import { ButtonContainer } from './button-container';
+import type { ButtonContainerProps } from './button-container';
 import styles from './text-button.module.scss';
 
 export interface ButtonProps extends ButtonContainerProps {

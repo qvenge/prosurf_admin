@@ -1,1 +1,2 @@
-export { Portal, createContainer, type PortalProps, type ContainerOptions } from './portal';
+export { Portal, type PortalProps } from './portal';
+export { createContainer, type ContainerOptions } from './portal-utils';

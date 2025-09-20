@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { Icon } from '@/shared/ui'; 
 import { CaretDownFill, CaretUpFill } from '@/shared/ds/icons';
@@ -46,14 +46,14 @@ export function Select({
     setIsOpen(!isOpen);
   };
 
-  const handleSelectOption = (newValue: any) => {
+  const handleSelectOption = useCallback((newValue: string) => {
     if (inputValue == null) {
       setDefaultValue(newValue);
     }
 
     onChange?.(newValue);
     setIsOpen(false);
-  };
+  }, [inputValue, onChange]);
 
   useEffect(() => {
     if (isOpen) {
@@ -71,7 +71,7 @@ export function Select({
     return () => {
       document.removeEventListener('keydown', handleSpaceDown);
     };
-  }, [isOpen, globalThis.document?.activeElement, ref.current]);
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -107,7 +107,9 @@ export function Select({
         }
         case 'Space':
         case 'Enter': {
-          handleSelectOption(highlighted);
+          if (highlighted != null) {
+            handleSelectOption(String(highlighted));
+          }
           break;
         }
       }
@@ -118,7 +120,7 @@ export function Select({
     return () => {
       document.removeEventListener('keydown', handleKeydown);
     };
-  }, [isOpen, highlighted]);
+  }, [isOpen, highlighted, handleSelectOption, options]);
 
   useEffect(() => {
     if (!isOpen) {

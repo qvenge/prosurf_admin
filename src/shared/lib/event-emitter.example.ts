@@ -47,7 +47,7 @@ class NotificationService {
 // Example 6: Generic event emitter (when you don't need strict typing)
 const genericEmitter = new EventEmitter();
 
-genericEmitter.on('any-event', (data: any) => {
+genericEmitter.on('any-event', (data: unknown) => {
   console.log('Generic event:', data);
 });
 

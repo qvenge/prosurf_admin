@@ -29,7 +29,7 @@ export function Slider({
       className={clsx(className, styles.slider, styles[orientation])}
       style={{
         ...style,
-        // @ts-ignore
+        // @ts-expect-error - CSS custom property
         "--progress": progress
       }}
     >

@@ -26,7 +26,7 @@ type SessionRowData = {
   startsAt: string;
 };
 
-interface SessionsTableProps extends React.HTMLAttributes<HTMLDivElement> {}
+type SessionsTableProps = React.HTMLAttributes<HTMLDivElement>;
 
 const columnHelper = createColumnHelper<SessionRowData>();
 
@@ -106,7 +106,7 @@ export function SessionsTable({ className }: SessionsTableProps) {
         ),
       }),
     ],
-    [_sessionsData]
+    []
   );
 
   const [sorting, setSorting] = useState<SortingState>([]);

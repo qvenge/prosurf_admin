@@ -68,9 +68,10 @@ export const webhooksClient = {
    * @returns Boolean indicating if signature is valid
    */
   verifyWebhookSignature(
-    payload: string | Buffer, 
-    signature: string, 
+    payload: string | Buffer,
+    signature: string,
     secret: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _algorithm: 'sha256' | 'sha512' = 'sha256'
   ): boolean {
     // This would typically use crypto libraries to verify the signature

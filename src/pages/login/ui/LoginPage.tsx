@@ -10,9 +10,9 @@ import type { FormState } from './LoginForm/LoginForm';
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { mutateAsync: login, isPending } = useLoginWithCredentials();
+  const { mutateAsync: login } = useLoginWithCredentials();
 
-  const handleLogin = async (state: FormState, formData: FormData): Promise<FormState> => {
+  const handleLogin = async (_: FormState, formData: FormData): Promise<FormState> => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const callbackUrl = formData.get('callbackUrl') as string;
@@ -25,17 +25,18 @@ export function LoginPage() {
 
       navigate(callbackUrl || '/');
       return undefined;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login failed:', error);
 
-      if (error?.response?.data?.errors) {
+      const axiosError = error as { response?: { data?: { errors?: Record<string, string[]>; message?: string } } };
+      if (axiosError?.response?.data?.errors) {
         return {
-          errors: error.response.data.errors
+          errors: axiosError.response.data.errors
         };
       }
 
       return {
-        message: error?.response?.data?.message || 'Ошибка авторизации'
+        message: axiosError?.response?.data?.message || 'Ошибка авторизации'
       };
     }
   };

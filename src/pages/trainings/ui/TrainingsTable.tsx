@@ -23,7 +23,7 @@ type TrainingRowData = {
   event: Event;
 };
 
-interface TrainingsTableProps extends React.HTMLAttributes<HTMLDivElement> {}
+type TrainingsTableProps = React.HTMLAttributes<HTMLDivElement>;
 
 const columnHelper = createColumnHelper<TrainingRowData>();
 

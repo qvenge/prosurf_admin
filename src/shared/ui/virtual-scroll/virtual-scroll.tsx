@@ -2,23 +2,21 @@
 
 import { useEffect, memo, type JSXElementConstructor, useMemo } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useInfiniteQuery , type InfiniteQueryObserverOptions} from '@tanstack/react-query';
+import { useInfiniteQuery , type UseInfiniteQueryOptions, type InfiniteData} from '@tanstack/react-query';
 
-
-export interface VirtualScrollProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface VirtualScrollProps<TPageData = unknown, TItem = unknown> extends React.HTMLAttributes<HTMLDivElement> {
   parentRef: React.RefObject<HTMLDivElement | null>;
-  // useFetcher: () => UseInfiniteQueryResult<R>;
-  queryOptions: InfiniteQueryObserverOptions<any>;
-  convertorFn: (data: any) => any[];
+  queryOptions: UseInfiniteQueryOptions<TPageData, Error, InfiniteData<TPageData>, unknown[]>;
+  convertorFn: (data: TPageData) => TItem[];
   estimateSize: (index: number) => number;
-  ItemComponent: JSXElementConstructor<{item: any, index: number}>;
-  LoaderComponent?: JSXElementConstructor<{}>;
-  EmptyComponent?: JSXElementConstructor<{}>;
+  ItemComponent: JSXElementConstructor<{item: TItem, index: number}>;
+  LoaderComponent?: JSXElementConstructor<object>;
+  EmptyComponent?: JSXElementConstructor<object>;
   ErrorComponent?: JSXElementConstructor<{error: Error}>;
   overscan?: number;
 }
 
-export function VirtualScroll({
+export function VirtualScroll<TPageData = unknown, TItem = unknown>({
   queryOptions,
   convertorFn,
   parentRef,
@@ -29,7 +27,7 @@ export function VirtualScroll({
   EmptyComponent,
   overscan,
   // ...props
-}: VirtualScrollProps) {
+}: VirtualScrollProps<TPageData, TItem>) {
   const {
     status,
     data,
@@ -37,9 +35,9 @@ export function VirtualScroll({
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = useInfiniteQuery<any>(queryOptions);
-  
-  const MemoizedItem = useMemo(() => memo(({item, index}: {item: any, index: number}) => (
+  } = useInfiniteQuery<TPageData, Error, InfiniteData<TPageData>, unknown[]>(queryOptions);
+
+  const MemoizedItem = useMemo(() => memo(({item, index}: {item: TItem, index: number}) => (
     <ItemComponent item={item} index={index} />
   )), [ItemComponent]);
 
@@ -54,7 +52,8 @@ export function VirtualScroll({
   });
 
   useEffect(() => {
-    const [lastItem] = rowVirtualizer.getVirtualItems().slice(-1);
+    const virtualItems = rowVirtualizer.getVirtualItems();
+    const [lastItem] = virtualItems.slice(-1);
 
     if (
       (lastItem == null || lastItem.index >= items.length - 1) &&
@@ -68,7 +67,7 @@ export function VirtualScroll({
     fetchNextPage,
     items.length,
     isFetchingNextPage,
-    rowVirtualizer.getVirtualItems(),
+    rowVirtualizer,
   ]);
 
   // Reset virtualizer when query key changes to prevent stale data display
@@ -76,7 +75,7 @@ export function VirtualScroll({
     if (parentRef.current) {
       rowVirtualizer.scrollToIndex(0, { align: 'start' });
     }
-  }, [queryOptions.queryKey, rowVirtualizer]);
+  }, [queryOptions.queryKey, rowVirtualizer, parentRef]);
 
   if (status === 'error') {
     return ErrorComponent && <ErrorComponent error={error as Error} />;

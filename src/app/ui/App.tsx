@@ -3,8 +3,6 @@ import { Outlet, useLocation, useNavigate } from 'react-router';
 import { useAuthStatus } from '@/shared/api';
 import { useEffect } from 'react';
 import styles from './App.module.scss';
-import { NavigationBar } from '@/shared/ui';
-import { navItems } from './nav-items';
 
 export function App() {
   const { isAuthenticated, isLoading } = useAuthStatus();
@@ -26,7 +24,7 @@ export function App() {
     }
   }, [isAuthenticated, isLoading, location.pathname, navigate]);
 
-  if (isLoading || !isAuthenticated) {
+  if (isLoading) {
     return (
       <div className={styles.wrapper}>
         <main className={styles.main}>
@@ -36,12 +34,5 @@ export function App() {
     );
   }
 
-  return (
-    <div className={styles.wrapper}>
-      <NavigationBar className={styles.sidebar} items={navItems} />
-      <main className={styles.main}>
-        <Outlet />
-      </main>
-    </div>
-  );
+  return <Outlet />;
 }

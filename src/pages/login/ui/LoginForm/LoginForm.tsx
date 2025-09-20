@@ -20,7 +20,7 @@ export type FormState =
   | undefined
 
 export interface LoginFormProps extends React.HTMLAttributes<HTMLFormElement> {
-  action: (state: FormState, data: FormData) => Promise<any>;
+  action: (state: FormState, data: FormData) => Promise<FormState>;
 }
 
 export function LoginForm({
@@ -42,7 +42,7 @@ export function LoginForm({
           label="Логин"
           placeholder="Введите логин"
           error={Boolean(state?.errors?.email)}
-          hint={state?.errors?.email && state.errors.email}
+          hint={state?.errors?.email?.[0]}
           disabled={pending}
           required
         />
@@ -52,7 +52,7 @@ export function LoginForm({
           label="Пароль"
           placeholder="Введите пароль"
           error={Boolean(state?.errors?.password)}
-          hint={state?.errors?.password && state.errors.password}
+          hint={state?.errors?.password?.[0]}
           disabled={pending}
           required
         />
@@ -66,7 +66,7 @@ export function LoginForm({
         >
           Войти
         </Button>
-        <p className={styles.errorMessage}>{state?.errors?.detail}</p>
+        <p className={styles.errorMessage}>{state?.message}</p>
       </div>
     </form>
   );

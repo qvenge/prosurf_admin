@@ -65,9 +65,9 @@ export const callMultiple =
       fns.filter((f: any) => typeof f === 'function').forEach((f: any) => f(...args));
 
   
-export function callWithLimit<R extends any>(
-  func: Function,
-  args: any[],
+export function callWithLimit<R>(
+  func: (...args: unknown[]) => R | Promise<R>,
+  args: unknown[],
   limit: number = Infinity
 ): Promise<PromiseSettledResult<Awaited<R>>[]> {
   return new Promise((resolve) => {
@@ -79,7 +79,8 @@ export function callWithLimit<R extends any>(
     }
 
     function callAndInsert(index: number) {
-      results[index] = func.apply(null, Array.isArray(args[index]) ? args[index] : [args[index]])
+      const argArray = Array.isArray(args[index]) ? args[index] as unknown[] : [args[index]];
+      results[index] = Promise.resolve(func(...argArray))
         .finally(() => {
           pointer++;
       

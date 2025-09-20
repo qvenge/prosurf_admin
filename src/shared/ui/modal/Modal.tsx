@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useRef, useState, type MouseEventHandler } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { Portal, createContainer } from '@/shared/ui/portal';
 import { ButtonContainer } from '@/shared/ui/button';
 import { XBold } from '@/shared/ds/icons';

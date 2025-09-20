@@ -36,7 +36,7 @@ export const UserSchema = z.object({
   photoUrl: z.string().nullable(),
   role: RoleSchema,
   createdAt: z.string().datetime(),
-  authMethod: z.enum(['TELEGRAM', 'EMAIL', 'USERNAME']),
+  authMethod: z.enum(['telegram', 'email', 'username']),
 });
 
 export const UserUpdateDtoSchema = z.object({
@@ -44,6 +44,15 @@ export const UserUpdateDtoSchema = z.object({
   firstName: z.string().optional(),
   lastName: z.string().optional(),
   email: z.string().optional(),
+});
+
+// Guest contact schema
+export const GuestContactSchema = z.object({
+  phone: z.string().regex(/^\+?[0-9]{7,15}$/),
+  firstName: z.string().max(128).nullable().optional(),
+  lastName: z.string().max(128).nullable().optional(),
+  email: z.string().email().nullable().optional(),
+  note: z.string().max(500).nullable().optional(),
 });
 
 // Event schemas
@@ -144,18 +153,48 @@ export const BookingStatusSchema = z.enum(['HOLD', 'CONFIRMED', 'CANCELLED', 'EX
 export const BookingSchema = z.object({
   id: z.string(),
   sessionId: z.string(),
-  userId: z.string(),
+  userId: z.string().nullable(),
   quantity: z.number().int().min(1),
   status: BookingStatusSchema,
   hold: z.object({
     expiresAt: z.string().datetime(),
   }).nullable(),
   totalPrice: PriceSchema,
+  guestContact: GuestContactSchema.nullable().optional(),
+  notes: z.string().nullable().optional(),
   createdAt: z.string().datetime(),
+  createdBy: z.string().nullable().optional(),
 });
 
 export const BookRequestSchema = z.object({
   quantity: z.number().int().min(1),
+});
+
+export const BookingExtendedSchema = BookingSchema.extend({
+  user: UserSchema.optional(),
+  guestContact: GuestContactSchema.optional(),
+  session: z.lazy(() => SessionSchema).optional(),
+  paymentInfo: z.object({
+    method: z.enum(['card', 'certificate', 'pass', 'cashback', 'composite']),
+    paymentId: z.string().nullable().optional(),
+    certificateId: z.string().nullable().optional(),
+    seasonTicketId: z.string().nullable().optional(),
+  }).nullable().optional(),
+});
+
+export const BookingCreateDtoSchema = z.object({
+  quantity: z.number().int().min(1),
+  userId: z.string().nullable().optional(),
+  guestContact: GuestContactSchema.nullable().optional(),
+  status: z.enum(['HOLD', 'CONFIRMED']).default('HOLD').optional(),
+  ticketId: z.string().nullable().optional(),
+  notes: z.string().max(1000).nullable().optional(),
+});
+
+export const BookingUpdateDtoSchema = z.object({
+  quantity: z.number().int().min(1).optional(),
+  guestContact: GuestContactSchema.optional(),
+  notes: z.string().max(1000).optional(),
 });
 
 // Payment schemas
@@ -505,6 +544,13 @@ export const SessionFiltersSchema = z.object({
 
 export const BookingFiltersSchema = z.object({
   userId: z.string().optional(),
+  sessionId: z.string().optional(),
+  status: z.enum(['HOLD', 'CONFIRMED', 'CANCELLED', 'EXPIRED']).optional(),
+  bookingType: z.enum(['registered', 'guest', 'all']).default('all').optional(),
+  includeUser: z.boolean().default(false).optional(),
+  includeSession: z.boolean().default(false).optional(),
+  includePaymentInfo: z.boolean().default(false).optional(),
+  includeGuestContact: z.boolean().default(false).optional(),
   cursor: CursorParamSchema,
   limit: LimitParamSchema,
 });

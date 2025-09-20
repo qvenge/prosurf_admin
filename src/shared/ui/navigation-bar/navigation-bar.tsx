@@ -12,8 +12,8 @@ import { Suspense } from 'react';
 interface NavItem {
   id: string;
   title: string;
-  iconDefault: any;
-  iconActive: any;
+  iconDefault: string;
+  iconActive: string;
   path: string;
 }
 

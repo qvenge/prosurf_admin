@@ -74,8 +74,7 @@ export function UploadImageInput({
     setShowPreviewSrc(false);
 
     if (fileInputRef.current) {
-      // @ts-ignore - удобный способ очистить инпут
-      fileInputRef.current.value = ''; 
+      fileInputRef.current.value = '';
     }
   }
 

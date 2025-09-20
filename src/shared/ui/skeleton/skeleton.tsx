@@ -13,9 +13,7 @@ export function Skeleton({ children, className, ...props }: SkeletonProps) {
   );
 }
 
-export interface SkeletonItemProps extends React.HTMLAttributes<HTMLDivElement> {};
-
-export function SkeletonItem({ className, ...props }: SkeletonItemProps) {
+export function SkeletonItem({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={clsx(className, styles.skeletonItem)} {...props} />
   );

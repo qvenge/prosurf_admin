@@ -46,7 +46,7 @@ export function dashirize(value: string): string {
 export function camelize(value: string): string {
   return value
     .toLowerCase() // всё в нижний регистр для однозначности
-    .replace(/[-_]+(.)?/g, (match, chr) => chr ? chr.toUpperCase() : '')
+    .replace(/[-_]+(.)?/g, (_, chr) => chr ? chr.toUpperCase() : '')
     .replace(/^./, match => match.toUpperCase()); // делаем первую букву заглавной
 }
 

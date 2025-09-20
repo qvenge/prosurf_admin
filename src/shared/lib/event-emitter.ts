@@ -1,4 +1,4 @@
-type EventMap = Record<string, any>;
+type EventMap = Record<string, unknown>;
 type EventKey<T extends EventMap> = string & keyof T;
 type EventHandler<T> = (payload: T) => void;
 
@@ -9,7 +9,7 @@ interface ListenerNode<T> {
 }
 
 export class EventEmitter<T extends EventMap = EventMap> {
-  private listeners: Map<string, ListenerNode<any> | null> = new Map();
+  private listeners: Map<string, ListenerNode<unknown> | null> = new Map();
 
   on<K extends EventKey<T>>(event: K, handler: EventHandler<T[K]>): () => void {
     return this.addListener(event, handler, false);
@@ -94,7 +94,7 @@ export class EventEmitter<T extends EventMap = EventMap> {
       next: this.listeners.get(event) || null,
     };
 
-    this.listeners.set(event, node);
+    this.listeners.set(event, node as ListenerNode<unknown>);
 
     return () => this.off(event, handler);
   }

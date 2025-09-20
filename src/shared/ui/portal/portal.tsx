@@ -3,11 +3,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-export interface ContainerOptions {
-  id: string;
-  mountNode?: HTMLElement;
-}
-
 export interface PortalProps {
   id: string;
   children: React.ReactNode;
@@ -32,17 +27,4 @@ export const Portal = (props: PortalProps) => {
   }, [id]);
 
   return container ? createPortal(children, container) : null;
-};
-
-export const createContainer = (options : ContainerOptions) => {
-  if (document.getElementById(options.id)) {
-    return;
-  }
-
-  const { id, mountNode = document.body } = options;
-  
-  const portalContainer = document.createElement('div');
-
-  portalContainer.setAttribute('id', id);
-  mountNode.appendChild(portalContainer);
 };

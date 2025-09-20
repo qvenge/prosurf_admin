@@ -30,10 +30,14 @@ export type SessionCreationResponse = z.infer<typeof schemas.SessionCreationResp
 export type BookingStatus = z.infer<typeof schemas.BookingStatusSchema>;
 export type Booking = z.infer<typeof schemas.BookingSchema>;
 export type BookRequest = z.infer<typeof schemas.BookRequestSchema>;
+export type BookingExtended = z.infer<typeof schemas.BookingExtendedSchema>;
+export type BookingCreateDto = z.infer<typeof schemas.BookingCreateDtoSchema>;
+export type BookingUpdateDto = z.infer<typeof schemas.BookingUpdateDtoSchema>;
+export type GuestContact = z.infer<typeof schemas.GuestContactSchema>;
 
 // Booking with hold TTL header
 export interface BookingWithHoldTTL {
-  booking: Booking;
+  booking: Booking | BookingExtended;
   holdTtlSeconds: number | null;
 }
 

@@ -8,7 +8,7 @@ export interface SessionDetailsProps {
 }
 
 interface TempBooking extends Booking {
-  user: {
+  user?: {
     id: string;
     email: string;
     firstName: string;
@@ -45,7 +45,7 @@ export function SessionDetails({ sessionId }: SessionDetailsProps) {
                 {booking.user?.firstName} {booking.user?.lastName}
               </div>
               <div className={styles.bookingTicket}>
-                {booking.ticket.title} {booking.ticket.full ? `(${formatPrice(booking.ticket.full.price)})` : ''}
+                Количество мест: {booking.quantity} | Статус: {booking.status}
               </div>
             </div>
           ))}
