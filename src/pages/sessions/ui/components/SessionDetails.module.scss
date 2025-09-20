@@ -1,0 +1,33 @@
+.header,
+.bookings,
+.bookingsHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: stretch;
+  gap: 12px;
+  align-self: stretch;
+}
+
+.datetime {
+  @include ds.typo('body/b3/medium');
+  color: ds.color('text/primary');
+}
+
+.title {
+  @include ds.typo('header/h4/semibold');
+  color: ds.color('text/primary');
+}
+
+.location {
+  @include ds.typo('body/b3/medium');
+  color: ds.color('text/secondary');
+}
+
+.bookings {
+  gap: 40px;
+}
+
+.bookingsHeader {
+  gap: 24px;
+}

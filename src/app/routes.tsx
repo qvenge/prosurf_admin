@@ -3,7 +3,7 @@ import { App } from './ui/App';
 
 import { CalendarPage } from '@/pages/calendar';
 import { LoginPage } from '@/pages/login';
-import { BookingsPage } from '@/pages/bookings';
+import { SessionsPage } from '@/pages/sessions';
 import { TrainingsPage } from '@/pages/trainings';
 
 export const router = createBrowserRouter([
@@ -16,12 +16,12 @@ export const router = createBrowserRouter([
         Component: CalendarPage
       },
       {
-        path: 'bookings',
-        Component: BookingsPage
+        path: 'sessions',
+        Component: SessionsPage
       },
       {
         path: 'users',
-        Component: BookingsPage
+        Component: CalendarPage
       },
       {
         path: 'trainings',
@@ -29,19 +29,19 @@ export const router = createBrowserRouter([
       },
       {
         path: 'season-tickets',
-        Component: BookingsPage
+        Component: CalendarPage
       },
       {
         path: 'certificates',
-        Component: BookingsPage
+        Component: CalendarPage
       },
       {
         path: 'events',
-        Component: BookingsPage
+        Component: CalendarPage
       },
       {
         path: 'settings',
-        Component: BookingsPage
+        Component: CalendarPage
       },
       {
         path: 'login',

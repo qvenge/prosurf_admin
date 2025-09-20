@@ -8,6 +8,7 @@ export { Portal } from './portal';
 export { Modal } from './modal';
 export { Header } from './header';
 export { Toggle } from './toggle';
+export { SideModal } from './side-modal';
 export { Select } from './select';
 export { UploadImageInput } from './upload-image-input';
 export { Skeleton, SkeletonItem, SkeletonText } from './skeleton';

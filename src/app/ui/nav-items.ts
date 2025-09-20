@@ -34,11 +34,11 @@ export const navItems = [
     path: '/'
   },
   {
-    id: 'bookings',
+    id: 'sessions',
     title: 'Записи',
     iconDefault: ListChecksRegular,
     iconActive: ListChecksFill,
-    path: '/bookings'
+    path: '/sessions'
   },
   {
     id: 'users',

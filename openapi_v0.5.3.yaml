@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: Surf Booking Telegram Web App API
-  version: 0.4.0
-  description: "API для сервиса бронирования и оплаты тренировок по (серфинг, скейтсерфинг, вейксерфинг)\nи многодневных туров. Включает подарочные сертификаты, абонементы, лист ожидания,\nкэшбэк-кошелёк и админ-аудит"
+  version: 0.5.3
+  description: "API для сервиса бронирования и оплаты тренировок по (серфинг, скейтсерфинг, вейксерфинг) и многодневных туров. Включает подарочные сертификаты, абонементы, лист ожидания, кэшбэк-кошелёк, админ-аудит и унифицированное создание бронирований"
 servers:
 - url: https://api.example.com
   description: Production
@@ -245,6 +245,10 @@ components:
           - HOLD_EXPIRED
           - NO_SEATS
           - PROVIDER_UNAVAILABLE
+          - INVALID_CREDENTIALS
+          - USER_EXISTS
+          - WEAK_PASSWORD
+          - INVALID_EMAIL
         message:
           type: string
         details:
@@ -273,13 +277,13 @@ components:
       - id
       - createdAt
       - role
-      - telegramId
       properties:
         id:
           type: string
         telegramId:
           type: integer
-          description: Telegram user ID
+          nullable: true
+          description: Telegram user ID (null для пользователей без Telegram)
         phone:
           type: string
           nullable: true
@@ -292,7 +296,7 @@ components:
         username:
           type: string
           nullable: true
-          description: Telegram username
+          description: Уникальный username для авторизации (альтернатива email)
         email:
           type: string
           nullable: true
@@ -305,6 +309,13 @@ components:
         createdAt:
           type: string
           format: date-time
+        authMethod:
+          type: string
+          enum:
+          - telegram
+          - email
+          - username
+          description: Способ авторизации пользователя
     UserUpdateDto:
       type: object
       properties:
@@ -317,6 +328,73 @@ components:
         email:
           type: string
       additionalProperties: false
+    LoginDto:
+      type: object
+      required:
+      - login
+      - password
+      properties:
+        login:
+          type: string
+          description: Email или username для авторизации
+        password:
+          type: string
+          format: password
+          minLength: 6
+      additionalProperties: false
+    TelegramLoginDto:
+      type: object
+      required:
+      - initData
+      properties:
+        initData:
+          type: string
+          description: Telegram Web App initData
+      additionalProperties: false
+    RegisterDto:
+      type: object
+      required:
+      - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email пользователя (обязателен, если не указан username)
+        username:
+          type: string
+          pattern: ^[a-zA-Z0-9_-]{3,32}$
+          description: Уникальный username (обязателен, если не указан email)
+        password:
+          type: string
+          format: password
+          minLength: 6
+          description: Пароль пользователя
+        firstName:
+          type: string
+          maxLength: 128
+        lastName:
+          type: string
+          maxLength: 128
+        phone:
+          type: string
+          pattern: ^\+?[0-9]{7,15}$
+        role:
+          $ref: '#/components/schemas/Role'
+          description: Роль пользователя (только ADMIN может указать роль при регистрации)
+      additionalProperties: false
+    AuthResponse:
+      type: object
+      required:
+      - accessToken
+      - refreshToken
+      - user
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
     EventDescription:
       type: object
       required:
@@ -533,7 +611,6 @@ components:
       required:
       - id
       - sessionId
-      - userId
       - quantity
       - status
       - totalPrice
@@ -544,6 +621,8 @@ components:
           type: string
         userId:
           type: string
+          nullable: true
+          description: ID пользователя. Может быть null для гостевых бронирований, созданных админом
         quantity:
           type: integer
           minimum: 1
@@ -558,9 +637,127 @@ components:
               format: date-time
         totalPrice:
           $ref: '#/components/schemas/Price'
+        guestContact:
+          $ref: '#/components/schemas/GuestContact'
+          nullable: true
+          description: Контактные данные гостя для бронирований без регистрации (создается админом)
+        notes:
+          type: string
+          nullable: true
+          description: Заметки администратора о бронировании
         createdAt:
           type: string
           format: date-time
+        createdBy:
+          type: string
+          nullable: true
+          description: ID пользователя (админа), создавшего бронирование
+    BookingExtended:
+      allOf:
+        - $ref: '#/components/schemas/Booking'
+        - type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+              description: Информация о пользователе (доступно при запросе с правами ADMIN)
+            guestContact:
+              $ref: '#/components/schemas/GuestContact'
+              description: Контактные данные гостя (если бронирование создано админом без привязки к пользователю)
+            session:
+              $ref: '#/components/schemas/Session'
+              description: Информация о сессии (включается при использовании параметра includeSession)
+            paymentInfo:
+              type: object
+              nullable: true
+              properties:
+                method:
+                  type: string
+                  enum: [card, certificate, pass, cashback, composite]
+                  description: Метод оплаты
+                paymentId:
+                  type: string
+                  nullable: true
+                  description: ID платежа (если применимо)
+                certificateId:
+                  type: string
+                  nullable: true
+                  description: ID использованного сертификата (если применимо)
+                seasonTicketId:
+                  type: string
+                  nullable: true
+                  description: ID использованного абонемента (если применимо)
+              description: Информация об оплате (доступно при запросе с правами ADMIN)
+    GuestContact:
+      type: object
+      required:
+      - phone
+      properties:
+        phone:
+          type: string
+          pattern: ^\+?[0-9]{7,15}$
+          description: Телефон гостя (обязательное поле)
+        firstName:
+          type: string
+          nullable: true
+          maxLength: 128
+          description: Имя гостя
+        lastName:
+          type: string
+          nullable: true
+          maxLength: 128
+          description: Фамилия гостя
+        email:
+          type: string
+          format: email
+          nullable: true
+          description: Email гостя
+        note:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: Дополнительные заметки админа о госте
+    BookingCreateDto:
+      type: object
+      required:
+      - quantity
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+          description: Количество мест для бронирования
+        userId:
+          type: string
+          nullable: true
+          description: |
+            ID пользователя для бронирования (только ADMIN).
+            Если не указан, бронирование создается для текущего пользователя.
+        guestContact:
+          $ref: '#/components/schemas/GuestContact'
+          nullable: true
+          description: |
+            Контактные данные гостя без регистрации (только ADMIN).
+            Используется для создания гостевых бронирований.
+            Нельзя использовать одновременно с userId.
+        status:
+          type: string
+          enum:
+          - HOLD
+          - CONFIRMED
+          default: HOLD
+          description: |
+            Начальный статус брони (только ADMIN).
+            CONFIRMED используется для немедленного подтверждения при офлайн оплате.
+            Обычные пользователи всегда создают статус HOLD.
+        ticketId:
+          type: string
+          nullable: true
+          description: ID билета для расчета цены (только ADMIN)
+        notes:
+          type: string
+          nullable: true
+          maxLength: 1000
+          description: Внутренние заметки администратора (только ADMIN)
+      additionalProperties: false
     PaymentStatus:
       type: string
       enum:
@@ -1273,47 +1470,152 @@ components:
         nextAction:
           type: none
 paths:
-  /auth/login:
+  /auth/telegram:
     post:
       tags:
       - Auth
-      summary: Логин по Telegram initData
+      summary: Логин через Telegram initData
+      security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required:
-              - initData
-              properties:
-                initData:
-                  type: string
+              $ref: '#/components/schemas/TelegramLoginDto'
+      responses:
+        '200':
+          description: Успешная аутентификация через Telegram
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /auth/login:
+    post:
+      tags:
+      - Auth
+      summary: Логин по email/username и паролю
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+            examples:
+              emailLogin:
+                summary: Логин по email
+                value:
+                  login: user@example.com
+                  password: SecurePassword123
+              usernameLogin:
+                summary: Логин по username
+                value:
+                  login: johndoe
+                  password: SecurePassword123
       responses:
         '200':
           description: Успешная аутентификация
           content:
             application/json:
               schema:
-                type: object
-                required:
-                - accessToken
-                - refreshToken
-                - user
-                properties:
-                  accessToken:
-                    type: string
-                  refreshToken:
-                    type: string
-                  user:
-                    $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/AuthResponse'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          description: Неверные учетные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: INVALID_CREDENTIALS
+                message: Invalid login credentials
+  /auth/register:
+    post:
+      tags:
+      - Auth
+      summary: Регистрация нового пользователя
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDto'
+            examples:
+              regularUserByEmail:
+                summary: Регистрация обычного пользователя по email
+                value:
+                  email: newuser@example.com
+                  password: SecurePassword123
+                  firstName: Иван
+                  lastName: Иванов
+                  phone: "+79001234567"
+              regularUserByUsername:
+                summary: Регистрация обычного пользователя по username
+                value:
+                  username: ivan_ivanov
+                  password: SecurePassword123
+                  firstName: Иван
+                  lastName: Иванов
+                  email: ivan@example.com
+              adminCreatesAdmin:
+                summary: Админ создает нового админа
+                value:
+                  email: admin@example.com
+                  username: admin_user
+                  password: AdminPassword456
+                  firstName: Admin
+                  lastName: User
+                  role: ADMIN
+      responses:
+        '201':
+          description: Пользователь успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                weakPassword:
+                  summary: Слабый пароль
+                  value:
+                    code: WEAK_PASSWORD
+                    message: Password must be at least 6 characters long
+                invalidEmail:
+                  summary: Некорректный email
+                  value:
+                    code: INVALID_EMAIL
+                    message: Invalid email format
+        '403':
+          description: Недостаточно прав для указания роли
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: FORBIDDEN
+                message: Only admins can specify user role during registration
+        '409':
+          description: Пользователь уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: USER_EXISTS
+                message: User with this email or username already exists
   /auth/refresh:
     post:
       tags:
       - Auth
       summary: Обновление accessToken по refreshToken (ротация refresh)
+      security: []
       requestBody:
         required: true
         content:
@@ -1485,6 +1787,15 @@ paths:
       - $ref: '#/components/parameters/EndsBeforeParam'
       - $ref: '#/components/parameters/CursorParam'
       - $ref: '#/components/parameters/LimitParam'
+      - $ref: '#/components/parameters/LabelsAnyParam'
+      - $ref: '#/components/parameters/LabelsAllParam'
+      - $ref: '#/components/parameters/LabelsNoneParam'
+      - $ref: '#/components/parameters/AttrEqParam'
+      - $ref: '#/components/parameters/AttrInParam'
+      - $ref: '#/components/parameters/AttrGteParam'
+      - $ref: '#/components/parameters/AttrLteParam'
+      - $ref: '#/components/parameters/AttrBoolParam'
+      - $ref: '#/components/parameters/AttrExistsParam'
       responses:
         '200':
           description: OK
@@ -1743,7 +2054,20 @@ paths:
     post:
       tags:
       - Bookings
-      summary: Забронировать места в сессии (создать HOLD)
+      summary: Забронировать места в сессии
+      description: |
+        Создает бронирование для сессии. Поведение зависит от роли пользователя:
+        
+        **Для обычных пользователей (USER):**
+        - Создает бронирование для текущего пользователя
+        - Принимает только поле `quantity`
+        - Всегда создает статус HOLD
+        
+        **Для администраторов (ADMIN):**
+        - Может создать бронирование для любого пользователя или гостя
+        - Поддерживает дополнительные поля: `userId`, `guestContact`, `status`, `notes`
+        - Может сразу подтвердить бронирование (status: CONFIRMED) для офлайн оплаты
+        - Если не указан userId или guestContact, создает для текущего пользователя
       parameters:
       - in: path
         name: id
@@ -1756,27 +2080,64 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-              - quantity
-              properties:
-                quantity:
-                  type: integer
-                  minimum: 1
+              $ref: '#/components/schemas/BookingCreateDto'
+            examples:
+              userBooking:
+                summary: Обычное бронирование пользователем
+                value:
+                  quantity: 2
+              adminForUser:
+                summary: Админ бронирует для зарегистрированного пользователя
+                value:
+                  quantity: 2
+                  userId: user_456
+                  status: CONFIRMED
+                  notes: Оплачено наличными в офисе
+              adminForGuest:
+                summary: Админ бронирует для гостя без регистрации
+                value:
+                  quantity: 1
+                  guestContact:
+                    phone: "+79001234567"
+                    firstName: Иван
+                    lastName: Петров
+                    email: ivan@example.com
+                  status: HOLD
+                  notes: Позвонить за день до тренировки для подтверждения
+              adminForSelf:
+                summary: Админ бронирует для себя с заметкой
+                value:
+                  quantity: 1
+                  status: CONFIRMED
+                  notes: Тестовое бронирование
       responses:
         '201':
-          description: HOLD создан
+          description: Бронирование создано
           headers:
             X-Hold-TTL:
-              description: Время жизни брони (сек)
+              description: Время жизни брони в секундах (только для статуса HOLD)
               schema:
                 type: integer
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Booking'
+                oneOf:
+                - $ref: '#/components/schemas/Booking'
+                - $ref: '#/components/schemas/BookingExtended'
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Недостаточно прав (попытка использовать админские поля без роли ADMIN)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
@@ -1785,13 +2146,62 @@ paths:
     get:
       tags:
       - Bookings
-      summary: Список бронирований (self или ADMIN)
+      summary: Список бронирований (self или ADMIN с расширенными возможностями фильтрации)
       parameters:
       - in: query
         name: userId
         schema:
           type: string
-        description: Доступно только ADMIN для просмотра чужих бронирований
+        description: Фильтр по ID пользователя. Доступно только ADMIN для просмотра чужих бронирований. По умолчанию возвращаются бронирования текущего пользователя.
+      - in: query
+        name: sessionId
+        schema:
+          type: string
+        description: Фильтр по ID сессии. Доступно только ADMIN для получения всех бронирований конкретной сессии.
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - HOLD
+          - CONFIRMED
+          - CANCELLED
+          - EXPIRED
+        description: Фильтр по статусу бронирования. Доступно только ADMIN.
+      - in: query
+        name: bookingType
+        schema:
+          type: string
+          enum:
+          - registered
+          - guest
+          - all
+          default: all
+        description: Фильтр по типу бронирования (зарегистрированные пользователи / гости / все). Доступно только ADMIN.
+      - in: query
+        name: includeUser
+        schema:
+          type: boolean
+          default: false
+        description: Включить информацию о пользователе в ответ. Доступно только ADMIN.
+      - in: query
+        name: includeSession
+        schema:
+          type: boolean
+          default: false
+        description: Включить полную информацию о сессии в ответ. Доступно только ADMIN.
+      - in: query
+        name: includePaymentInfo
+        schema:
+          type: boolean
+          default: false
+        description: Включить информацию об оплате в ответ. Доступно только ADMIN.
+      - in: query
+        name: includeGuestContact
+        schema:
+          type: boolean
+          default: false
+        description: Включить контактные данные гостей в ответ. Доступно только ADMIN.
       - $ref: '#/components/parameters/CursorParam'
       - $ref: '#/components/parameters/LimitParam'
       responses:
@@ -1805,7 +2215,9 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Booking'
+                      oneOf:
+                        - $ref: '#/components/schemas/Booking'
+                        - $ref: '#/components/schemas/BookingExtended'
                   next:
                     type: string
                     nullable: true
@@ -1835,6 +2247,60 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Bookings
+      - Admin
+      summary: Обновить бронирование (ADMIN)
+      description: |
+        Позволяет администратору обновить данные бронирования:
+        - Контактную информацию гостя
+        - Заметки администратора
+        - Количество мест (при наличии свободных)
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                  minimum: 1
+                  description: Новое количество мест
+                guestContact:
+                  $ref: '#/components/schemas/GuestContact'
+                  description: Обновленные контактные данные гостя
+                notes:
+                  type: string
+                  maxLength: 1000
+                  description: Обновленные заметки администратора
+              additionalProperties: false
+      responses:
+        '200':
+          description: Бронирование обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingExtended'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Конфликт (например, недостаточно мест для увеличения количества)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /bookings/{id}/cancel:
     post:
       tags:
@@ -1972,7 +2438,7 @@ paths:
                 providerUnavailable:
                   $ref: '#/components/examples/ErrProviderUnavailable'
       description: "Creates or continues a payment for the specified booking (booking must be in HOLD state).\n\nScenarios:\n1) **Telegram invoice (Mini App)**\n   Request: `{\"method\":\"card\",\"provider\":\"telegram\"}`\n   Response `201`: `Payment{ status:PENDING, provider:'telegram', nextAction:{ type:'openInvoice', slugOrUrl } }`\n   Client: call `Telegram.WebApp.openInvoice(slugOrUrl)`, then on `invoiceClosed('paid')` or via polling call `GET /payments/{id}`.\n   Server: via `/webhooks/telegram/bot` handles `pre_checkout_query` (≤10s) and `successful_payment`, sets `Payment=SUCCEEDED` and `Booking=CONFIRMED`.\n\n2) **External PSP (redirect or embedded)**\n   Request: `{\"method\":\"card\",\"provider\":\"stripe\",\"returnUrl\":\"https://...\"}`\n   Response `201`: `Payment{ status:PENDING, provider:'stripe', nextAction:{ type:'redirect', url } }`\n   Client: open `url` inside WebApp; on return to `returnUrl`, poll `GET /payments/{id}`.\n   Server: confirms via `/webhooks/payments/provider`.\n\
-        \n3) **Composite payments (certificate/pass/cashback + card)**\n   Request:\n   {\n     \"methods\": [\n       {\"method\":\"certificate\",\"certificateId\":\"cert_123\"},\n       {\"method\":\"cashback\",\"amount\": 1500},\n       {\"method\":\"card\",\"provider\":\"telegram\"}\n     ]\n   }\n   Response `201`: \n     - If remainder > 0 → `nextAction.openInvoice` (or `redirect`).\n     - If fully covered → `status:SUCCEEDED`, `nextAction:'none'`.\n\nConflicts (409):\n- `HOLD_EXPIRED` — hold TTL elapsed; re-book required.\n- `NO_SEATS` — seats not available anymore.\n- `AMOUNT_MISMATCH` — server-calculated amount differs from invoice amount.\n- `PROVIDER_UNAVAILABLE` — payment provider is temporarily unavailable.\n\nAll create/continue calls SHOULD be sent with `Idempotency-Key`.\n"
+        \n3) **Composite payments (certificate/pass/cashback + card)**\n   Request:\n   {\n     \"methods\": [\n       {\"method\":\"certificate\",\"certificateId\":\"cert_123\"},\n       {\"method\":\"cashback\",\"amount\": 1500},\n       {\"method\":\"card\",\"provider\":\"telegram\"}\n     ]\n   }\n   Response `201`: \n     - If remainder > 0 → `nextAction.openInvoice` (or `redirect`).\n     - If fully covered → `status:SUCCEEDED`, `nextAction:'none'`.\n\nConflicts (409):\n- `HOLD_EXPIRED` – hold TTL elapsed; re-book required.\n- `NO_SEATS` – seats not available anymore.\n- `AMOUNT_MISMATCH` – server-calculated amount differs from invoice amount.\n- `PROVIDER_UNAVAILABLE` – payment provider is temporarily unavailable.\n\nAll create/continue calls SHOULD be sent with `Idempotency-Key`.\n"
   /payments/{id}:
     get:
       tags:
@@ -2059,7 +2525,7 @@ paths:
         name: userId
         schema:
           type: string
-        description: Только ADMIN — просматривать по userId
+        description: Только ADMIN – просматривать по userId
       - $ref: '#/components/parameters/CursorParam'
       - $ref: '#/components/parameters/LimitParam'
       responses:
@@ -2204,7 +2670,7 @@ paths:
         name: userId
         schema:
           type: string
-        description: Только ADMIN — фильтр по userId
+        description: Только ADMIN – фильтр по userId
       - $ref: '#/components/parameters/CursorParam'
       - $ref: '#/components/parameters/LimitParam'
       responses:

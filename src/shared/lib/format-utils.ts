@@ -1,3 +1,5 @@
+import type { Price } from '@/shared/api';
+
 export const formatDuration = (start: string, end: string | null) => {
   if (!end) return undefined;
   const startDate = new Date(start);
@@ -23,7 +25,22 @@ export const formatAvailability = (remainingSeats: number) => {
   }
 };
 
-export const formatPrice = (price: { amountMinor: number; currency: string }) => {
-  const amount = (price.amountMinor / 100).toLocaleString('ru-RU');
-  return price.currency === 'RUB' ? `${amount} ₽` : `${amount} ${price.currency}`;
-};
+// export const formatPrice = (price: { amountMinor: number; currency: string }) => {
+//   const amount = (price.amountMinor / 100).toLocaleString('ru-RU');
+//   return price.currency === 'RUB' ? `${amount} ₽` : `${amount} ${price.currency}`;
+// };
+
+export const formatPrice = (price: Price) => new Intl.NumberFormat(
+  'ru-RU',
+  { style: "currency", currency: price.currency, maximumFractionDigits: 0 }
+).format(price.amountMinor / 100);
+
+export const formatDate = (dateString: string) => new Intl.DateTimeFormat(
+  'ru-RU',
+  {day: '2-digit', month: 'long', year: 'numeric'}
+).format(new Date(dateString));
+
+export const formatTime = (dateString: string) => new Intl.DateTimeFormat(
+  'ru-RU',
+  {hour: '2-digit', minute: '2-digit'}
+).format(new Date(dateString));

@@ -1,0 +1,1 @@
+export { SideModal, type SideModalProps } from './SideModal';
