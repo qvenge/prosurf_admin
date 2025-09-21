@@ -5,6 +5,8 @@
   align-items: flex-start;
   gap: 80px;
   flex: 1 0 0;
+  min-width: 0;
+  overflow: hidden;
   align-self: stretch;
 }
 

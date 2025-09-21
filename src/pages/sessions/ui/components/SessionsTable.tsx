@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -12,7 +12,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { CaretRightBold } from '@/shared/ds/icons';
 import { IconButton, SideModal } from '@/shared/ui';
 import { capitalize } from '@/shared/lib/string';
-import { useSessions, type Session } from '@/shared/api';
+import { useSessionsInfinite, type Session } from '@/shared/api';
 import { formatDate, formatTime, formatPrice } from '@/shared/lib/format-utils';
 import styles from './SessionsTable.module.scss';
 import { SessionDetails } from './SessionDetails';
@@ -32,16 +32,26 @@ const columnHelper = createColumnHelper<SessionRowData>();
 
 export function SessionsTable({ className }: SessionsTableProps) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
+  const tbodyRef = useRef<HTMLTableSectionElement>(null);
   const [openedSession, setOpenedSession] = useState<string | null>(null);
 
-  const { data: _sessionsData, isLoading: sessionsLoading, error: sessionsError } = useSessions({
-    limit: 10,
+  const {
+    data: _sessionsData,
+    isLoading: sessionsLoading,
+    error: sessionsError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useSessionsInfinite({
+    limit: 100,
   });
 
   const sessionsData = useMemo(() => {
-    if (!_sessionsData?.items) return [];
+    if (!_sessionsData?.pages) return [];
 
-    return _sessionsData.items.map((session: Session) => {
+    const allSessions = _sessionsData.pages.flatMap(page => page.items);
+
+    return allSessions.map((session: Session) => {
       const event = session.event;
       const minPrice = event.tickets.length > 0
         ? event.tickets.map(ticket => ticket.full.price).reduce((minPrice, price) => {
@@ -135,6 +145,25 @@ export function SessionsTable({ className }: SessionsTableProps) {
     setOpenedSession(eventId);
   };
 
+  // Infinite scroll detection
+  useEffect(() => {
+    const container = tbodyRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      console.log('scrolling');
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100; // 100px threshold
+
+      if (isNearBottom && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   if (sessionsLoading) {
     return <div className={styles.loading}>Loading training sessions...</div>;
   }
@@ -167,7 +196,7 @@ export function SessionsTable({ className }: SessionsTableProps) {
             </tr>
           ))}
         </thead>
-        <tbody className={styles.tbody}>
+        <tbody className={styles.tbody} ref={tbodyRef}>
           {rowVirtualizer.getVirtualItems().map(virtualRow => {
             const row = rows[virtualRow.index];
             return (
@@ -193,6 +222,21 @@ export function SessionsTable({ className }: SessionsTableProps) {
           })}
         </tbody>
       </table>
+
+      {/* Loading state for pagination */}
+      {isFetchingNextPage && (
+        <div className={styles.paginationLoading}>
+          Loading more sessions...
+        </div>
+      )}
+
+      {/* End of list indicator */}
+      {!hasNextPage && sessionsData.length > 0 && (
+        <div className={styles.endOfList}>
+          No more sessions to load
+        </div>
+      )}
+
       {openedSession != null && <SideModal onClose={() => setOpenedSession(null)}>
         <SessionDetails sessionId={openedSession} />
       </SideModal>}
