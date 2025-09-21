@@ -1,0 +1,87 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+.label {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 20px;
+  color: #191f2e;
+  margin: 0;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  background: transparent;
+  user-select: none;
+}
+
+.option {
+  @include ds.typo('body/b3/regular');
+
+  min-width: 40px;
+  padding: 8px 16px;
+  text-align: center;
+  border: none;
+  border-radius: ds.number('radius/S');
+
+  background: transparent;
+  cursor: pointer;
+  // transition: all 0.2s ease;
+
+  &:hover:not(.selected):not(.optionDisabled) {
+    background: rgba(25, 31, 46, 0.05);
+  }
+
+  &.selected {
+    @include ds.typo('body/b3/medium');
+    background: ds.color('background/alternative');
+    color: ds.color('text/brand/primary');
+
+    &:hover {
+      background: #191f2e;
+    }
+  }
+
+  &.optionDisabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+
+    &:hover {
+      background: transparent;
+    }
+  }
+}
+
+.optionLabel {
+  white-space: nowrap;
+  line-height: 0;
+}
+
+.option:not(.selected) + .option:not(selected) {
+  margin-left: 1px;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 12px;
+    background: ds.color('border/seconday');
+  }
+}

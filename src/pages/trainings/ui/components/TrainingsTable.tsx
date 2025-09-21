@@ -12,49 +12,48 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { ArrowDownBold, ArrowUpBold, CaretRightBold } from '@/shared/ds/icons';
 import { Icon, IconButton, SideModal } from '@/shared/ui';
 import { capitalize } from '@/shared/lib/string';
-import { useSessionsInfinite, type Session } from '@/shared/api';
+import { useEventsInfinite, type Event } from '@/shared/api';
 import { formatDate, formatTime, formatPrice } from '@/shared/lib/format-utils';
-import styles from './SessionsTable.module.scss';
-import { SessionDetails } from './SessionDetails';
+import styles from './TrainingsTable.module.scss';
 
-type SessionRowData = {
+type TrainingRowData = {
   id: string;
   title: string;
   location: string | null | undefined;
   price: string | null;
-  occupied: string;
-  startsAt: string;
+  capacity: number;
+  dates: string[];
 };
 
 export interface SessionsTableProps extends React.HTMLAttributes<HTMLDivElement> {
   eventType: string;
 }
 
-const columnHelper = createColumnHelper<SessionRowData>();
+const columnHelper = createColumnHelper<TrainingRowData>();
 
-export function SessionsTable({ className, eventType }: SessionsTableProps) {
+export function TrainingsTable({ className, eventType }: SessionsTableProps) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const bodyContainerRef = useRef<HTMLDivElement>(null);
   const [openedSession, setOpenedSession] = useState<string | null>(null);
 
   const {
-    data: _sessionsData,
-    isLoading: sessionsLoading,
-    error: sessionsError,
+    data: _trainingData,
+    isLoading: trainingLoading,
+    error: trainingError,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage
-  } = useSessionsInfinite({
+  } = useEventsInfinite({
     limit: 15,
-    "labels.any": [eventType],
+    'labels.any': ['training']
   });
 
-  const sessionsData = useMemo(() => {
-    if (!_sessionsData?.pages) return [];
+  const trainingData = useMemo(() => {
+    if (!_trainingData?.pages) return [];
 
-    const allSessions = _sessionsData.pages.flatMap(page => page.items);
+    const allSessions = _trainingData.pages.flatMap(page => page.items);
 
-    return allSessions.map((session: Session) => {
+    return allSessions.map((session: Event) => {
       const event = session.event;
       const minPrice = event.tickets.length > 0
         ? event.tickets.map(ticket => ticket.full.price).reduce((minPrice, price) => {
@@ -89,20 +88,28 @@ export function SessionsTable({ className, eventType }: SessionsTableProps) {
           return info.getValue() || 'N/A';
         },
       }),
-      columnHelper.accessor('occupied', {
-        header: 'Записи',
+      columnHelper.accessor('capacity', {
+        header: 'Кол-во мест',
         cell: info => info.getValue(),
       }),
       columnHelper.display({
-        id: 'datetime',
-        header: 'Дата',
-        cell: (info) => {
-          const date = formatDate(info.row.original.startsAt);
-          const time = formatTime(info.row.original.startsAt);
+        id: 'dates',
+        header: 'Даты',
+        cell: () => {
           return (
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span className={styles.date}>{date}</span>
-              <span className={styles.time}>{time}</span>
+            <div className={styles.dates}>
+              <div className={styles.date}>
+                <div className={styles.date}>11 ноября 2025</div>
+                <div className={styles.times}>21:00 / 22:00 / 23:00</div>
+              </div>
+              <div className={styles.date}>
+                <div className={styles.date}>12 ноября 2025</div>
+                <div className={styles.times}>21:00 / 22:00 / 23:00</div>
+              </div>
+              <div className={styles.date}>
+                <div className={styles.date}>13 ноября 2025</div>
+                <div className={styles.times}>21:00 / 22:00 / 23:00</div>
+              </div>
             </div>
           )
         },
@@ -254,7 +261,7 @@ export function SessionsTable({ className, eventType }: SessionsTableProps) {
       </div>
 
       {openedSession != null && <SideModal onClose={() => setOpenedSession(null)}>
-        <SessionDetails sessionId={openedSession} />
+        {/* <SessionDetails sessionId={openedSession} /> */}
       </SideModal>}
     </div>
   );

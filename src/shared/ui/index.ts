@@ -17,4 +17,5 @@ export { VirtualScroll } from './virtual-scroll';
 export { Dropdown } from './dropdown';
 export { Loader } from './loader';
 export { SupportButton } from './support-button';
+export { SegmentedButtons, type SegmentedButtonsProps } from './segmented-buttons';
 export * from './icon-button';
