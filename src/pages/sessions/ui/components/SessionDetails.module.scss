@@ -41,6 +41,17 @@
   display: flex;
   justify-content: space-between;
   gap: 24px;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: ds.color('border/primary');
+  }
 }
 
 .addBookingForm {
@@ -55,7 +66,7 @@
 .bookingsList {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 }
 
 .bookingItem {
@@ -91,4 +102,66 @@
   color: ds.color('text/secondary');
   text-align: center;
   padding: 24px;
+}
+
+.booking {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  align-self: stretch;
+
+  &Info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &UserAvatarWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: ds.color('background/secondary');
+    color: ds.color('text/secondary');
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  &UserAvatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &UserName {
+    @include ds.typo('body/b3/medium');
+    color: ds.color('text/primary');
+  }
+
+  &PaymentMethod {
+    @include ds.typo('body/b4/medium');
+    color: ds.color('text/success');
+  }
+
+  &CancelBtn {
+    cursor: pointer;
+    color: ds.color('graphic/secondary');
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+}
+
+.booking + .booking::after {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: ds.color('border/primary');
 }

@@ -40,7 +40,9 @@ export function TrainingsTable({ className }: TrainingsTableProps) {
 
     return eventsData.items.map((event) => {
       const minPrice = event.tickets.length > 0
-        ? Math.min(...event.tickets.map(ticket => ticket.prepayment.price.amountMinor / 100))
+        ? Math.min(...event.tickets.map(ticket =>
+            ticket.prepayment ? ticket.prepayment.price.amountMinor / 100 : ticket.full.price.amountMinor / 100
+          ))
         : null;
 
       return {

@@ -69,7 +69,7 @@ export const TicketPriceSchema = z.object({
 export const EventTicketSchema = z.object({
   id: z.string(),
   name: z.string(),
-  prepayment: TicketPriceSchema,
+  prepayment: TicketPriceSchema.nullable(),
   full: TicketPriceSchema,
 });
 
@@ -172,14 +172,17 @@ export const BookRequestSchema = z.object({
 
 export const BookingExtendedSchema = BookingSchema.extend({
   user: UserSchema.optional(),
-  guestContact: GuestContactSchema.optional(),
+  guestContact: GuestContactSchema.nullable().optional(),
   session: z.lazy(() => SessionSchema).optional(),
-  paymentInfo: z.object({
-    method: z.enum(['card', 'certificate', 'pass', 'cashback', 'composite']),
-    paymentId: z.string().nullable().optional(),
-    certificateId: z.string().nullable().optional(),
-    seasonTicketId: z.string().nullable().optional(),
-  }).nullable().optional(),
+  paymentInfo: z.union([
+    z.object({
+      method: z.enum(['card', 'certificate', 'pass', 'cashback', 'composite']),
+      paymentId: z.string().nullable().optional(),
+      certificateId: z.string().nullable().optional(),
+      seasonTicketId: z.string().nullable().optional(),
+    }),
+    z.array(z.unknown()),
+  ]).nullable().optional(),
 });
 
 export const BookingCreateDtoSchema = z.object({

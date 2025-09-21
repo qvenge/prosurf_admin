@@ -1,12 +1,13 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { bookingsClient } from '../clients/bookings';
 import { sessionsKeys } from './sessions';
-import type { 
-  Booking, 
-  BookRequest, 
-  BookingFilters, 
+import type {
+  Booking,
+  BookingExtended,
+  BookRequest,
+  BookingFilters,
   PaginatedResponse,
-  IdempotencyKey 
+  IdempotencyKey
 } from '../types';
 
 // Query key factory for bookings
@@ -55,14 +56,31 @@ export const useBookSession = () => {
   });
 };
 
-// Get bookings list
-export const useBookings = (filters?: BookingFilters) => {
+// Type helper to determine if extended fields are requested
+type HasExtendedFields<T extends BookingFilters | undefined> = T extends BookingFilters
+  ? T['includeUser'] extends true
+    ? true
+    : T['includeSession'] extends true
+    ? true
+    : T['includePaymentInfo'] extends true
+    ? true
+    : T['includeGuestContact'] extends true
+    ? true
+    : false
+  : false;
+
+// Get bookings list with proper return typing
+export function useBookings<T extends BookingFilters | undefined = undefined>(
+  filters?: T
+): HasExtendedFields<T> extends true
+  ? ReturnType<typeof useQuery<PaginatedResponse<BookingExtended>>>
+  : ReturnType<typeof useQuery<PaginatedResponse<Booking>>> {
   return useQuery({
     queryKey: bookingsKeys.list(filters),
     queryFn: () => bookingsClient.getBookings(filters),
     staleTime: 1 * 60 * 1000, // 1 minute
-  });
-};
+  }) as any;
+}
 
 // Infinite query for bookings
 export const useBookingsInfinite = (filters?: Omit<BookingFilters, 'cursor'>) => {

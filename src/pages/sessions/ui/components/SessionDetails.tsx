@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import styles from './SessionDetails.module.scss';
-import { Button } from '@/shared/ui';
-import { useSession, useBookings } from '@/shared/api';
+import { Button, Icon } from '@/shared/ui';
+import { useSession, useBookings, type BookingExtended } from '@/shared/api';
 import { formatDate, formatTime } from '@/shared/lib/format-utils';
 
 import { AddBookingForm } from './AddBookingForm'
+import { TrashRegular, UserRegular } from '@/shared/ds/icons';
 
 export interface SessionDetailsProps {
   sessionId: string;
 }
-
 
 export function SessionDetails({ sessionId }: SessionDetailsProps) {
   const { data } = useSession(sessionId);
@@ -19,8 +19,47 @@ export function SessionDetails({ sessionId }: SessionDetailsProps) {
     includeUser: true,
     includePaymentInfo: true,
     limit: 100,
+    status: 'CONFIRMED'
   });
   const [isAddBookingOpen, setIsAddBookingOpen] = useState(false);
+
+  const getUserName = (booking: BookingExtended) => {
+    if (booking.user?.firstName || booking.user?.lastName) {
+      return `${booking.user.firstName || ''} ${booking.user.lastName || ''}`.trim();
+    }
+    if (booking.guestContact?.firstName || booking.guestContact?.lastName) {
+      return `${booking.guestContact.firstName || ''} ${booking.guestContact.lastName || ''}`.trim();
+    }
+    if (booking.guestContact?.phone) {
+      return booking.guestContact.phone;
+    }
+    return 'Неизвестно';
+  };
+
+  const getPaymentMethodText = (booking: BookingExtended) => {
+    const paymentInfo = booking.paymentInfo;
+
+    // Check if paymentInfo is an object with method property (not an array)
+    if (paymentInfo && typeof paymentInfo === 'object' && !Array.isArray(paymentInfo) && 'method' in paymentInfo) {
+      const method = paymentInfo.method;
+      switch (method) {
+        case 'card':
+          return 'Карта';
+        case 'certificate':
+          return 'Сертификат';
+        case 'pass':
+          return 'Абонемент';
+        case 'cashback':
+          return 'Кэшбэк';
+        case 'composite':
+          return 'Комбинированный';
+        default:
+          return 'Не оплачено';
+      }
+    }
+
+    return 'Не оплачено';
+  };
 
   if (!data) return null;
 
@@ -58,29 +97,27 @@ export function SessionDetails({ sessionId }: SessionDetailsProps) {
         <div className={styles.bookingsList}>
           {bookingsLoading && <div>Загрузка записей...</div>}
           {bookingsError && <div>Ошибка загрузки записей</div>}
-          {bookingsData?.items.map((booking) => {
-            const userName = booking.user
-              ? `${booking.user.firstName || ''} ${booking.user.lastName || ''}`.trim() || booking.user.username || booking.user.email
-              : booking.guestContact
-                ? `${booking.guestContact.firstName || ''} ${booking.guestContact.lastName || ''}`.trim() || booking.guestContact.phone
-                : 'Неизвестный пользователь';
-
-            const paymentMethod = booking.paymentInfo?.method || 'Не указан';
-
-            return (
-              <div key={booking.id} className={styles.bookingItem}>
-                <div className={styles.bookingUser}>{userName}</div>
-                <div className={styles.bookingDetails}>
-                  <span className={styles.bookingQuantity}>Мест: {booking.quantity}</span>
-                  <span className={styles.bookingStatus}>Статус: {booking.status}</span>
-                  <span className={styles.bookingPayment}>Оплата: {paymentMethod}</span>
-                </div>
+          {bookingsData?.items.length === 0 && <div>Нет записей</div>}
+          {bookingsData?.items.length && bookingsData.items.map((booking) => (
+            <div key={booking.id} className={styles.booking}>
+              <div className={styles.bookingUserAvatarWrapper}>
+                {booking.user?.photoUrl ? (
+                  <img
+                    className={styles.bookingUserAvatar}
+                    src={booking.user.photoUrl}
+                    alt="Avatar"
+                  />
+                ) : (
+                  <Icon src={UserRegular} width={20} height={20} />
+                )}
               </div>
-            );
-          })}
-          {bookingsData?.items.length === 0 && !bookingsLoading && (
-            <div className={styles.emptyBookings}>Нет записей</div>
-          )}
+              <div className={styles.bookingInfo}>
+                <div className={styles.bookingUserName}>{getUserName(booking)}</div>
+                <div className={styles.bookingPaymentMethod}>{getPaymentMethodText(booking)}</div>
+              </div>
+              <Icon className={styles.bookingCancelBtn} src={TrashRegular} width={20} height={20} />
+            </div>
+          ))}
         </div>
       </div>
     </div>

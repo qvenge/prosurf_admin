@@ -76,8 +76,6 @@ export { default as BrainRegular } from '@/shared/ds/icons/20/brain_regular.svg'
 export { default as BrainFill } from '@/shared/ds/icons/20/brain_fill.svg';
 
 
-
-
 export { default as CalendarBlankRegular } from '@/shared/ds/icons/20/calendar-blank_regular.svg';
 export { default as CalendarBlankFill } from '@/shared/ds/icons/20/calendar-blank_fill.svg';
 export { default as ListChecksRegular } from '@/shared/ds/icons/20/list-checks_regular.svg';
@@ -94,3 +92,5 @@ export { default as CertificateRegular } from '@/shared/ds/icons/20/certificate_
 export { default as CertificateFill } from '@/shared/ds/icons/20/certificate_fill.svg';
 export { default as ConfettiRegular } from '@/shared/ds/icons/20/confetti_regular.svg';
 export { default as ConfettiFill } from '@/shared/ds/icons/20/confetti_fill.svg';
+
+export { default as TrashRegular } from '@/shared/ds/icons/20/trash_regular.svg';
