@@ -51,10 +51,9 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
   const trainingData = useMemo(() => {
     if (!_trainingData?.pages) return [];
 
-    const allSessions = _trainingData.pages.flatMap(page => page.items);
+    const allEvents = _trainingData.pages.flatMap(page => page.items);
 
-    return allSessions.map((session: Event) => {
-      const event = session.event;
+    return allEvents.map((event: Event) => {
       const minPrice = event.tickets.length > 0
         ? event.tickets.map(ticket => ticket.full.price).reduce((minPrice, price) => {
             return price.amountMinor < minPrice.amountMinor ? price : minPrice;
@@ -62,15 +61,15 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
         : null;
 
       return {
-        id: session.id,
+        id: event.id,
         title: event.title,
         location: event.location,
         price: minPrice ? formatPrice(minPrice) : null,
-        occupied: `${session.capacity - session.remainingSeats} из ${session.capacity}`,
-        startsAt: session.startsAt,
+        capacity: 0,
+        dates: [],
       };
     });
-  }, [_sessionsData]);
+  }, [_trainingData]);
 
   const columns = useMemo(
     () => [
@@ -88,30 +87,27 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
           return info.getValue() || 'N/A';
         },
       }),
-      columnHelper.accessor('capacity', {
-        header: 'Кол-во мест',
-        cell: info => info.getValue(),
-      }),
-      columnHelper.display({
-        id: 'dates',
+      columnHelper.accessor('dates', {
         header: 'Даты',
-        cell: () => {
+        cell: info => {
+          const dates = info.getValue() as string[];
+          if (!dates || dates.length === 0) {
+            return <span>Даты не указаны</span>;
+          }
           return (
             <div className={styles.dates}>
-              <div className={styles.date}>
-                <div className={styles.date}>11 ноября 2025</div>
-                <div className={styles.times}>21:00 / 22:00 / 23:00</div>
-              </div>
-              <div className={styles.date}>
-                <div className={styles.date}>12 ноября 2025</div>
-                <div className={styles.times}>21:00 / 22:00 / 23:00</div>
-              </div>
-              <div className={styles.date}>
-                <div className={styles.date}>13 ноября 2025</div>
-                <div className={styles.times}>21:00 / 22:00 / 23:00</div>
-              </div>
+              {dates.slice(0, 3).map((date, index) => (
+                <div key={index} className={styles.date}>
+                  <div className={styles.date}>{date}</div>
+                </div>
+              ))}
+              {dates.length > 3 && (
+                <div className={styles.date}>
+                  <div className={styles.date}>+{dates.length - 3} ещё</div>
+                </div>
+              )}
             </div>
-          )
+          );
         },
       }),
       columnHelper.display({
@@ -132,7 +128,7 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
-    data: sessionsData,
+    data: trainingData,
     columns,
     state: {
       sorting,
@@ -174,12 +170,12 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
     return () => container.removeEventListener('scroll', handleScroll);
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  if (sessionsLoading) {
-    return <div className={styles.loading}>Loading training sessions...</div>;
+  if (trainingLoading) {
+    return <div className={styles.loading}>Loading training events...</div>;
   }
 
-  if (sessionsError) {
-    return <div className={styles.error}>Error loading training sessions</div>;
+  if (trainingError) {
+    return <div className={styles.error}>Error loading training events</div>;
   }
 
   return (
@@ -248,14 +244,14 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
         {/* Loading state for pagination */}
         {isFetchingNextPage && (
           <div className={styles.paginationLoading}>
-            Loading more sessions...
+            Loading more trainings...
           </div>
         )}
 
         {/* End of list indicator */}
-        {!hasNextPage && sessionsData.length > 0 && (
+        {!hasNextPage && trainingData.length > 0 && (
           <div className={styles.endOfList}>
-            No more sessions to load
+            No more trainings to load
           </div>
         )}
       </div>
