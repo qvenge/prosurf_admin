@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 // import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { type PropsWithChildren, useState, useEffect } from 'react';
 import { authUtils, AuthContext } from '../auth';
-import { logError, getErrorInfo } from '../error-handler';
+import { logError, getErrorInfo, isValidationResponseError } from '../error-handler';
 import type { AuthState, User, LoginRequest, LoginResponse } from '../types';
 import { authClient } from '../clients/auth';
 import { performLogout } from '../auth';
@@ -16,17 +16,22 @@ const createQueryClient = () => {
         staleTime: 5 * 60 * 1000, // 5 minutes
         gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
         retry: (failureCount, error) => {
+          // Don't retry validation errors - these indicate schema mismatch
+          if (isValidationResponseError(error)) {
+            return false;
+          }
+
           // Don't retry auth errors
           const errorInfo = getErrorInfo(error);
           if (errorInfo.status === 401 || errorInfo.status === 403) {
             return false;
           }
-          
+
           // Retry server errors up to 3 times
           if (errorInfo.status && errorInfo.status >= 500) {
             return failureCount < 3;
           }
-          
+
           // Default retry logic for other errors
           return failureCount < 2;
         },

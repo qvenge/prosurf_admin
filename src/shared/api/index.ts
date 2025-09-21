@@ -7,7 +7,7 @@ export * from './types';
 export * from './schemas';
 
 // Configuration and utilities
-export { apiClient, tokenStorage, withIdempotency, createQueryString, validateResponse, config } from './config';
+export { apiClient, tokenStorage, withIdempotency, createQueryString, validateResponse, config, ValidationError } from './config';
 
 // Error handling
 export * from './error-handler';

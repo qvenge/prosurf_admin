@@ -64,6 +64,16 @@ export class ApiErrorClass extends Error {
   }
 }
 
+// Custom error class for validation errors
+export class ValidationError extends Error {
+  public readonly isValidationError = true;
+
+  constructor(message: string = 'Invalid response format') {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+
 // Create axios instance
 const createApiClient = (): AxiosInstance => {
   const client = axios.create({
@@ -251,7 +261,7 @@ export const validateResponse = <T>(
     return schema.parse(data);
   } catch (error) {
     console.error('Response validation error:', error);
-    throw new Error('Invalid response format');
+    throw new ValidationError('Invalid response format');
   }
 };
 

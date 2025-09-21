@@ -1,4 +1,4 @@
-import { ApiErrorClass } from './config';
+import { ApiErrorClass, ValidationError } from './config';
 import type { ApiError } from './types';
 
 // Type guards for different error types
@@ -32,6 +32,10 @@ export const isNetworkError = (error: unknown): boolean => {
 
 export const isServerError = (error: unknown): boolean => {
   return isApiError(error) && error.status >= 500;
+};
+
+export const isValidationResponseError = (error: unknown): boolean => {
+  return error instanceof ValidationError;
 };
 
 // Specific business error type guards
@@ -154,11 +158,16 @@ export const logError = (error: unknown, context?: string): void => {
 
 // Retry utilities
 export const shouldRetry = (error: unknown): boolean => {
+  // Never retry validation errors - these indicate schema mismatch and won't resolve with retry
+  if (isValidationResponseError(error)) {
+    return false;
+  }
+
   if (isApiError(error)) {
     // Retry on server errors and specific provider unavailable errors
     return isServerError(error) || isProviderUnavailableError(error);
   }
-  
+
   return isNetworkError(error);
 };
 
@@ -186,7 +195,15 @@ export const getErrorInfo = (error: unknown): ErrorInfo => {
       shouldShowToUser: !isAuthError(error), // Don't show auth errors to user
     };
   }
-  
+
+  if (isValidationResponseError(error)) {
+    return {
+      message: 'Данные не соответствуют ожидаемому формату',
+      canRetry: false,
+      shouldShowToUser: true,
+    };
+  }
+
   return {
     message: getUserFriendlyErrorMessage(error),
     canRetry: shouldRetry(error),
@@ -230,6 +247,7 @@ export const useErrorHandler = () => {
     isNotFoundError,
     isConflictError,
     isValidationError,
+    isValidationResponseError,
     isNetworkError,
     isServerError,
     isHoldExpiredError,
