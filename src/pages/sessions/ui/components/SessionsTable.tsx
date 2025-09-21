@@ -9,8 +9,8 @@ import {
 } from '@tanstack/react-table';
 import clsx from 'clsx';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { CaretRightBold } from '@/shared/ds/icons';
-import { IconButton, SideModal } from '@/shared/ui';
+import { ArrowDownBold, ArrowUpBold, CaretRightBold } from '@/shared/ds/icons';
+import { Icon, IconButton, SideModal } from '@/shared/ui';
 import { capitalize } from '@/shared/lib/string';
 import { useSessionsInfinite, type Session } from '@/shared/api';
 import { formatDate, formatTime, formatPrice } from '@/shared/lib/format-utils';
@@ -32,7 +32,7 @@ const columnHelper = createColumnHelper<SessionRowData>();
 
 export function SessionsTable({ className }: SessionsTableProps) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
-  const tbodyRef = useRef<HTMLTableSectionElement>(null);
+  const bodyContainerRef = useRef<HTMLDivElement>(null);
   const [openedSession, setOpenedSession] = useState<string | null>(null);
 
   const {
@@ -136,8 +136,8 @@ export function SessionsTable({ className }: SessionsTableProps) {
 
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
-    getScrollElement: () => tableContainerRef.current,
-    estimateSize: () => 60,
+    getScrollElement: () => bodyContainerRef.current,
+    estimateSize: () => 80,
     overscan: 5,
   });
 
@@ -147,7 +147,7 @@ export function SessionsTable({ className }: SessionsTableProps) {
 
   // Infinite scroll detection
   useEffect(() => {
-    const container = tbodyRef.current;
+    const container = bodyContainerRef.current;
     if (!container) return;
 
     const handleScroll = () => {
@@ -174,68 +174,81 @@ export function SessionsTable({ className }: SessionsTableProps) {
 
   return (
     <div className={clsx(className, styles.tableContainer)} ref={tableContainerRef}>
-      <table className={styles.table}>
-        <thead className={styles.thead}>
-          {table.getHeaderGroups().map(headerGroup => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map(header => (
-                <th
-                  key={header.id}
-                  className={clsx(styles.th, styles[`th${capitalize(header.id, true)}`])}
-                  onClick={header.column.getToggleSortingHandler()}
-                  style={{ cursor: header.column.getCanSort() ? 'pointer' : 'default' }}
-                >
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                  {header.column.getIsSorted() && (
-                    <span className={styles.sortIndicator}>
-                      {header.column.getIsSorted() === 'asc' ? ' ↑' : ' ↓'}
-                    </span>
-                  )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody className={styles.tbody} ref={tbodyRef}>
+      {/* Fixed Header */}
+      <div className={styles.headerContainer}>
+        {table.getHeaderGroups().map(headerGroup => (
+          <div key={headerGroup.id} className={styles.gridHeader}>
+            {headerGroup.headers.map(header => (
+              <div
+                key={header.id}
+                className={clsx(
+                  styles.headerCell,
+                  styles[`headerCell${capitalize(header.id, true)}`],
+                  header.column.getCanSort() && styles.headerCellSortable
+                )}
+                onClick={header.column.getToggleSortingHandler()}
+              >
+                {flexRender(header.column.columnDef.header, header.getContext())}
+                {header.column.getCanSort() && (
+                  <Icon
+                    className={clsx(styles.sortIndicator, header.column.getIsSorted() && styles.sortIndicatorActive)}
+                    src={header.column.getIsSorted() === 'asc' ? ArrowUpBold : ArrowDownBold}
+                    width={16}
+                    height={16}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      {/* Scrollable Body */}
+      <div className={styles.bodyContainer} ref={bodyContainerRef}>
+        <div
+          className={styles.gridBody}
+          style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative' }}
+        >
           {rowVirtualizer.getVirtualItems().map(virtualRow => {
             const row = rows[virtualRow.index];
             return (
-              <tr
+              <div
                 key={row.id}
-                className={styles.virtualRow}
+                className={styles.gridRow}
                 style={{
-                  width: '100%',  
-                  position: 'relative',
-                  height: `${virtualRow.size}px`,
+                  width: '100%',
+                  position: 'absolute',
+                  top: `${virtualRow.start}px`,
+                  // height: `${virtualRow.size}px`,
                 }}
               >
                 {row.getVisibleCells().map(cell => (
-                  <td
+                  <div
                     key={cell.id}
-                    className={clsx(styles.td, styles[`td${capitalize(cell.column.id, true)}`])}
+                    className={clsx(styles.cell, styles[`cell${capitalize(cell.column.id, true)}`])}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
+                  </div>
                 ))}
-              </tr>
+              </div>
             );
           })}
-        </tbody>
-      </table>
-
-      {/* Loading state for pagination */}
-      {isFetchingNextPage && (
-        <div className={styles.paginationLoading}>
-          Loading more sessions...
         </div>
-      )}
 
-      {/* End of list indicator */}
-      {!hasNextPage && sessionsData.length > 0 && (
-        <div className={styles.endOfList}>
-          No more sessions to load
-        </div>
-      )}
+        {/* Loading state for pagination */}
+        {isFetchingNextPage && (
+          <div className={styles.paginationLoading}>
+            Loading more sessions...
+          </div>
+        )}
+
+        {/* End of list indicator */}
+        {!hasNextPage && sessionsData.length > 0 && (
+          <div className={styles.endOfList}>
+            No more sessions to load
+          </div>
+        )}
+      </div>
 
       {openedSession != null && <SideModal onClose={() => setOpenedSession(null)}>
         <SessionDetails sessionId={openedSession} />

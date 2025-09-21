@@ -45,8 +45,6 @@ export { default as SpeakerHighRegular } from '@/shared/ds/icons/20/speaker-high
 export { default as SpeakerXRegular } from '@/shared/ds/icons/20/speaker-x_regular.svg';
 export { default as XRegular } from '@/shared/ds/icons/20/x_regular.svg';
 export { default as WaveformFill } from '@/shared/ds/icons/20/waveform_fill.svg';
-export { default as ArrowDownBold } from '@/shared/ds/icons/20/arrow-down_bold.svg';
-export { default as ArrowUpBold } from '@/shared/ds/icons/20/arrow-up_bold.svg';
 
 export { default as CheckBold } from '@/shared/ds/icons/20/check_bold.svg';
 
@@ -94,3 +92,5 @@ export { default as ConfettiRegular } from '@/shared/ds/icons/20/confetti_regula
 export { default as ConfettiFill } from '@/shared/ds/icons/20/confetti_fill.svg';
 
 export { default as TrashRegular } from '@/shared/ds/icons/20/trash_regular.svg';
+export { default as ArrowDownBold } from '@/shared/ds/icons/20/arrow-down_bold.svg';
+export { default as ArrowUpBold } from '@/shared/ds/icons/20/arrow-up_bold.svg';

@@ -1,70 +1,90 @@
 .tableContainer {
-  overflow: auto;
   border: 1px solid ds.color('border/primary');
   border-radius: ds.number('radius/M');
   background: ds.color('background/primary');
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-.thead {
-  position: sticky;
-  top: 0;
+.headerContainer {
+  flex-shrink: 0;
   background: ds.color('background/secondary');
-  z-index: 10;
+  border-bottom: 1px solid ds.color('border/primary');
 }
 
-.th {
+.bodyContainer {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0; // Allow flex item to shrink below content size
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.gridHeader,
+.gridRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 120px 120px 140px minmax(100px, 250px);
+  width: 100%;
+}
+
+.headerCell {
   @include ds.typo('body/b4/semibold');
 
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+
   padding: ds.number('paddings & gaps/M');
-  text-align: left;
   color: ds.color('text/primary');
   user-select: none;
+  background: ds.color('background/secondary');
 
-  &:hover {
+  &Sortable {
+    cursor: pointer;
+  }
+
+  &Sortable:hover {
     background: ds.color('background/tertiary');
   }
 }
 
-.thPrice,
-.thOccupied {
-  width: 120px;
-}
-
-.tbody {
-  position: relative;
+.gridBody {
+  width: 100%;
 }
 
 .sortIndicator {
   color: ds.color('graphic/secondary');
-  margin-left: 4px;
 }
 
-.virtualRow {
+.sortIndicatorActive {
+  color: ds.color('graphic/accent');
+}
+
+.gridRow {
   @include ds.typo('body/b4/medium');
   color: ds.color('text/primary');
-  border-bottom: 1px solid ds.color('border/primary');
+  min-height: 60px; // Use min-height to prevent shrinking
 
-  &:hover {
+  &:hover .cell {
     background: ds.color('background/secondary');
   }
 }
 
-.td {
+.cell {
   padding: ds.number('paddings & gaps/M');
   color: ds.color('text/primary');
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  border-bottom: 1px solid ds.color('border/primary');
+  display: flex;
+  align-items: center;
 }
 
-.tdActions {
-  text-align: right;
+.cellActions {
+  justify-content: flex-end;
 }
 
 .loading {
@@ -88,4 +108,23 @@
 
 .time {
   color: ds.color('text/secondary');
+}
+
+// Specific column styling
+.headerCellActions,
+.cellActions {
+  justify-content: flex-end;
+}
+
+.cellDatetime {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.paginationLoading,
+.endOfList {
+  padding: ds.number('paddings & gaps/M');
+  text-align: center;
+  color: ds.color('text/secondary');
+  @include ds.typo('body/b4/medium');
 }
