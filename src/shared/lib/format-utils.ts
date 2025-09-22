@@ -35,12 +35,12 @@ export const formatPrice = (price: Price) => new Intl.NumberFormat(
   { style: "currency", currency: price.currency, maximumFractionDigits: 0 }
 ).format(price.amountMinor / 100);
 
-export const formatDate = (dateString: string) => new Intl.DateTimeFormat(
+export const formatDate = (date: string | Date) => new Intl.DateTimeFormat(
   'ru-RU',
   {day: '2-digit', month: 'long', year: 'numeric'}
-).format(new Date(dateString));
+).format(date instanceof Date ? date : new Date(date));
 
-export const formatTime = (dateString: string) => new Intl.DateTimeFormat(
+export const formatTime = (date: string | Date) => new Intl.DateTimeFormat(
   'ru-RU',
   {hour: '2-digit', minute: '2-digit'}
-).format(new Date(dateString));
+).format(date instanceof Date ? date : new Date(date));

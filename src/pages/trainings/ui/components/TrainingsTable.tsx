@@ -8,8 +8,8 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 import clsx from 'clsx';
-import { ArrowDownBold, ArrowUpBold, CaretRightBold } from '@/shared/ds/icons';
-import { Icon, IconButton, SideModal } from '@/shared/ui';
+import { ArrowDownBold, ArrowUpBold, PencilSimpleBold } from '@/shared/ds/icons';
+import { Icon, IconButton } from '@/shared/ui';
 import { capitalize } from '@/shared/lib/string';
 import { useEventsInfinite, useSessionsInfinite, type Event, type Session } from '@/shared/api';
 import { formatDate, formatTime, formatPrice } from '@/shared/lib/format-utils';
@@ -21,21 +21,20 @@ type TrainingRowData = {
   location: string | null | undefined;
   price: string | null;
   capacity: number;
-  occupied: number;
-  dates: string[];
+  dates: { date: string; times: string[] }[];
   sessions: Session[];
 };
 
 export interface SessionsTableProps extends React.HTMLAttributes<HTMLDivElement> {
   eventType: string;
+  handleEdit?: (eventId: string) => void;
 }
 
 const columnHelper = createColumnHelper<TrainingRowData>();
 
-export function TrainingsTable({ className, eventType }: SessionsTableProps) {
+export function TrainingsTable({ className, eventType, handleEdit }: SessionsTableProps) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const bodyContainerRef = useRef<HTMLDivElement>(null);
-  const [openedSession, setOpenedSession] = useState<string | null>(null);
 
   const {
     data: _trainingData,
@@ -46,7 +45,7 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
     isFetchingNextPage
   } = useEventsInfinite({
     limit: 15,
-    'labels.any': ['training']
+    'labels.any': [eventType]
   });
 
   const {
@@ -55,7 +54,7 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
     error: sessionsError,
   } = useSessionsInfinite({
     limit: 100,
-    'labels.any': ['training']
+    'labels.any': [eventType]
   });
 
   // Group sessions by event ID for quick lookup
@@ -91,26 +90,35 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
       // Get sessions for this event
       const eventSessions = sessionsByEventId[event.id] || [];
 
-      // Calculate capacity and occupied seats
-      const totalCapacity = eventSessions.reduce((sum, session) => sum + session.capacity, 0);
-      const totalOccupied = eventSessions.reduce((sum, session) => sum + (session.capacity - session.remainingSeats), 0);
+      // Assuming all sessions have the same capacity
+      const capacity = eventSessions[0]?.capacity ?? 0;
 
-      // Format session dates
-      const sessionDates = eventSessions
-        .map(session => {
-          const date = formatDate(new Date(session.startsAt));
-          const time = formatTime(new Date(session.startsAt));
-          return `${date} в ${time}`;
-        })
-        .sort();
+      // Group sessions by date
+      const sessionsByDate: Record<string, string[]> = {};
+      eventSessions.forEach(session => {
+        const date = formatDate(session.startsAt);
+        const time = formatTime(session.startsAt);
+
+        if (!sessionsByDate[date]) {
+          sessionsByDate[date] = [];
+        }
+        sessionsByDate[date].push(time);
+      });
+
+      // Convert to array and sort
+      const sessionDates = Object.entries(sessionsByDate)
+        .map(([date, times]) => ({
+          date,
+          times: times.sort() // Sort times within each day
+        }))
+        .sort((a, b) => a.date.localeCompare(b.date)); // Sort by date
 
       return {
         id: event.id,
         title: event.title,
         location: event.location,
         price: minPrice ? formatPrice(minPrice) : null,
-        capacity: totalCapacity,
-        occupied: totalOccupied,
+        capacity,
         dates: sessionDates,
         sessions: eventSessions,
       };
@@ -135,28 +143,26 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
       }),
       columnHelper.accessor('capacity', {
         header: 'Кол-во мест',
-        cell: info => {
-          const row = info.row.original;
-          return row.capacity > 0 ? `${row.occupied} из ${row.capacity}` : 'N/A';
-        },
+        cell: info => info.getValue(),
       }),
       columnHelper.accessor('dates', {
         header: 'Даты',
         cell: info => {
-          const dates = info.getValue() as string[];
+          const dates = info.getValue() as { date: string; times: string[] }[];
           if (!dates || dates.length === 0) {
             return <span>Даты не указаны</span>;
           }
           return (
             <div className={styles.dates}>
-              {dates.slice(0, 3).map((dateTime, index) => (
+              {dates.slice(0, 3).map((dateGroup, index) => (
                 <div key={index} className={styles.date}>
-                  <div className={styles.dateTime}>{dateTime}</div>
+                  <div className={styles.dateDay}>{dateGroup.date}</div>
+                  <div className={styles.dateTimes}>{dateGroup.times.join(' / ')}</div>
                 </div>
               ))}
               {dates.length > 3 && (
                 <div className={styles.date}>
-                  <div className={styles.dateTime}>+{dates.length - 3} ещё</div>
+                  <div className={styles.dateTime}>+{dates.length - 3} ещё дней</div>
                 </div>
               )}
             </div>
@@ -167,10 +173,10 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
         id: 'actions',
         cell: info => (
           <IconButton
-            src={CaretRightBold}
+            src={PencilSimpleBold}
             type="secondary"
             size="s"
-            onClick={() => handleEdit(info.row.original.id)}
+            onClick={() => handleEdit?.(info.row.original.id)}
           />
         ),
       }),
@@ -192,10 +198,6 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
   });
 
   const { rows } = table.getRowModel();
-
-  const handleEdit = (eventId: string) => {
-    setOpenedSession(eventId);
-  };
 
   // Infinite scroll detection
   useEffect(() => {
@@ -286,10 +288,6 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
           </div>
         )}
       </div>
-
-      {openedSession != null && <SideModal onClose={() => setOpenedSession(null)}>
-        {/* <SessionDetails sessionId={openedSession} /> */}
-      </SideModal>}
     </div>
   );
 }

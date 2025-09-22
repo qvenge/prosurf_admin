@@ -24,7 +24,7 @@
 .gridHeader,
 .gridRow {
   display: grid;
-  grid-template-columns: 1fr 1fr 120px 120px 140px minmax(100px, 250px);
+  grid-template-columns: 2fr 2fr minmax(120px, 1fr) minmax(170px, 1fr) minmax(170px, 1fr) minmax(100px, 1fr);
   width: 100%;
 }
 
@@ -40,6 +40,7 @@
   color: ds.color('text/primary');
   user-select: none;
   background: ds.color('background/secondary');
+  white-space: nowrap;
 
   &Sortable {
     cursor: pointer;
@@ -67,9 +68,9 @@
   color: ds.color('text/primary');
   min-height: 60px; // Use min-height to prevent shrinking
 
-  &:hover .cell {
-    background: ds.color('background/secondary');
-  }
+  // &:hover .cell {
+  //   background: ds.color('background/secondary');
+  // }
 }
 
 .cell {
@@ -77,10 +78,9 @@
   color: ds.color('text/primary');
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
   border-bottom: 1px solid ds.color('border/primary');
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .cellActions {
@@ -106,7 +106,22 @@
   padding: ds.number('paddings & gaps/S') ds.number('paddings & gaps/M');
 }
 
-.time {
+.dates {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1 0 0;
+}
+
+.dateDay {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/primary');
+}
+
+.dateTimes {
+  @include ds.typo('body/b4/medium');
   color: ds.color('text/secondary');
 }
 
