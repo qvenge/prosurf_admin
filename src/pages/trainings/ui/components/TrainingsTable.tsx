@@ -12,7 +12,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { ArrowDownBold, ArrowUpBold, CaretRightBold } from '@/shared/ds/icons';
 import { Icon, IconButton, SideModal } from '@/shared/ui';
 import { capitalize } from '@/shared/lib/string';
-import { useEventsInfinite, type Event } from '@/shared/api';
+import { useEventsInfinite, useSessionsInfinite, type Event, type Session } from '@/shared/api';
 import { formatDate, formatTime, formatPrice } from '@/shared/lib/format-utils';
 import styles from './TrainingsTable.module.scss';
 
@@ -22,7 +22,9 @@ type TrainingRowData = {
   location: string | null | undefined;
   price: string | null;
   capacity: number;
+  occupied: number;
   dates: string[];
+  sessions: Session[];
 };
 
 export interface SessionsTableProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -48,6 +50,33 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
     'labels.any': ['training']
   });
 
+  const {
+    data: _sessionsData,
+    isLoading: sessionsLoading,
+    error: sessionsError,
+  } = useSessionsInfinite({
+    limit: 100,
+    'labels.any': ['training']
+  });
+
+  // Group sessions by event ID for quick lookup
+  const sessionsByEventId = useMemo(() => {
+    if (!_sessionsData?.pages) return {};
+
+    const allSessions = _sessionsData.pages.flatMap(page => page.items);
+    const grouped: Record<string, Session[]> = {};
+
+    allSessions.forEach((session: Session) => {
+      const eventId = session.event.id;
+      if (!grouped[eventId]) {
+        grouped[eventId] = [];
+      }
+      grouped[eventId].push(session);
+    });
+
+    return grouped;
+  }, [_sessionsData]);
+
   const trainingData = useMemo(() => {
     if (!_trainingData?.pages) return [];
 
@@ -60,16 +89,34 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
           })
         : null;
 
+      // Get sessions for this event
+      const eventSessions = sessionsByEventId[event.id] || [];
+
+      // Calculate capacity and occupied seats
+      const totalCapacity = eventSessions.reduce((sum, session) => sum + session.capacity, 0);
+      const totalOccupied = eventSessions.reduce((sum, session) => sum + (session.capacity - session.remainingSeats), 0);
+
+      // Format session dates
+      const sessionDates = eventSessions
+        .map(session => {
+          const date = formatDate(new Date(session.startsAt));
+          const time = formatTime(new Date(session.startsAt));
+          return `${date} в ${time}`;
+        })
+        .sort();
+
       return {
         id: event.id,
         title: event.title,
         location: event.location,
         price: minPrice ? formatPrice(minPrice) : null,
-        capacity: 0,
-        dates: [],
+        capacity: totalCapacity,
+        occupied: totalOccupied,
+        dates: sessionDates,
+        sessions: eventSessions,
       };
     });
-  }, [_trainingData]);
+  }, [_trainingData, sessionsByEventId]);
 
   const columns = useMemo(
     () => [
@@ -87,6 +134,13 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
           return info.getValue() || 'N/A';
         },
       }),
+      columnHelper.accessor('capacity', {
+        header: 'Кол-во мест',
+        cell: info => {
+          const row = info.row.original;
+          return row.capacity > 0 ? `${row.occupied} из ${row.capacity}` : 'N/A';
+        },
+      }),
       columnHelper.accessor('dates', {
         header: 'Даты',
         cell: info => {
@@ -96,14 +150,14 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
           }
           return (
             <div className={styles.dates}>
-              {dates.slice(0, 3).map((date, index) => (
+              {dates.slice(0, 3).map((dateTime, index) => (
                 <div key={index} className={styles.date}>
-                  <div className={styles.date}>{date}</div>
+                  <div className={styles.dateTime}>{dateTime}</div>
                 </div>
               ))}
               {dates.length > 3 && (
                 <div className={styles.date}>
-                  <div className={styles.date}>+{dates.length - 3} ещё</div>
+                  <div className={styles.dateTime}>+{dates.length - 3} ещё</div>
                 </div>
               )}
             </div>
@@ -170,12 +224,12 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
     return () => container.removeEventListener('scroll', handleScroll);
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  if (trainingLoading) {
-    return <div className={styles.loading}>Loading training events...</div>;
+  if (trainingLoading || sessionsLoading) {
+    return <div className={styles.loading}>Loading training data...</div>;
   }
 
-  if (trainingError) {
-    return <div className={styles.error}>Error loading training events</div>;
+  if (trainingError || sessionsError) {
+    return <div className={styles.error}>Error loading training data</div>;
   }
 
   return (
