@@ -8,7 +8,6 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 import clsx from 'clsx';
-import { useVirtualizer } from '@tanstack/react-virtual';
 import { ArrowDownBold, ArrowUpBold, CaretRightBold } from '@/shared/ds/icons';
 import { Icon, IconButton, SideModal } from '@/shared/ui';
 import { capitalize } from '@/shared/lib/string';
@@ -194,13 +193,6 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
 
   const { rows } = table.getRowModel();
 
-  const rowVirtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: () => bodyContainerRef.current,
-    estimateSize: () => 80,
-    overscan: 5,
-  });
-
   const handleEdit = (eventId: string) => {
     setOpenedSession(eventId);
   };
@@ -265,34 +257,19 @@ export function TrainingsTable({ className, eventType }: SessionsTableProps) {
 
       {/* Scrollable Body */}
       <div className={styles.bodyContainer} ref={bodyContainerRef}>
-        <div
-          className={styles.gridBody}
-          style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative' }}
-        >
-          {rowVirtualizer.getVirtualItems().map(virtualRow => {
-            const row = rows[virtualRow.index];
-            return (
-              <div
-                key={row.id}
-                className={styles.gridRow}
-                style={{
-                  width: '100%',
-                  position: 'absolute',
-                  top: `${virtualRow.start}px`,
-                  // height: `${virtualRow.size}px`,
-                }}
-              >
-                {row.getVisibleCells().map(cell => (
-                  <div
-                    key={cell.id}
-                    className={clsx(styles.cell, styles[`cell${capitalize(cell.column.id, true)}`])}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </div>
-                ))}
-              </div>
-            );
-          })}
+        <div className={styles.gridBody}>
+          {rows.map(row => (
+            <div key={row.id} className={styles.gridRow}>
+              {row.getVisibleCells().map(cell => (
+                <div
+                  key={cell.id}
+                  className={clsx(styles.cell, styles[`cell${capitalize(cell.column.id, true)}`])}
+                >
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
 
         {/* Loading state for pagination */}
