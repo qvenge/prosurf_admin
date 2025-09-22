@@ -1,0 +1,136 @@
+.root {
+  padding: 28px;
+  gap: 40px;
+}
+
+.root,
+.form,
+.mainInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.form {
+  gap: 28px;
+}
+
+.mainInfo {
+  gap: 16px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary, #1a1a1a);
+  margin: 0;
+}
+
+.dateWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dateAndDuration {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.timesWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 4px;
+}
+
+.timesLabel {
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/primary');
+}
+
+.times {
+  display: flex;
+  gap: 8px;
+}
+
+.time {
+  width: 120px;
+}
+
+.sessionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sessionLabel {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.sessionFields {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.addSessionButton {
+  align-self: flex-start;
+  gap: 8px;
+}
+
+.photosSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.photoHint {
+  font-size: 14px;
+  color: var(--text-secondary, #666);
+  margin: 0;
+}
+
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 12px;
+  max-width: 480px;
+}
+
+.photoUpload {
+  aspect-ratio: 1;
+  min-height: 80px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid var(--border-tertiary, #e5e5e5);
+  margin-top: auto;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+  }
+
+  button {
+    flex: 1;
+
+    @media (max-width: 480px) {
+      flex: none;
+    }
+  }
+}
+
+.removeIcon {
+  color: ds.color('graphic/secondary');
+}

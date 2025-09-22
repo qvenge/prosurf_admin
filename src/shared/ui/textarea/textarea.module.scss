@@ -1,0 +1,107 @@
+// Using CSS custom properties to match design system
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &.disabled {
+    opacity: 0.5;
+  }
+
+  &.readOnly {
+    .textarea {
+      background-color: var(--background-secondary, #f8f8f8);
+      cursor: default;
+    }
+  }
+
+  &.error {
+    .textarea {
+      border-color: var(--border-error, #dc3545);
+    }
+  }
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.textareaWrapper {
+  position: relative;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 12px 16px;
+  border: 1px solid var(--border-tertiary, #e5e5e5);
+  border-radius: 12px;
+  background-color: var(--background-primary, #ffffff);
+  color: var(--text-primary, #1a1a1a);
+  font-size: 16px;
+  line-height: 1.5;
+  resize: vertical;
+  font-family: inherit;
+
+  &::placeholder {
+    color: var(--text-secondary, #666);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--border-accent, #007bff);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    background-color: var(--background-secondary, #f8f8f8);
+  }
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+  margin: 0;
+  flex: 1;
+}
+
+.counter {
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.sizeLarge {
+  .textarea {
+    min-height: 100px;
+    padding: 16px;
+    font-size: 16px;
+  }
+}
+
+.sizeMedium {
+  .textarea {
+    min-height: 80px;
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+}
+
+.sizeSmall {
+  .textarea {
+    min-height: 60px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}

@@ -128,3 +128,25 @@
     padding-right: calc(ds.number('paddings & gaps/XS') + 24px);
   }
 }
+
+.input::-webkit-inner-spin-button,
+.input::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+.input {
+  -moz-appearance: textfield;
+  position: relative;
+  z-index: 2;
+  background: transparent;
+}
+
+// .input::-webkit-calendar-picker-indicator {
+//   opacity: 0;
+//   position: absolute;
+//   left: 0;
+//   width: 100%;
+//   height: 100%;
+//   cursor: pointer;
+// }

@@ -20,3 +20,17 @@
   flex-direction: column;
   overflow: hidden;
 }
+
+.scroll-disabled {
+  overflow: hidden;
+  
+  // Ensure all descendants also can't scroll
+  * {
+    overflow: hidden !important;
+  }
+  
+  // Alternative: target specific scrollable elements
+  .scrollable-content {
+    overflow: hidden !important;
+  }
+}

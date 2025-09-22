@@ -1,0 +1,145 @@
+.tableContainer {
+  border: 1px solid ds.color('border/primary');
+  border-radius: ds.number('radius/M');
+  background: ds.color('background/primary');
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.headerContainer {
+  flex-shrink: 0;
+  background: ds.color('background/secondary');
+  border-bottom: 1px solid ds.color('border/primary');
+}
+
+.bodyContainer {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0; // Allow flex item to shrink below content size
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.gridHeader,
+.gridRow {
+  display: grid;
+  grid-template-columns: 2fr 2fr minmax(120px, 1fr) minmax(170px, 1fr) minmax(170px, 1fr) minmax(100px, 1fr);
+  width: 100%;
+}
+
+.headerCell {
+  @include ds.typo('body/b4/semibold');
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+
+  padding: ds.number('paddings & gaps/M');
+  color: ds.color('text/primary');
+  user-select: none;
+  background: ds.color('background/secondary');
+  white-space: nowrap;
+
+  &Sortable {
+    cursor: pointer;
+  }
+
+  &Sortable:hover {
+    background: ds.color('background/tertiary');
+  }
+}
+
+.gridBody {
+  width: 100%;
+}
+
+.sortIndicator {
+  color: ds.color('graphic/secondary');
+}
+
+.sortIndicatorActive {
+  color: ds.color('graphic/accent');
+}
+
+.gridRow {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/primary');
+  min-height: 60px; // Use min-height to prevent shrinking
+
+  // &:hover .cell {
+  //   background: ds.color('background/secondary');
+  // }
+}
+
+.cell {
+  padding: ds.number('paddings & gaps/M');
+  color: ds.color('text/primary');
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-bottom: 1px solid ds.color('border/primary');
+  display: flex;
+  align-items: flex-start;
+}
+
+.cellActions {
+  justify-content: flex-end;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: ds.color('text/secondary');
+}
+
+.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: ds.color('text/error/primary');
+  background: ds.color('background/error');
+  border-radius: ds.number('radius/M');
+  padding: ds.number('paddings & gaps/S') ds.number('paddings & gaps/M');
+}
+
+.dates {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1 0 0;
+}
+
+.dateDay {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/primary');
+}
+
+.dateTimes {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/secondary');
+}
+
+// Specific column styling
+.headerCellActions,
+.cellActions {
+  justify-content: flex-end;
+}
+
+.cellDatetime {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.paginationLoading,
+.endOfList {
+  padding: ds.number('paddings & gaps/M');
+  text-align: center;
+  color: ds.color('text/secondary');
+  @include ds.typo('body/b4/medium');
+}

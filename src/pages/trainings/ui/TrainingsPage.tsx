@@ -1,5 +1,6 @@
 import { Header } from '@/shared/ui';
 import { TrainingsTable } from './components/TrainingsTable';
+import { EventForm } from './components/EventForm';
 import styles from './TrainingsPage.module.scss';
 import { SegmentedButtons, Button, Icon, SideModal } from '@/shared/ui';
 import { PlusBold } from '@/shared/ds/icons';
@@ -41,9 +42,11 @@ export function TrainingsPage() {
       <div className={styles.page}>
         <TrainingsTable eventType={selectedEventType} className={styles.table} />
       </div>
-      {isModalOpen && <SideModal onClose={() => setIsModalOpen(false)}>
-        {/* Here will be the form to add a new training or edit existing one */}
-      </SideModal>}
+      {isModalOpen && (
+        <SideModal onClose={() => setIsModalOpen(false)}>
+          <EventForm onClose={() => setIsModalOpen(false)} />
+        </SideModal>
+      )}
     </>
   );
 }
