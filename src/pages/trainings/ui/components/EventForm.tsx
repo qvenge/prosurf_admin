@@ -475,14 +475,6 @@ export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
 
       <div className={styles.actions}>
         <Button
-          type="secondary"
-          size="l"
-          onClick={onClose}
-          disabled={isLoading}
-        >
-          Отмена
-        </Button>
-        <Button
           type="primary"
           size="l"
           onClick={handleSubmit}
@@ -490,6 +482,14 @@ export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
         >
           {isLoading ? 'Сохранение...' : 'Добавить'}
         </Button>
+        {/* <Button
+          type="secondary"
+          size="l"
+          onClick={onClose}
+          disabled={isLoading}
+        >
+          Удалить
+        </Button> */}
       </div>
     </div>
   );

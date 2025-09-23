@@ -51,6 +51,7 @@ export function Select({
       setDefaultValue(newValue);
     }
 
+    setHighlighted(newValue);
     onChange?.(newValue);
     setIsOpen(false);
   }, [inputValue, onChange]);

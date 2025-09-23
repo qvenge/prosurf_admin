@@ -88,7 +88,7 @@
   border-radius: ds.number('radius/S');
 
   &Highlighted,
-  &:hover {
+  &:not(&Selected):hover {
     background: ds.color('background/secondary');
   }
 

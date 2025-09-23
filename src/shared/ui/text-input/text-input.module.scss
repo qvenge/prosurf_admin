@@ -129,7 +129,8 @@
     border-radius: ds.number('radius/M');
   }
 
-  .input {
+  .input,
+  .input::placeholder {
     @include ds.typo('body/b3/regular');
 
     // &[type=password] {
@@ -144,7 +145,8 @@
     border-radius: ds.number('radius/M');
   }
 
-  .input {
+  .input,
+  .input::placeholder {
     @include ds.typo('body/b3/regular');
 
     // &[type=password] {
@@ -159,7 +161,8 @@
     border-radius: ds.number('radius/S');
   }
 
-  .input {
+  .input,
+  .input::placeholder {
     @include ds.typo('body/b4/regular');
 
     // &[type=password] {
@@ -177,6 +180,17 @@
 .input {
   -moz-appearance: textfield;
   background: transparent;
+}
+
+// .input {
+//   -webkit-background-clip: text !important;
+// }
+
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus,
+.input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0px 1000px white inset;
 }
 
 // .input::-webkit-calendar-picker-indicator {
