@@ -37,8 +37,10 @@ interface FormData {
 }
 
 const disciplineOptions = [
-  { value: 'surfing', label: 'Серфинг' },
-  { value: 'surfskate', label: 'Серфскейт' },
+  { value: 'training:surfing', label: 'Серфинг' },
+  { value: 'training:surfskate', label: 'Серфскейт' },
+  { value: 'tour', label: 'Тур' },
+  { value: 'activity', label: 'Ивент' },
 ];
 
 export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
@@ -240,7 +242,7 @@ export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
             },
           },
         ],
-        labels: [`training:${formData.discipline}`],
+        labels: [formData.discipline],
         attributes: {
           discipline: formData.discipline,
           capacity: parseInt(formData.capacity),
