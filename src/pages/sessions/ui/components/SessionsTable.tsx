@@ -67,7 +67,12 @@ export function SessionsTable({ className, eventType }: SessionsTableProps) {
         title: event.title,
         location: event.location,
         price: minPrice ? formatPrice(minPrice) : null,
-        occupied: `${session.capacity - session.remainingSeats} из ${session.capacity}`,
+        occupied: (() => {
+          const capacity = session.capacity ?? event.capacity;
+          return capacity !== null && capacity !== undefined
+            ? `${capacity - session.remainingSeats} из ${capacity}`
+            : `${session.remainingSeats > 0 ? '?' : '0'} из ?`;
+        })(),
         startsAt: session.startsAt,
       };
     });

@@ -22,6 +22,7 @@ export type EventCreateDto = z.infer<typeof schemas.EventCreateDtoSchema>;
 // Session types
 export type SessionStatus = z.infer<typeof schemas.SessionStatusSchema>;
 export type Session = z.infer<typeof schemas.SessionSchema>;
+export type SessionCompact = z.infer<typeof schemas.SessionCompactSchema>;
 export type SessionCreateDto = z.infer<typeof schemas.SessionCreateDtoSchema>;
 export type SessionUpdateDto = z.infer<typeof schemas.SessionUpdateDtoSchema>;
 export type SessionCreationResponse = z.infer<typeof schemas.SessionCreationResponseSchema>;

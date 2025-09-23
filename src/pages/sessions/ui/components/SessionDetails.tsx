@@ -84,7 +84,14 @@ export function SessionDetails({ sessionId }: SessionDetailsProps) {
       </div>
       <div className={styles.bookings}>
         <div className={styles.bookingsHeader}>
-          <div className={styles.bookingsCount}>Записи: {`${data.capacity - data.remainingSeats} из ${data.capacity}`}</div>
+          <div className={styles.bookingsCount}>
+            Записи: {(() => {
+              const capacity = data.capacity ?? data.event.capacity;
+              return capacity !== null && capacity !== undefined
+                ? `${capacity - data.remainingSeats} из ${capacity}`
+                : `${data.remainingSeats > 0 ? '?' : '0'} из ?`;
+            })()}
+          </div>
           <Button
             className={styles.addBookingButton}
             type="primary"

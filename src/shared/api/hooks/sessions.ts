@@ -1,13 +1,14 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { sessionsClient } from '../clients/sessions';
 import { eventsKeys } from './events';
-import type { 
-  Session, 
-  SessionCreateDto, 
-  SessionUpdateDto, 
-  SessionFilters, 
+import type {
+  Session,
+  SessionCompact,
+  SessionCreateDto,
+  SessionUpdateDto,
+  SessionFilters,
   PaginatedResponse,
-  IdempotencyKey 
+  IdempotencyKey
 } from '../types';
 
 // Query key factory for sessions
@@ -36,15 +37,15 @@ export const useEventSessions = (eventId: string, filters?: SessionFilters) => {
 
 // Infinite query for event sessions
 export const useEventSessionsInfinite = (
-  eventId: string, 
+  eventId: string,
   filters?: Omit<SessionFilters, 'cursor'>
 ) => {
   return useInfiniteQuery({
     queryKey: sessionsKeys.eventSessions(eventId, filters),
-    queryFn: ({ pageParam }) => 
+    queryFn: ({ pageParam }) =>
       sessionsClient.getEventSessions(eventId, { ...filters, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage: PaginatedResponse<Session>) => lastPage.next,
+    getNextPageParam: (lastPage: PaginatedResponse<SessionCompact>) => lastPage.next,
     staleTime: 2 * 60 * 1000,
   });
 };

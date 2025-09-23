@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TextInput, Select, Button, Textarea, UploadImageInput, AlternativeTabs, IconButton, ButtonContainer } from '@/shared/ui';
+import { TextInput, Select, Button, Textarea, AlternativeTabs, IconButton, ButtonContainer } from '@/shared/ui';
 import { useCreateEvent, useCreateEventSessions } from '@/shared/api';
 import type { EventCreateDto, SessionCreateDto } from '@/shared/api';
 import { PlusBold, TrashRegular } from '@/shared/ds/icons';

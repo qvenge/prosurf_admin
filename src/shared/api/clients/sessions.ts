@@ -1,14 +1,16 @@
 import { apiClient, validateResponse, createQueryString, withIdempotency } from '../config';
-import { 
-  SessionSchema, 
+import {
+  SessionSchema,
+  SessionCompactSchema,
   SessionCreateDtoSchema,
   SessionUpdateDtoSchema,
   SessionCreationResponseSchema,
   PaginatedResponseSchema,
   SessionFiltersSchema
 } from '../schemas';
-import type { 
-  Session, 
+import type {
+  Session,
+  SessionCompact,
   SessionCreateDto,
   SessionUpdateDto,
   SessionCreationResponse,
@@ -25,12 +27,12 @@ export const sessionsClient = {
    * Get sessions for an event
    * GET /events/{id}/sessions
    */
-  async getEventSessions(eventId: string, filters?: SessionFilters): Promise<PaginatedResponse<Session>> {
+  async getEventSessions(eventId: string, filters?: SessionFilters): Promise<PaginatedResponse<SessionCompact>> {
     const validatedFilters = SessionFiltersSchema.parse(filters || {});
     const queryString = createQueryString(validatedFilters);
-    
+
     const response = await apiClient.get(`/events/${encodeURIComponent(eventId)}/sessions${queryString}`);
-    return validateResponse(response.data, PaginatedResponseSchema(SessionSchema));
+    return validateResponse(response.data, PaginatedResponseSchema(SessionCompactSchema));
   },
 
   /**

@@ -92,6 +92,7 @@ export const EventSchema = z.object({
   title: z.string(),
   description: z.array(EventDescriptionSchema).nullable().optional(),
   location: z.string().nullable().optional(),
+  capacity: z.number().int().min(0).nullable().optional(),
   tickets: z.array(EventTicketSchema),
   createdAt: z.string().datetime(),
   labels: z.array(z.string()).optional(),
@@ -102,6 +103,7 @@ export const EventCreateDtoSchema = z.object({
   title: z.string(),
   description: z.array(EventDescriptionSchema).nullable().optional(),
   location: z.string().nullable().optional(),
+  capacity: z.number().int().min(0).nullable().optional(),
   tickets: z.array(EventTicketCreateSchema),
   labels: z.array(z.string()).optional(),
   attributes: z.record(z.string(), AttributeValueSchema).optional(),
@@ -115,7 +117,25 @@ export const SessionSchema = z.object({
   event: EventSchema,
   startsAt: z.string().datetime(),
   endsAt: z.string().datetime().nullable().optional(),
-  capacity: z.number().int().min(0),
+  capacity: z.number().int().min(0).nullable().optional(),
+  remainingSeats: z.number().int().min(0),
+  hasBooking: z.boolean().optional(),
+  onWaitlist: z.boolean().optional(),
+  status: SessionStatusSchema.optional(),
+  labels: z.array(z.string()).nullable().optional(),
+  attributes: z.record(z.string(), AttributeValueSchema).optional(),
+  effectiveLabels: z.array(z.string()).optional(),
+  effectiveAttributes: z.record(z.string(), AttributeValueSchema).optional(),
+  createdAt: z.string().datetime().optional(),
+});
+
+// SessionCompact schema for API responses that don't include the full event object
+export const SessionCompactSchema = z.object({
+  id: z.string(),
+  eventId: z.string(),
+  startsAt: z.string().datetime(),
+  endsAt: z.string().datetime().nullable().optional(),
+  capacity: z.number().int().min(0).nullable().optional(),
   remainingSeats: z.number().int().min(0),
   hasBooking: z.boolean().optional(),
   onWaitlist: z.boolean().optional(),
@@ -130,7 +150,7 @@ export const SessionSchema = z.object({
 export const SessionCreateDtoSchema = z.object({
   startsAt: z.string().datetime(),
   endsAt: z.string().datetime().nullable().optional(),
-  capacity: z.number().int().min(0),
+  capacity: z.number().int().min(0).nullable().optional(),
   labels: z.array(z.string()).optional(),
   attributes: z.record(z.string(), AttributeValueSchema).optional(),
 });
@@ -144,7 +164,7 @@ export const SessionUpdateDtoSchema = z.object({
 });
 
 export const SessionCreationResponseSchema = z.object({
-  items: z.array(SessionSchema),
+  items: z.array(SessionCompactSchema),
 });
 
 // Booking schemas

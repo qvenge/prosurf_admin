@@ -24,7 +24,7 @@ export function App() {
     // else if (isAuthenticated && isOnLoginPage) {
     //   navigate('/', { replace: true });
     // }
-  }, [isAuthenticated, isLoading, location.pathname, navigate]);
+  }, [isAuthenticated, isLoading, isOnLoginPage, location.pathname, navigate]);
 
   if (isLoading || (!isAuthenticated && !isOnLoginPage)) {
     return (

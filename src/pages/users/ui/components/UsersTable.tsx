@@ -15,9 +15,10 @@ import { useEventsInfinite, useSessionsInfinite, type Event, type Session } from
 import { formatDate, formatTime, formatPrice } from '@/shared/lib/format-utils';
 import styles from './UsersTable.module.scss';
 
-type TrainingRowData = {
+type UserRowData = {
   id: string;
-  title: string;
+  firstName?: string;
+  secondName?: string;
   location: string | null | undefined;
   price: string | null;
   capacity: number;
@@ -29,7 +30,7 @@ export interface SessionsTableProps extends React.HTMLAttributes<HTMLDivElement>
   handleEdit?: (eventId: string) => void;
 }
 
-const columnHelper = createColumnHelper<TrainingRowData>();
+const columnHelper = createColumnHelper<UserRowData>();
 
 export function UsersTable({ className, handleEdit }: SessionsTableProps) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -124,9 +125,9 @@ export function UsersTable({ className, handleEdit }: SessionsTableProps) {
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor('title', {
-        header: 'Название',
-        cell: info => info.getValue(),
+      columnHelper.accessor('firstName', {
+        header: 'Имя',
+        cell: info => info.getValue() || 'Not specified',
       }),
       columnHelper.accessor('location', {
         header: 'Место',
