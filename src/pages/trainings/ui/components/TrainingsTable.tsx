@@ -11,9 +11,10 @@ import clsx from 'clsx';
 import { ArrowDownBold, ArrowUpBold, PencilSimpleBold } from '@/shared/ds/icons';
 import { Icon, IconButton } from '@/shared/ui';
 import { capitalize } from '@/shared/lib/string';
-import { useEventsInfinite, useSessionsInfinite, type Event, type Session } from '@/shared/api';
-import { formatDate, formatTime, formatPrice } from '@/shared/lib/format-utils';
+import { useEventsInfinite, type Event } from '@/shared/api';
+import { formatPrice } from '@/shared/lib/format-utils';
 import styles from './TrainingsTable.module.scss';
+import { EventSessionDates } from './EventSessionDates';
 
 type TrainingRowData = {
   id: string;
@@ -21,8 +22,6 @@ type TrainingRowData = {
   location: string | null | undefined;
   price: string | null;
   capacity: number;
-  dates: { date: string; times: string[] }[];
-  sessions: Session[];
 };
 
 export interface SessionsTableProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -48,32 +47,7 @@ export function TrainingsTable({ className, eventType, handleEdit }: SessionsTab
     'labels.any': [eventType]
   });
 
-  const {
-    data: _sessionsData,
-    isLoading: sessionsLoading,
-    error: sessionsError,
-  } = useSessionsInfinite({
-    limit: 100,
-    'labels.any': [eventType]
-  });
 
-  // Group sessions by event ID for quick lookup
-  const sessionsByEventId = useMemo(() => {
-    if (!_sessionsData?.pages) return {};
-
-    const allSessions = _sessionsData.pages.flatMap(page => page.items);
-    const grouped: Record<string, Session[]> = {};
-
-    allSessions.forEach((session: Session) => {
-      const eventId = session.event.id;
-      if (!grouped[eventId]) {
-        grouped[eventId] = [];
-      }
-      grouped[eventId].push(session);
-    });
-
-    return grouped;
-  }, [_sessionsData]);
 
   const trainingData = useMemo(() => {
     if (!_trainingData?.pages) return [];
@@ -87,43 +61,15 @@ export function TrainingsTable({ className, eventType, handleEdit }: SessionsTab
           })
         : null;
 
-      // Get sessions for this event
-      const eventSessions = sessionsByEventId[event.id] || [];
-
-      // Assuming all sessions have the same capacity
-      const capacity = eventSessions[0]?.capacity ?? 0;
-
-      // Group sessions by date
-      const sessionsByDate: Record<string, string[]> = {};
-      eventSessions.forEach(session => {
-        const date = formatDate(session.startsAt);
-        const time = formatTime(session.startsAt);
-
-        if (!sessionsByDate[date]) {
-          sessionsByDate[date] = [];
-        }
-        sessionsByDate[date].push(time);
-      });
-
-      // Convert to array and sort
-      const sessionDates = Object.entries(sessionsByDate)
-        .map(([date, times]) => ({
-          date,
-          times: times.sort() // Sort times within each day
-        }))
-        .sort((a, b) => a.date.localeCompare(b.date)); // Sort by date
-
       return {
         id: event.id,
         title: event.title,
         location: event.location,
         price: minPrice ? formatPrice(minPrice) : null,
-        capacity,
-        dates: sessionDates,
-        sessions: eventSessions,
+        capacity: event.capacity ?? 0,
       };
     });
-  }, [_trainingData, sessionsByEventId]);
+  }, [_trainingData]);
 
   const columns = useMemo(
     () => [
@@ -145,29 +91,12 @@ export function TrainingsTable({ className, eventType, handleEdit }: SessionsTab
         header: 'Кол-во мест',
         cell: info => info.getValue(),
       }),
-      columnHelper.accessor('dates', {
+      columnHelper.display({
+        id: 'dates',
         header: 'Даты',
-        cell: info => {
-          const dates = info.getValue() as { date: string; times: string[] }[];
-          if (!dates || dates.length === 0) {
-            return <span>Даты не указаны</span>;
-          }
-          return (
-            <div className={styles.dates}>
-              {dates.slice(0, 3).map((dateGroup, index) => (
-                <div key={index} className={styles.date}>
-                  <div className={styles.dateDay}>{dateGroup.date}</div>
-                  <div className={styles.dateTimes}>{dateGroup.times.join(' / ')}</div>
-                </div>
-              ))}
-              {dates.length > 3 && (
-                <div className={styles.date}>
-                  <div className={styles.dateTime}>+{dates.length - 3} ещё дней</div>
-                </div>
-              )}
-            </div>
-          );
-        },
+        cell: info => (
+          <EventSessionDates eventId={info.row.original.id} />
+        ),
       }),
       columnHelper.display({
         id: 'actions',
@@ -218,11 +147,11 @@ export function TrainingsTable({ className, eventType, handleEdit }: SessionsTab
     return () => container.removeEventListener('scroll', handleScroll);
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  if (trainingLoading || sessionsLoading) {
+  if (trainingLoading) {
     return <div className={styles.loading}>Loading training data...</div>;
   }
 
-  if (trainingError || sessionsError) {
+  if (trainingError) {
     return <div className={styles.error}>Error loading training data</div>;
   }
 
