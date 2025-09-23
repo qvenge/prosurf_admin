@@ -34,6 +34,7 @@ export function TextInput({
   ...inputProps
 }: TextInputProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const maskRef = useRef<InputMask | null>(null);
 
@@ -62,6 +63,23 @@ export function TextInput({
     }
   }, [initialType]);
 
+
+  const controls = [
+    children,
+    initialType === 'password' && <ButtonContainer
+      className={styles.showPasswordButton}
+      onClick={() => setShowPassword(!showPassword)}
+    >
+      <Icon
+        className={styles.icon}
+        src={showPassword ? EyeSlashRegular : EyeRegular}
+        width={20}
+        height={20}
+      />
+    </ButtonContainer>
+  ].filter(Boolean);
+
+
   return (
     <div
       id={id}
@@ -71,7 +89,8 @@ export function TextInput({
         styles[`size${camelize(size)}`],
         inputProps.disabled && styles.disabled,
         inputProps.readOnly && styles.readOnly,
-        error && styles.error
+        error && styles.error,
+        focused && styles.focus
       )}
       style={style}
     >
@@ -88,23 +107,18 @@ export function TextInput({
           id={inputId}
           type={type}
           {...inputProps}
+          onFocus={(e) => {
+            setFocused(true);
+            inputProps.onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setFocused(false);
+            inputProps.onBlur?.(e);
+          }}
         />
-        <div className={styles.controls}>
-          {children}
-          {initialType === 'password' &&
-            <ButtonContainer
-              className={styles.showPasswordButton}
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              <Icon
-                className={styles.icon}
-                src={showPassword ? EyeSlashRegular : EyeRegular}
-                width={20}
-                height={20}
-              />
-            </ButtonContainer>
-          }
-        </div>
+        {controls.length > 0 && <div className={styles.controls}>
+          {controls}
+        </div>}
       </div>
       {hint && <p className={styles.hint}>{hint}</p>}
     </div>

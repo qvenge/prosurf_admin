@@ -13,21 +13,17 @@
 .inputWrapper {
   width: 100%;
   position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 16px;
+  border: 1px solid ds.color('border/primary');
 }
 
 .controls {
-  position: absolute;
-  top: 0;
-  right: 0;
   display: flex;
   align-items: center;
   gap: 4px;
-  height: 100%;
-  padding: 16px;
-  // top: 50%;
-  // right: 16px;
-  // transform: translateY(-50%);
-
   color: ds.color('graphic/secondary');
 }
 
@@ -45,10 +41,15 @@
   color: ds.color('text/primary');
 }
 
+.focus .inputWrapper {
+  border: 1px solid ds.color('border/accent');
+}
+
 .input {
   @include utils.ellipsis(1);
 
-  // height: 48px;
+  flex-grow: 1;
+  height: 100%;
   width: 100%;
   margin: 0;
 
@@ -57,9 +58,11 @@
   gap: ds.number('paddings & gaps/XXS');
   align-self: stretch;
 
-  border: 1px solid ds.color('border/primary');
-
   color: ds.color('text/primary');
+
+  outline: none;
+  border: none;
+  box-shadow: none;
 
   &::placeholder {
     color: ds.color('text/secondary');
@@ -69,7 +72,8 @@
 .input:focus,
 .input:focus-visible {
   outline: none;
-  border: 1px solid ds.color('border/accent');
+  border: none;
+  box-shadow: none;
 }
 
 .hint {
@@ -77,14 +81,14 @@
   color: ds.color('text/secondary');
 }
 
-.root:not(.disabled):not(.readOnly):not(.error):hover {
-  & .input:not(:focus) {
+.root:not(.disabled):not(.readOnly):not(.error):not(.focus):hover {
+  & .inputWrapper {
     border: 1px solid ds.color('border/secondary');
   }
 }
 
 .error {
-  & .input {
+  & .inputWrapper {
     border: 1px solid ds.color('border/error');
   }
 
@@ -99,8 +103,12 @@
     color: ds.color('text/secondary'); 
   }
 
-  & .input {
+  & .inputWrapper {
     border: 1px solid ds.color('border/primary');
+    background: inherit;
+  }
+
+  & .input {
     color: ds.color('text/tertiary');
     background: inherit;
   }
@@ -114,34 +122,49 @@
   }
 }
 
-.sizeLarge .input {
-  @include ds.typo('body/b3/regular');
-  height: 48px;
-  padding: 0px ds.number('paddings & gaps/S');
-  border-radius: ds.number('radius/M');
+.sizeLarge {
+  .inputWrapper {
+    height: 48px;
+    padding: 0px ds.number('paddings & gaps/S');
+    border-radius: ds.number('radius/M');
+  }
 
-  &[type=password] {
-    padding-right: calc(ds.number('paddings & gaps/S') + 24px);
+  .input {
+    @include ds.typo('body/b3/regular');
+
+    // &[type=password] {
+    //   padding-right: calc(ds.number('paddings & gaps/S') + 24px);
+    // }
   }
 }
 
-.sizeMedium .input {
-  @include ds.typo('body/b3/regular');
-  padding: ds.number('paddings & gaps/XXS') ds.number('paddings & gaps/S');
-  border-radius: ds.number('radius/M');
+.sizeMedium {
+  .inputWrapper {
+    padding: ds.number('paddings & gaps/XXS') ds.number('paddings & gaps/S');
+    border-radius: ds.number('radius/M');
+  }
 
-  &[type=password] {
-    padding-right: calc(ds.number('paddings & gaps/S') + 24px);
+  .input {
+    @include ds.typo('body/b3/regular');
+
+    // &[type=password] {
+    //   padding-right: calc(ds.number('paddings & gaps/S') + 24px);
+    // }
   }
 }
 
-.sizeSmall .input {
-  @include ds.typo('body/b4/regular');
-  padding: 6px ds.number('paddings & gaps/XS');
-  border-radius: ds.number('radius/S');
+.sizeSmall {
+  .inputWrapper {
+    padding: 6px ds.number('paddings & gaps/XS');
+    border-radius: ds.number('radius/S');
+  }
 
-  &[type=password] {
-    padding-right: calc(ds.number('paddings & gaps/XS') + 24px);
+  .input {
+    @include ds.typo('body/b4/regular');
+
+    // &[type=password] {
+    //   padding-right: calc(ds.number('paddings & gaps/XS') + 24px);
+    // }
   }
 }
 
