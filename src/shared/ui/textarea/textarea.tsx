@@ -1,8 +1,9 @@
 'use client';
 
 import clsx from 'clsx';
-import { camelize } from '@/shared/lib/string';
-import styles from './textarea.module.scss';
+import { useEffect, useRef, useCallback } from 'react';
+import { camelize, pluralize } from '@/shared/lib/string';
+import styles from './Textarea.module.scss';
 
 type Parent = React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
@@ -14,6 +15,7 @@ interface TextareaProps extends Omit<Parent, 'size'> {
   size?: 'small' | 'medium' | 'large';
   maxLength?: number;
   showCounter?: boolean;
+  autoResize?: boolean;
 }
 
 export function Textarea({
@@ -27,11 +29,25 @@ export function Textarea({
   error,
   maxLength,
   showCounter = false,
+  autoResize = false,
   value,
   ...textareaProps
 }: TextareaProps) {
   const textareaId = initialTextareaId ?? `${id ?? textareaProps.name}-textarea`;
   const currentLength = typeof value === 'string' ? value.length : 0;
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const adjustHeight = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea || !autoResize) return;
+
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [autoResize]);
+
+  useEffect(() => {
+    adjustHeight();
+  }, [value, adjustHeight]);
 
   return (
     <div
@@ -54,20 +70,29 @@ export function Textarea({
           {label}
         </label>
       )}
-      <div className={styles.textareaWrapper}>
-        <textarea
-          className={styles.textarea}
-          id={textareaId}
-          maxLength={maxLength}
-          value={value}
-          {...textareaProps}
-        />
-      </div>
+      <textarea
+        ref={textareaRef}
+        className={clsx(
+          styles.textarea,
+          autoResize && styles.autoResize
+        )}
+        id={textareaId}
+        maxLength={maxLength}
+        value={value}
+        onInput={(e) => {
+          adjustHeight();
+          textareaProps.onInput?.(e);
+        }}
+        {...textareaProps}
+      />
       <div className={styles.footer}>
         {hint && <p className={styles.hint}>{hint}</p>}
         {showCounter && maxLength && (
           <p className={styles.counter}>
-            {currentLength}/{maxLength}
+            {currentLength > 0
+              ? `${currentLength}/${maxLength}`
+              : `До ${maxLength} ${pluralize(maxLength, ['символ', 'символа', 'символов'])}`
+            }
           </p>
         )}
       </div>

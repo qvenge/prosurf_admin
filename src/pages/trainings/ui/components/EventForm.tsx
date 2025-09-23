@@ -428,7 +428,7 @@ export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
           Добавить ещё дату
         </Button>
 
-        <div className={styles.photosSection}>
+        {/* <div className={styles.photosSection}>
           <h3 className={styles.sectionTitle}>Фотографии</h3>
           <p className={styles.photoHint}>не более 10</p>
           <div className={styles.photoGrid}>
@@ -448,7 +448,7 @@ export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
               />
             ))}
           </div>
-        </div>
+        </div> */}
 
         <div className={styles.description}>
           <Textarea
@@ -458,7 +458,7 @@ export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
             onChange={(e) => handleInputChange('description', e.target.value)}
             maxLength={500}
             showCounter
-            hint="до 500 символов"
+            autoResize
           />
 
           <Textarea
@@ -468,7 +468,7 @@ export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
             onChange={(e) => handleInputChange('whatToBring', e.target.value)}
             maxLength={500}
             showCounter
-            hint="до 500 символов"
+            autoResize
           />
         </div>
       </div>
