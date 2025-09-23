@@ -30,6 +30,7 @@ export function TextInput({
   hint,
   size = 'large',
   error,
+  children,
   ...inputProps
 }: TextInputProps) {
   const [showPassword, setShowPassword] = useState(false);
@@ -88,19 +89,22 @@ export function TextInput({
           type={type}
           {...inputProps}
         />
-        {initialType === 'password' &&
-          <ButtonContainer
-            className={styles.showPasswordButton}
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            <Icon
-              className={styles.icon}
-              src={showPassword ? EyeSlashRegular : EyeRegular}
-              width={20}
-              height={20}
-            />
-          </ButtonContainer>
-        }
+        <div className={styles.controls}>
+          {children}
+          {initialType === 'password' &&
+            <ButtonContainer
+              className={styles.showPasswordButton}
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              <Icon
+                className={styles.icon}
+                src={showPassword ? EyeSlashRegular : EyeRegular}
+                width={20}
+                height={20}
+              />
+            </ButtonContainer>
+          }
+        </div>
       </div>
       {hint && <p className={styles.hint}>{hint}</p>}
     </div>

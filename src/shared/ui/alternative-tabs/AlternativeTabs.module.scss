@@ -37,7 +37,7 @@
   &.selected {
     background: ds.color('background/alternative');
     color: ds.color('text/alternative/primary');
-    border: none;
+    // border: transparent;
 
     // &:hover {
     //   background: #191f2e;

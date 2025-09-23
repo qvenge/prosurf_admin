@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TextInput, Select, Button, Textarea, UploadImageInput, AlternativeTabs, IconButton } from '@/shared/ui';
+import { TextInput, Select, Button, Textarea, UploadImageInput, AlternativeTabs, IconButton, ButtonContainer } from '@/shared/ui';
 import { useCreateEvent, useCreateEventSessions } from '@/shared/api';
 import type { EventCreateDto, SessionCreateDto } from '@/shared/api';
 import { PlusBold, TrashRegular } from '@/shared/ds/icons';
@@ -11,12 +11,17 @@ interface EventFormProps {
   eventId?: string; // For edit mode
 }
 
+interface TimeSlot {
+  id: string;
+  startTime: string;
+}
+
 interface SessionForm {
   id: string;
   date: string;
-  startTime: string;
-  duration: string;
+  timeSlots: TimeSlot[];
   capacity: number;
+  duration: string;
 }
 
 interface FormData {
@@ -36,7 +41,7 @@ const disciplineOptions = [
   { value: 'surfskate', label: 'Серфскейт' },
 ];
 
-export function EventForm({ onClose, eventId }: EventFormProps) {
+export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
   const [formData, setFormData] = useState<FormData>({
     discipline: disciplineOptions[0].value,
     title: '',
@@ -46,7 +51,10 @@ export function EventForm({ onClose, eventId }: EventFormProps) {
     sessions: [{
       id: '1',
       date: '',
-      startTime: '',
+      timeSlots: [{
+        id: 'time-1',
+        startTime: ''
+      }],
       duration: '1.5',
       capacity: 10,
     }],
@@ -56,6 +64,7 @@ export function EventForm({ onClose, eventId }: EventFormProps) {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [selectedSessionId, setSelectedSessionId] = useState<string>(formData.sessions[0].id);
 
   const createEventMutation = useCreateEvent();
   const createSessionsMutation = useCreateEventSessions();
@@ -67,7 +76,7 @@ export function EventForm({ onClose, eventId }: EventFormProps) {
     }
   };
 
-  const handleSessionChange = (sessionId: string, field: keyof SessionForm, value: string | number) => {
+  const handleSessionChange = (sessionId: string, field: keyof Omit<SessionForm, 'timeSlots'>, value: string | number) => {
     setFormData(prev => ({
       ...prev,
       sessions: prev.sessions.map(session =>
@@ -76,11 +85,56 @@ export function EventForm({ onClose, eventId }: EventFormProps) {
     }));
   };
 
+  const handleTimeSlotChange = (sessionId: string, timeSlotId: string, field: keyof TimeSlot, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      sessions: prev.sessions.map(session =>
+        session.id === sessionId
+          ? {
+              ...session,
+              timeSlots: session.timeSlots.map(timeSlot =>
+                timeSlot.id === timeSlotId ? { ...timeSlot, [field]: value } : timeSlot
+              ),
+            }
+          : session
+      ),
+    }));
+  };
+
+  const addTimeSlot = (sessionId: string) => {
+    const newTimeSlot: TimeSlot = {
+      id: `time-${Date.now()}`,
+      startTime: '',
+    };
+    setFormData(prev => ({
+      ...prev,
+      sessions: prev.sessions.map(session =>
+        session.id === sessionId
+          ? { ...session, timeSlots: [...session.timeSlots, newTimeSlot] }
+          : session
+      ),
+    }));
+  };
+
+  const removeTimeSlot = (sessionId: string, timeSlotId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      sessions: prev.sessions.map(session =>
+        session.id === sessionId
+          ? { ...session, timeSlots: session.timeSlots.filter(ts => ts.id !== timeSlotId) }
+          : session
+      ),
+    }));
+  };
+
   const addSession = () => {
     const newSession: SessionForm = {
       id: Date.now().toString(),
       date: '',
-      startTime: '',
+      timeSlots: [{
+        id: `time-${Date.now()}`,
+        startTime: '',
+      }],
       duration: '1.5',
       capacity: parseInt(formData.capacity) || 10,
     };
@@ -88,13 +142,24 @@ export function EventForm({ onClose, eventId }: EventFormProps) {
       ...prev,
       sessions: [...prev.sessions, newSession],
     }));
+    // Automatically select the newly added session
+    setSelectedSessionId(newSession.id);
   };
 
   const removeSession = (sessionId: string) => {
-    setFormData(prev => ({
-      ...prev,
-      sessions: prev.sessions.filter(session => session.id !== sessionId),
-    }));
+    setFormData(prev => {
+      const filteredSessions = prev.sessions.filter(session => session.id !== sessionId);
+
+      // If removing the currently selected session, switch to the first remaining one
+      if (sessionId === selectedSessionId && filteredSessions.length > 0) {
+        setSelectedSessionId(filteredSessions[0].id);
+      }
+
+      return {
+        ...prev,
+        sessions: filteredSessions,
+      };
+    });
   };
 
   const validateForm = (): boolean => {
@@ -124,9 +189,11 @@ export function EventForm({ onClose, eventId }: EventFormProps) {
       if (!session.date) {
         newErrors[`session_${session.id}_date`] = 'Дата обязательна';
       }
-      if (!session.startTime) {
-        newErrors[`session_${session.id}_time`] = 'Время обязательно';
-      }
+      session.timeSlots.forEach((timeSlot) => {
+        if (!timeSlot.startTime) {
+          newErrors[`session_${session.id}_timeSlot_${timeSlot.id}_time`] = 'Время обязательно';
+        }
+      });
     });
 
     setErrors(newErrors);
@@ -183,17 +250,20 @@ export function EventForm({ onClose, eventId }: EventFormProps) {
       // Create event
       const createdEvent = await createEventMutation.mutateAsync(eventData);
 
-      // Create sessions
-      const sessionsData: SessionCreateDto[] = formData.sessions.map(session => {
-        const startDateTime = new Date(`${session.date}T${session.startTime}:00`);
-        const endDateTime = new Date(startDateTime);
-        endDateTime.setHours(endDateTime.getHours() + parseFloat(session.duration));
+      // Create sessions - flatten timeSlots into separate sessions
+      const sessionsData: SessionCreateDto[] = [];
+      formData.sessions.forEach(session => {
+        session.timeSlots.forEach(timeSlot => {
+          const startDateTime = new Date(`${session.date}T${timeSlot.startTime}:00`);
+          const endDateTime = new Date(startDateTime);
+          endDateTime.setHours(endDateTime.getHours() + parseFloat(session.duration));
 
-        return {
-          startsAt: startDateTime.toISOString(),
-          endsAt: endDateTime.toISOString(),
-          capacity: session.capacity,
-        };
+          sessionsData.push({
+            startsAt: startDateTime.toISOString(),
+            endsAt: endDateTime.toISOString(),
+            capacity: session.capacity,
+          });
+        });
       });
 
       await createSessionsMutation.mutateAsync({
@@ -264,82 +334,87 @@ export function EventForm({ onClose, eventId }: EventFormProps) {
           items={formData.sessions.map((session, i) => ({
             label: (
               <>
-                {session.date ? new Date(session.date).toLocaleDateString() : `Дата ${i + 1}`}
-                <Icon className={styles.removeIcon} src={TrashRegular} width={20} height={20} />
+                {session.date ? new Intl.DateTimeFormat('ru-RU').format(new Date(session.date)) : `Дата ${i + 1}`}
+                {formData.sessions.length > 1 && <ButtonContainer onClick={() => removeSession(session.id)}>
+                  <Icon className={styles.removeIcon} src={TrashRegular} width={20} height={20} />
+                </ButtonContainer>}
               </>
             ),
             value: session.id
           }))}
-          value={formData.sessions[0].id}
+          value={selectedSessionId}
           onChange={(value) => {
-            const selectedSession = formData.sessions.find(session => session.id === value);
-            if (selectedSession) {
-              setFormData(prev => ({
-                ...prev,
-                selectedSessionId: selectedSession.id,
-              }));
-            }
+            setSelectedSessionId(value);
           }}
         />
 
         <div className={styles.sessionsSection}>
-          {formData.sessions.map((session, index) => (
-            <div key={session.id} className={styles.dateWrapper}>
-              {/* <div className={styles.sessionHeader}>
-                <span className={styles.sessionLabel}>Дата {index + 1}</span>
-                {formData.sessions.length > 1 && (
-                  <Button
-                    type="secondary"
-                    size="s"
-                    onClick={() => removeSession(session.id)}
-                  >
-                    <Icon src={TrashRegular} width={16} height={16} />
-                  </Button>
-                )}
-              </div> */}
+          {(() => {
+            const selectedSession = formData.sessions.find(session => session.id === selectedSessionId);
+            if (!selectedSession) return null;
 
-              <div className={styles.dateAndDuration}>
-                <TextInput
-                  label="Дата"
-                  type="date"
-                  value={session.date}
-                  onChange={(e) => handleSessionChange(session.id, 'date', e.target.value)}
-                  error={!!errors[`session_${session.id}_date`]}
-                  hint={errors[`session_${session.id}_date`]}
-                />
-
-                <TextInput
-                  label="Длительность, часов"
-                  type="number"
-                  step="0.5"
-                  min="0.5"
-                  max="8"
-                  value={session.duration}
-                  onChange={(e) => handleSessionChange(session.id, 'duration', e.target.value)}
-                />
-              </div>
-              <div className={styles.timesWrapper}>
-                <div className={styles.timesLabel}>Время</div>
-                <div className={styles.times}>
+            return (
+              <div key={selectedSession.id} className={styles.dateWrapper}>
+                <div className={styles.dateAndDuration}>
                   <TextInput
-                    className={styles.time}
-                    type="time"
-                    value={session.startTime}
-                    onChange={(e) => handleSessionChange(session.id, 'startTime', e.target.value)}
-                    error={!!errors[`session_${session.id}_time`]}
-                    hint={errors[`session_${session.id}_time`]}
+                    label="Дата"
+                    type="date"
+                    value={selectedSession.date}
+                    onChange={(e) => handleSessionChange(selectedSession.id, 'date', e.target.value)}
+                    error={!!errors[`session_${selectedSession.id}_date`]}
+                    hint={errors[`session_${selectedSession.id}_date`]}
                   />
-                  <IconButton
-                    className={styles.addTime}
-                    src={PlusBold}
-                    type="secondary"
-                    size="l"
-                    onClick={() => removeSession(session.id)}
+                  <TextInput
+                    className={styles.duration}
+                    label="Часов"
+                    type="number"
+                    step="0.5"
+                    min="0.5"
+                    max="8"
+                    value={selectedSession.duration}
+                    onChange={(e) => handleSessionChange(selectedSession.id, 'duration', e.target.value)}
                   />
                 </div>
-              </div> 
-            </div>
-          ))}
+                <div className={styles.timesWrapper}>
+                  <div className={styles.timesLabel}>Время</div>
+                    <div className={styles.times}>
+                      {selectedSession.timeSlots.map((timeSlot) => (
+                        <TextInput
+                          key={timeSlot.id}
+                          className={styles.time}
+                          type="time"
+                          value={timeSlot.startTime}
+                          onChange={(e) => handleTimeSlotChange(selectedSession.id, timeSlot.id, 'startTime', e.target.value)}
+                          error={!!errors[`session_${selectedSession.id}_timeSlot_${timeSlot.id}_time`]}
+                          hint={errors[`session_${selectedSession.id}_timeSlot_${timeSlot.id}_time`]}
+                        >
+                          {selectedSession.timeSlots.length > 1 &&
+                            <ButtonContainer
+                              className={styles.removeTimeWrapper}
+                              onClick={() => removeTimeSlot(selectedSession.id, timeSlot.id)}
+                            >
+                              <Icon
+                                className={styles.removeTime}
+                                src={TrashRegular}
+                                width={20}
+                                height={20}
+                              />
+                            </ButtonContainer>
+                          }
+                        </TextInput>
+                      ))}
+                      <IconButton
+                        className={styles.addTime}
+                        src={PlusBold}
+                        type="secondary"
+                        size="l"
+                        onClick={() => addTimeSlot(selectedSession.id)}
+                      />
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         <Button
@@ -375,25 +450,27 @@ export function EventForm({ onClose, eventId }: EventFormProps) {
           </div>
         </div>
 
-        <Textarea
-          label="Описание тренировки"
-          placeholder="Введите текст"
-          value={formData.description}
-          onChange={(e) => handleInputChange('description', e.target.value)}
-          maxLength={500}
-          showCounter
-          hint="до 500 символов"
-        />
+        <div className={styles.description}>
+          <Textarea
+            label="Описание тренировки"
+            placeholder="Введите текст"
+            value={formData.description}
+            onChange={(e) => handleInputChange('description', e.target.value)}
+            maxLength={500}
+            showCounter
+            hint="до 500 символов"
+          />
 
-        <Textarea
-          label="Что с собой?"
-          placeholder="Введите текст"
-          value={formData.whatToBring}
-          onChange={(e) => handleInputChange('whatToBring', e.target.value)}
-          maxLength={500}
-          showCounter
-          hint="до 500 символов"
-        />
+          <Textarea
+            label="Что с собой?"
+            placeholder="Введите текст"
+            value={formData.whatToBring}
+            onChange={(e) => handleInputChange('whatToBring', e.target.value)}
+            maxLength={500}
+            showCounter
+            hint="до 500 символов"
+          />
+        </div>
       </div>
 
       <div className={styles.actions}>

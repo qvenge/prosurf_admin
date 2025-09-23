@@ -5,7 +5,8 @@
 
 .root,
 .form,
-.mainInfo {
+.mainInfo,
+.description {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -15,9 +16,11 @@
   gap: 28px;
 }
 
-.mainInfo {
+.mainInfo,
+.description {
   gap: 16px;
 }
+
 
 .sectionTitle {
   font-size: 18px;
@@ -53,6 +56,7 @@
 
 .times {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 

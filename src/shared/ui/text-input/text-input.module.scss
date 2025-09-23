@@ -15,14 +15,30 @@
   position: relative;
 }
 
-.showPasswordButton {
+.controls {
   position: absolute;
-  top: 50%;
-  right: 16px;
-  transform: translateY(-50%);
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  padding: 16px;
+  // top: 50%;
+  // right: 16px;
+  // transform: translateY(-50%);
 
   color: ds.color('graphic/secondary');
 }
+
+// .showPasswordButton {
+//   position: absolute;
+//   top: 50%;
+//   right: 16px;
+//   transform: translateY(-50%);
+
+//   color: ds.color('graphic/secondary');
+// }
 
 .label {
   @include ds.typo('body/b4/regular');
@@ -137,8 +153,6 @@
 
 .input {
   -moz-appearance: textfield;
-  position: relative;
-  z-index: 2;
   background: transparent;
 }
 
