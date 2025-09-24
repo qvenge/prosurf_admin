@@ -20,7 +20,6 @@ interface SessionForm {
   id: string;
   date: string;
   timeSlots: TimeSlot[];
-  capacity: number;
   duration: string;
 }
 
@@ -58,7 +57,6 @@ export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
         startTime: ''
       }],
       duration: '1.5',
-      capacity: 10,
     }],
     photos: [],
     description: '',
@@ -138,7 +136,6 @@ export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
         startTime: '',
       }],
       duration: '1.5',
-      capacity: parseInt(formData.capacity) || 10,
     };
     setFormData(prev => ({
       ...prev,
@@ -243,10 +240,7 @@ export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
           },
         ],
         labels: [formData.discipline],
-        attributes: {
-          discipline: formData.discipline,
-          capacity: parseInt(formData.capacity),
-        },
+        capacity: parseInt(formData.capacity),
       };
 
       // Create event
@@ -262,8 +256,7 @@ export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
 
           sessionsData.push({
             startsAt: startDateTime.toISOString(),
-            endsAt: endDateTime.toISOString(),
-            capacity: session.capacity,
+            endsAt: endDateTime.toISOString()
           });
         });
       });
@@ -314,6 +307,9 @@ export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
           <TextInput
             label="Цена разовой тренировки"
             placeholder="7900"
+            type="number"
+            step="1"
+            min="0"
             value={formData.price}
             onChange={(e) => handleInputChange('price', e.target.value)}
             error={!!errors.price}

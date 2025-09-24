@@ -21,7 +21,7 @@ type TrainingRowData = {
   title: string;
   location: string | null | undefined;
   price: string | null;
-  capacity: number;
+  capacity?: number;
 };
 
 export interface SessionsTableProps extends React.HTMLAttributes<HTMLDivElement> {
