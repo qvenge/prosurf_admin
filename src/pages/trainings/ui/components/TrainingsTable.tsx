@@ -47,8 +47,6 @@ export function TrainingsTable({ className, eventType, handleEdit }: SessionsTab
     'labels.any': [eventType]
   });
 
-
-
   const trainingData = useMemo(() => {
     if (!_trainingData?.pages) return [];
 
@@ -102,6 +100,7 @@ export function TrainingsTable({ className, eventType, handleEdit }: SessionsTab
         id: 'actions',
         cell: info => (
           <IconButton
+            className={styles.editButton}
             src={PencilSimpleBold}
             type="secondary"
             size="s"
@@ -134,7 +133,6 @@ export function TrainingsTable({ className, eventType, handleEdit }: SessionsTab
     if (!container) return;
 
     const handleScroll = () => {
-      console.log('scrolling');
       const { scrollTop, scrollHeight, clientHeight } = container;
       const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100; // 100px threshold
 

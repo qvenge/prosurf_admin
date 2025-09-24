@@ -40,7 +40,11 @@ export function TrainingsPage() {
         </Button>
       </Header>
       <div className={styles.page}>
-        <TrainingsTable eventType={selectedEventType} className={styles.table} />
+        <TrainingsTable
+          className={styles.table}
+          eventType={selectedEventType}
+          handleEdit={() => setIsModalOpen(true)}
+        />
       </div>
       {isModalOpen && (
         <SideModal onClose={() => setIsModalOpen(false)}>

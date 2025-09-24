@@ -46,7 +46,7 @@ export function SessionsTable({ className, eventType }: SessionsTableProps) {
     isFetchingNextPage
   } = useSessionsInfinite({
     limit: 15,
-    "labels.any": [eventType],
+    'labels.any': [eventType],
   });
 
   const sessionsData = useMemo(() => {
