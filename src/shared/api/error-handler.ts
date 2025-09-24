@@ -115,6 +115,8 @@ const ERROR_MESSAGES: Record<ApiError['code'], string> = {
   USER_EXISTS: 'Пользователь с таким email или username уже существует.',
   WEAK_PASSWORD: 'Пароль должен содержать минимум 6 символов.',
   INVALID_EMAIL: 'Некорректный формат email.',
+  HAS_ACTIVE_BOOKINGS: 'Невозможно выполнить операцию: существуют активные бронирования.',
+  HAS_ACTIVE_SESSIONS: 'Невозможно выполнить операцию: существуют активные сессии.',
 };
 
 export const getUserFriendlyErrorMessage = (error: unknown): string => {

@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: Surf Booking Telegram Web App API
-  version: 0.5.0
-  description: "API для сервиса бронирования и оплаты тренировок по (серфинг, скейтсерфинг, вейксерфинг)\nи многодневных туров. Включает подарочные сертификаты, абонементы, лист ожидания,\nкэшбэк-кошелёк и админ-аудит"
+  version: 0.5.5
+  description: "API для сервиса бронирования и оплаты тренировок по (серфинг, скейтсерфинг, вейксерфинг) и многодневных туров. Включает подарочные сертификаты, абонементы, лист ожидания, кэшбэк-кошелёк, админ-аудит и унифицированное создание бронирований"
 servers:
 - url: https://api.example.com
   description: Production
@@ -249,6 +249,8 @@ components:
           - USER_EXISTS
           - WEAK_PASSWORD
           - INVALID_EMAIL
+          - HAS_ACTIVE_BOOKINGS
+          - HAS_ACTIVE_SESSIONS
         message:
           type: string
         details:
@@ -424,6 +426,11 @@ components:
         location:
           type: string
           nullable: true
+        capacity:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: Вместимость по умолчанию для сессий этого события. Может быть переопределена в конкретной сессии.
         tickets:
           type: array
           items:
@@ -490,6 +497,51 @@ components:
         location:
           type: string
           nullable: true
+        capacity:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: Вместимость по умолчанию для сессий этого события
+        tickets:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventTicketCreate'
+        labels:
+          type: array
+          items:
+            type: string
+          description: Ярлыки события.
+        attributes:
+          type: object
+          additionalProperties:
+            oneOf:
+            - type: string
+            - type: number
+            - type: integer
+            - type: boolean
+            - type: array
+              items:
+                type: string
+          description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
+      additionalProperties: false
+    EventUpdateDto:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDescription'
+          nullable: true
+        location:
+          type: string
+          nullable: true
+        capacity:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: Вместимость по умолчанию для сессий этого события
         tickets:
           type: array
           items:
@@ -531,7 +583,6 @@ components:
       - id
       - event
       - startsAt
-      - capacity
       - remainingSeats
       properties:
         id:
@@ -548,6 +599,84 @@ components:
         capacity:
           type: integer
           minimum: 0
+          nullable: true
+          description: Вместимость сессии. Если не указана, используется capacity из события.
+        remainingSeats:
+          type: integer
+          minimum: 0
+        hasBooking:
+          type: boolean
+          description: У текущего пользователя есть активная бронь
+        onWaitlist:
+          type: boolean
+          description: Текущий пользователь в листе ожидания
+        status:
+          $ref: '#/components/schemas/SessionStatus'
+        labels:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Ярлыки сессии (перекрывают/дополняют ярлыки события).
+        attributes:
+          type: object
+          additionalProperties:
+            oneOf:
+            - type: string
+            - type: number
+            - type: integer
+            - type: boolean
+            - type: array
+              items:
+                type: string
+          description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
+        effectiveLabels:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: Денормализованные ярлыки (Event ⊕ Session).
+        effectiveAttributes:
+          type: object
+          readOnly: true
+          additionalProperties:
+            oneOf:
+            - type: string
+            - type: number
+            - type: integer
+            - type: boolean
+            - type: array
+              items:
+                type: string
+          description: Денормализованные атрибуты (Event ⊕ Session).
+        createdAt:
+          type: string
+          format: date-time
+    SessionCompact:
+      type: object
+      required:
+      - id
+      - eventId
+      - startsAt
+      - remainingSeats
+      properties:
+        id:
+          type: string
+        eventId:
+          type: string
+          description: ID события вместо полного объекта
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+          nullable: true
+        capacity:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: Вместимость сессии. Если не указана, используется capacity из события.
         remainingSeats:
           type: integer
           minimum: 0
@@ -611,7 +740,6 @@ components:
       required:
       - id
       - sessionId
-      - userId
       - quantity
       - status
       - totalPrice
@@ -622,6 +750,8 @@ components:
           type: string
         userId:
           type: string
+          nullable: true
+          description: ID пользователя. Может быть null для гостевых бронирований, созданных админом
         quantity:
           type: integer
           minimum: 1
@@ -636,9 +766,127 @@ components:
               format: date-time
         totalPrice:
           $ref: '#/components/schemas/Price'
+        guestContact:
+          $ref: '#/components/schemas/GuestContact'
+          nullable: true
+          description: Контактные данные гостя для бронирований без регистрации (создается админом)
+        notes:
+          type: string
+          nullable: true
+          description: Заметки администратора о бронировании
         createdAt:
           type: string
           format: date-time
+        createdBy:
+          type: string
+          nullable: true
+          description: ID пользователя (админа), создавшего бронирование
+    BookingExtended:
+      allOf:
+        - $ref: '#/components/schemas/Booking'
+        - type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+              description: Информация о пользователе (доступно при запросе с правами ADMIN)
+            guestContact:
+              $ref: '#/components/schemas/GuestContact'
+              description: Контактные данные гостя (если бронирование создано админом без привязки к пользователю)
+            session:
+              $ref: '#/components/schemas/Session'
+              description: Информация о сессии (включается при использовании параметра includeSession)
+            paymentInfo:
+              type: object
+              nullable: true
+              properties:
+                method:
+                  type: string
+                  enum: [card, certificate, pass, cashback, composite]
+                  description: Метод оплаты
+                paymentId:
+                  type: string
+                  nullable: true
+                  description: ID платежа (если применимо)
+                certificateId:
+                  type: string
+                  nullable: true
+                  description: ID использованного сертификата (если применимо)
+                seasonTicketId:
+                  type: string
+                  nullable: true
+                  description: ID использованного абонемента (если применимо)
+              description: Информация об оплате (доступно при запросе с правами ADMIN)
+    GuestContact:
+      type: object
+      required:
+      - phone
+      properties:
+        phone:
+          type: string
+          pattern: ^\+?[0-9]{7,15}$
+          description: Телефон гостя (обязательное поле)
+        firstName:
+          type: string
+          nullable: true
+          maxLength: 128
+          description: Имя гостя
+        lastName:
+          type: string
+          nullable: true
+          maxLength: 128
+          description: Фамилия гостя
+        email:
+          type: string
+          format: email
+          nullable: true
+          description: Email гостя
+        note:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: Дополнительные заметки админа о госте
+    BookingCreateDto:
+      type: object
+      required:
+      - quantity
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+          description: Количество мест для бронирования
+        userId:
+          type: string
+          nullable: true
+          description: |
+            ID пользователя для бронирования (только ADMIN).
+            Если не указан, бронирование создается для текущего пользователя.
+        guestContact:
+          $ref: '#/components/schemas/GuestContact'
+          nullable: true
+          description: |
+            Контактные данные гостя без регистрации (только ADMIN).
+            Используется для создания гостевых бронирований.
+            Нельзя использовать одновременно с userId.
+        status:
+          type: string
+          enum:
+          - HOLD
+          - CONFIRMED
+          default: HOLD
+          description: |
+            Начальный статус брони (только ADMIN).
+            CONFIRMED используется для немедленного подтверждения при офлайн оплате.
+            Обычные пользователи всегда создают статус HOLD.
+        ticketId:
+          type: string
+          nullable: true
+          description: ID билета для расчета цены (только ADMIN)
+        notes:
+          type: string
+          nullable: true
+          maxLength: 1000
+          description: Внутренние заметки администратора (только ADMIN)
+      additionalProperties: false
     PaymentStatus:
       type: string
       enum:
@@ -1049,7 +1297,6 @@ components:
       type: object
       required:
       - startsAt
-      - capacity
       properties:
         startsAt:
           type: string
@@ -1061,6 +1308,8 @@ components:
         capacity:
           type: integer
           minimum: 0
+          nullable: true
+          description: Вместимость сессии. Если не указана, используется capacity из события.
         labels:
           type: array
           items:
@@ -1092,6 +1341,7 @@ components:
         capacity:
           type: integer
           minimum: 0
+          nullable: true
         labels:
           type: array
           items:
@@ -1109,6 +1359,60 @@ components:
               items:
                 type: string
           description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
+      additionalProperties: false
+    SessionBulkUpdateDto:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: ID сессии для обновления
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+          nullable: true
+        capacity:
+          type: integer
+          minimum: 0
+          nullable: true
+        labels:
+          type: array
+          items:
+            type: string
+          description: Ярлыки сессии.
+        attributes:
+          type: object
+          additionalProperties:
+            oneOf:
+            - type: string
+            - type: number
+            - type: integer
+            - type: boolean
+            - type: array
+              items:
+                type: string
+          description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
+      additionalProperties: false
+    SessionBulkDeleteDto:
+      type: object
+      required:
+      - ids
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 100
+          description: Список ID сессий для удаления
+        force:
+          type: boolean
+          default: false
+          description: Принудительное удаление даже при наличии активных бронирований
       additionalProperties: false
     JobExecutionResult:
       type: object
@@ -1733,11 +2037,96 @@ paths:
                 $ref: '#/components/schemas/Event'
         '404':
           $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Events
+      - Admin
+      summary: Обновить событие (ADMIN)
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventUpdateDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Конфликт (например, событие имеет активные сессии)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: HAS_ACTIVE_SESSIONS
+                message: Cannot modify event with active sessions
+    delete:
+      tags:
+      - Events
+      - Admin
+      summary: Удалить событие (ADMIN)
+      description: |
+        Удаляет событие. По умолчанию не позволяет удалить событие, 
+        если у него есть сессии с активными бронированиями.
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: force
+        schema:
+          type: boolean
+          default: false
+        description: Принудительное удаление даже при наличии связанных сессий
+      responses:
+        '204':
+          description: Событие успешно удалено
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Конфликт (событие имеет активные сессии или бронирования)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                hasActiveSessions:
+                  summary: Событие имеет активные сессии
+                  value:
+                    code: HAS_ACTIVE_SESSIONS
+                    message: Cannot delete event with active sessions. Use force=true to override.
+                hasActiveBookings:
+                  summary: Событие имеет активные бронирования
+                  value:
+                    code: HAS_ACTIVE_BOOKINGS
+                    message: Cannot delete event with active bookings
   /events/{id}/sessions:
     get:
       tags:
       - Sessions
-      summary: Сессии события
+      summary: Сессии события (возвращает eventId вместо полного события)
       parameters:
       - in: path
         name: id
@@ -1771,7 +2160,7 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Session'
+                      $ref: '#/components/schemas/SessionCompact'
                   next:
                     type: string
                     nullable: true
@@ -1811,7 +2200,7 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Session'
+                      $ref: '#/components/schemas/SessionCompact'
         '401': &id001
           $ref: '#/components/responses/Unauthorized'
         '403': &id002
@@ -1824,7 +2213,7 @@ paths:
     get:
       tags:
       - Sessions
-      summary: Поиск сессий
+      summary: Поиск сессий (возвращает полное событие)
       parameters:
       - in: query
         name: eventId
@@ -1861,6 +2250,138 @@ paths:
                   next:
                     type: string
                     nullable: true
+    patch:
+      tags:
+      - Sessions
+      - Admin
+      summary: Массовое обновление сессий (ADMIN)
+      description: |
+        Позволяет обновить несколько сессий за один запрос.
+        Каждая сессия в массиве должна содержать ID и поля для обновления.
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              minItems: 1
+              maxItems: 100
+              items:
+                $ref: '#/components/schemas/SessionBulkUpdateDto'
+            example:
+              - id: session_123
+                startsAt: "2025-03-01T10:00:00Z"
+                capacity: 20
+              - id: session_456
+                startsAt: "2025-03-02T10:00:00Z"
+                labels: ["sport:surf", "level:intermediate"]
+      responses:
+        '200':
+          description: Сессии успешно обновлены
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - items
+                - updated
+                - failed
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Session'
+                    description: Успешно обновленные сессии
+                  updated:
+                    type: integer
+                    description: Количество успешно обновленных сессий
+                  failed:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - id
+                      - error
+                      properties:
+                        id:
+                          type: string
+                          description: ID сессии, которую не удалось обновить
+                        error:
+                          type: string
+                          description: Описание ошибки
+                    description: Список сессий, которые не удалось обновить
+        '400':
+          description: Неверный формат запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags:
+      - Sessions
+      - Admin
+      summary: Массовое удаление сессий (ADMIN)
+      description: |
+        Позволяет удалить несколько сессий за один запрос.
+        По умолчанию не позволяет удалить сессии с активными бронированиями.
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionBulkDeleteDto'
+            example:
+              ids: ["session_123", "session_456", "session_789"]
+              force: false
+      responses:
+        '200':
+          description: Операция выполнена
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - deleted
+                - failed
+                properties:
+                  deleted:
+                    type: array
+                    items:
+                      type: string
+                    description: ID успешно удаленных сессий
+                  failed:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - id
+                      - error
+                      properties:
+                        id:
+                          type: string
+                          description: ID сессии, которую не удалось удалить
+                        error:
+                          type: string
+                          description: Причина ошибки
+                    description: Список сессий, которые не удалось удалить
+        '400':
+          description: Неверный формат запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
   /sessions/{id}:
     get:
       tags:
@@ -1935,7 +2456,20 @@ paths:
     post:
       tags:
       - Bookings
-      summary: Забронировать места в сессии (создать HOLD)
+      summary: Забронировать места в сессии
+      description: |
+        Создает бронирование для сессии. Поведение зависит от роли пользователя:
+        
+        **Для обычных пользователей (USER):**
+        - Создает бронирование для текущего пользователя
+        - Принимает только поле `quantity`
+        - Всегда создает статус HOLD
+        
+        **Для администраторов (ADMIN):**
+        - Может создать бронирование для любого пользователя или гостя
+        - Поддерживает дополнительные поля: `userId`, `guestContact`, `status`, `notes`
+        - Может сразу подтвердить бронирование (status: CONFIRMED) для офлайн оплаты
+        - Если не указан userId или guestContact, создает для текущего пользователя
       parameters:
       - in: path
         name: id
@@ -1948,27 +2482,64 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-              - quantity
-              properties:
-                quantity:
-                  type: integer
-                  minimum: 1
+              $ref: '#/components/schemas/BookingCreateDto'
+            examples:
+              userBooking:
+                summary: Обычное бронирование пользователем
+                value:
+                  quantity: 2
+              adminForUser:
+                summary: Админ бронирует для зарегистрированного пользователя
+                value:
+                  quantity: 2
+                  userId: user_456
+                  status: CONFIRMED
+                  notes: Оплачено наличными в офисе
+              adminForGuest:
+                summary: Админ бронирует для гостя без регистрации
+                value:
+                  quantity: 1
+                  guestContact:
+                    phone: "+79001234567"
+                    firstName: Иван
+                    lastName: Петров
+                    email: ivan@example.com
+                  status: HOLD
+                  notes: Позвонить за день до тренировки для подтверждения
+              adminForSelf:
+                summary: Админ бронирует для себя с заметкой
+                value:
+                  quantity: 1
+                  status: CONFIRMED
+                  notes: Тестовое бронирование
       responses:
         '201':
-          description: HOLD создан
+          description: Бронирование создано
           headers:
             X-Hold-TTL:
-              description: Время жизни брони (сек)
+              description: Время жизни брони в секундах (только для статуса HOLD)
               schema:
                 type: integer
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Booking'
+                oneOf:
+                - $ref: '#/components/schemas/Booking'
+                - $ref: '#/components/schemas/BookingExtended'
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Недостаточно прав (попытка использовать админские поля без роли ADMIN)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
@@ -1977,13 +2548,62 @@ paths:
     get:
       tags:
       - Bookings
-      summary: Список бронирований (self или ADMIN)
+      summary: Список бронирований (self или ADMIN с расширенными возможностями фильтрации)
       parameters:
       - in: query
         name: userId
         schema:
           type: string
-        description: Доступно только ADMIN для просмотра чужих бронирований
+        description: Фильтр по ID пользователя. Доступно только ADMIN для просмотра чужих бронирований. По умолчанию возвращаются бронирования текущего пользователя.
+      - in: query
+        name: sessionId
+        schema:
+          type: string
+        description: Фильтр по ID сессии. Доступно только ADMIN для получения всех бронирований конкретной сессии.
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - HOLD
+          - CONFIRMED
+          - CANCELLED
+          - EXPIRED
+        description: Фильтр по статусу бронирования. Доступно только ADMIN.
+      - in: query
+        name: bookingType
+        schema:
+          type: string
+          enum:
+          - registered
+          - guest
+          - all
+          default: all
+        description: Фильтр по типу бронирования (зарегистрированные пользователи / гости / все). Доступно только ADMIN.
+      - in: query
+        name: includeUser
+        schema:
+          type: boolean
+          default: false
+        description: Включить информацию о пользователе в ответ. Доступно только ADMIN.
+      - in: query
+        name: includeSession
+        schema:
+          type: boolean
+          default: false
+        description: Включить полную информацию о сессии в ответ. Доступно только ADMIN.
+      - in: query
+        name: includePaymentInfo
+        schema:
+          type: boolean
+          default: false
+        description: Включить информацию об оплате в ответ. Доступно только ADMIN.
+      - in: query
+        name: includeGuestContact
+        schema:
+          type: boolean
+          default: false
+        description: Включить контактные данные гостей в ответ. Доступно только ADMIN.
       - $ref: '#/components/parameters/CursorParam'
       - $ref: '#/components/parameters/LimitParam'
       responses:
@@ -1997,7 +2617,9 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Booking'
+                      oneOf:
+                        - $ref: '#/components/schemas/Booking'
+                        - $ref: '#/components/schemas/BookingExtended'
                   next:
                     type: string
                     nullable: true
@@ -2027,6 +2649,60 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Bookings
+      - Admin
+      summary: Обновить бронирование (ADMIN)
+      description: |
+        Позволяет администратору обновить данные бронирования:
+        - Контактную информацию гостя
+        - Заметки администратора
+        - Количество мест (при наличии свободных)
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                  minimum: 1
+                  description: Новое количество мест
+                guestContact:
+                  $ref: '#/components/schemas/GuestContact'
+                  description: Обновленные контактные данные гостя
+                notes:
+                  type: string
+                  maxLength: 1000
+                  description: Обновленные заметки администратора
+              additionalProperties: false
+      responses:
+        '200':
+          description: Бронирование обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingExtended'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Конфликт (например, недостаточно мест для увеличения количества)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /bookings/{id}/cancel:
     post:
       tags:
@@ -2251,7 +2927,7 @@ paths:
         name: userId
         schema:
           type: string
-        description: Только ADMIN – просматривать по userId
+        description: Только ADMIN — просматривать по userId
       - $ref: '#/components/parameters/CursorParam'
       - $ref: '#/components/parameters/LimitParam'
       responses:
@@ -2396,7 +3072,7 @@ paths:
         name: userId
         schema:
           type: string
-        description: Только ADMIN – фильтр по userId
+        description: Только ADMIN — фильтр по userId
       - $ref: '#/components/parameters/CursorParam'
       - $ref: '#/components/parameters/LimitParam'
       responses:

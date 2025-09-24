@@ -4,7 +4,11 @@ import {
   SessionCompactSchema,
   SessionCreateDtoSchema,
   SessionUpdateDtoSchema,
+  SessionBulkUpdateDtoSchema,
+  SessionBulkDeleteDtoSchema,
   SessionCreationResponseSchema,
+  SessionBulkUpdateResponseSchema,
+  SessionBulkDeleteResponseSchema,
   PaginatedResponseSchema,
   SessionFiltersSchema
 } from '../schemas';
@@ -13,7 +17,11 @@ import type {
   SessionCompact,
   SessionCreateDto,
   SessionUpdateDto,
+  SessionBulkUpdateDto,
+  SessionBulkDeleteDto,
   SessionCreationResponse,
+  SessionBulkUpdateResponse,
+  SessionBulkDeleteResponse,
   PaginatedResponse,
   SessionFilters,
   IdempotencyKey
@@ -102,5 +110,38 @@ export const sessionsClient = {
   async cancelSession(id: string): Promise<Session> {
     const response = await apiClient.delete(`/sessions/${encodeURIComponent(id)}`);
     return validateResponse(response.data, SessionSchema);
+  },
+
+  /**
+   * Bulk update sessions (ADMIN only)
+   * PATCH /sessions
+   */
+  async bulkUpdateSessions(
+    sessions: SessionBulkUpdateDto[],
+    idempotencyKey: IdempotencyKey
+  ): Promise<SessionBulkUpdateResponse> {
+    const validatedData = sessions.map(session => SessionBulkUpdateDtoSchema.parse(session));
+
+    const config = withIdempotency({}, idempotencyKey);
+    const response = await apiClient.patch('/sessions', validatedData, config);
+    return validateResponse(response.data, SessionBulkUpdateResponseSchema);
+  },
+
+  /**
+   * Bulk delete sessions (ADMIN only)
+   * DELETE /sessions
+   */
+  async bulkDeleteSessions(
+    data: SessionBulkDeleteDto,
+    idempotencyKey: IdempotencyKey
+  ): Promise<SessionBulkDeleteResponse> {
+    const validatedData = SessionBulkDeleteDtoSchema.parse(data);
+
+    const config = withIdempotency({}, idempotencyKey);
+    const response = await apiClient.delete('/sessions', {
+      ...config,
+      data: validatedData
+    });
+    return validateResponse(response.data, SessionBulkDeleteResponseSchema);
   },
 };

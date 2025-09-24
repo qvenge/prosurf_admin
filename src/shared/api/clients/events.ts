@@ -1,13 +1,15 @@
 import { apiClient, validateResponse, createQueryString } from '../config';
-import { 
-  EventSchema, 
+import {
+  EventSchema,
   EventCreateDtoSchema,
+  EventUpdateDtoSchema,
   PaginatedResponseSchema,
   EventFiltersSchema
 } from '../schemas';
-import type { 
-  Event, 
+import type {
+  Event,
   EventCreateDto,
+  EventUpdateDto,
   PaginatedResponse,
   EventFilters
 } from '../types';
@@ -46,5 +48,28 @@ export const eventsClient = {
   async getEventById(id: string): Promise<Event> {
     const response = await apiClient.get(`/events/${encodeURIComponent(id)}`);
     return validateResponse(response.data, EventSchema);
+  },
+
+  /**
+   * Update event (ADMIN only)
+   * PATCH /events/{id}
+   */
+  async updateEvent(id: string, data: EventUpdateDto): Promise<Event> {
+    const validatedData = EventUpdateDtoSchema.parse(data);
+
+    const response = await apiClient.patch(
+      `/events/${encodeURIComponent(id)}`,
+      validatedData
+    );
+    return validateResponse(response.data, EventSchema);
+  },
+
+  /**
+   * Delete event (ADMIN only)
+   * DELETE /events/{id}
+   */
+  async deleteEvent(id: string, force?: boolean): Promise<void> {
+    const queryParams = force ? '?force=true' : '';
+    await apiClient.delete(`/events/${encodeURIComponent(id)}${queryParams}`);
   },
 };

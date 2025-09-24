@@ -18,6 +18,7 @@ export type EventTicket = z.infer<typeof schemas.EventTicketSchema>;
 export type EventTicketCreate = z.infer<typeof schemas.EventTicketCreateSchema>;
 export type Event = z.infer<typeof schemas.EventSchema>;
 export type EventCreateDto = z.infer<typeof schemas.EventCreateDtoSchema>;
+export type EventUpdateDto = z.infer<typeof schemas.EventUpdateDtoSchema>;
 
 // Session types
 export type SessionStatus = z.infer<typeof schemas.SessionStatusSchema>;
@@ -25,7 +26,12 @@ export type Session = z.infer<typeof schemas.SessionSchema>;
 export type SessionCompact = z.infer<typeof schemas.SessionCompactSchema>;
 export type SessionCreateDto = z.infer<typeof schemas.SessionCreateDtoSchema>;
 export type SessionUpdateDto = z.infer<typeof schemas.SessionUpdateDtoSchema>;
+export type SessionBulkUpdateDto = z.infer<typeof schemas.SessionBulkUpdateDtoSchema>;
+export type SessionBulkDeleteDto = z.infer<typeof schemas.SessionBulkDeleteDtoSchema>;
 export type SessionCreationResponse = z.infer<typeof schemas.SessionCreationResponseSchema>;
+export type BulkOperationFailure = z.infer<typeof schemas.BulkOperationFailureSchema>;
+export type SessionBulkUpdateResponse = z.infer<typeof schemas.SessionBulkUpdateResponseSchema>;
+export type SessionBulkDeleteResponse = z.infer<typeof schemas.SessionBulkDeleteResponseSchema>;
 
 // Booking types
 export type BookingStatus = z.infer<typeof schemas.BookingStatusSchema>;

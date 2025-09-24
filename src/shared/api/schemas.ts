@@ -12,6 +12,8 @@ export const ErrorSchema = z.object({
     'USER_EXISTS',
     'WEAK_PASSWORD',
     'INVALID_EMAIL',
+    'HAS_ACTIVE_BOOKINGS',
+    'HAS_ACTIVE_SESSIONS',
   ]),
   message: z.string(),
   details: z.unknown().nullable(),
@@ -109,6 +111,16 @@ export const EventCreateDtoSchema = z.object({
   attributes: z.record(z.string(), AttributeValueSchema).optional(),
 });
 
+export const EventUpdateDtoSchema = z.object({
+  title: z.string().optional(),
+  description: z.array(EventDescriptionSchema).nullable().optional(),
+  location: z.string().nullable().optional(),
+  capacity: z.number().int().min(0).nullable().optional(),
+  tickets: z.array(EventTicketCreateSchema).optional(),
+  labels: z.array(z.string()).optional(),
+  attributes: z.record(z.string(), AttributeValueSchema).optional(),
+});
+
 // Session schemas
 export const SessionStatusSchema = z.enum(['SCHEDULED', 'CANCELLED']);
 
@@ -163,8 +175,38 @@ export const SessionUpdateDtoSchema = z.object({
   attributes: z.record(z.string(), AttributeValueSchema).optional(),
 });
 
+export const SessionBulkUpdateDtoSchema = z.object({
+  id: z.string(),
+  startsAt: z.string().datetime().optional(),
+  endsAt: z.string().datetime().nullable().optional(),
+  capacity: z.number().int().min(0).optional(),
+  labels: z.array(z.string()).optional(),
+  attributes: z.record(z.string(), AttributeValueSchema).optional(),
+});
+
+export const SessionBulkDeleteDtoSchema = z.object({
+  ids: z.array(z.string()).min(1).max(100),
+  force: z.boolean().default(false).optional(),
+});
+
 export const SessionCreationResponseSchema = z.object({
   items: z.array(SessionCompactSchema),
+});
+
+export const BulkOperationFailureSchema = z.object({
+  id: z.string(),
+  error: z.string(),
+});
+
+export const SessionBulkUpdateResponseSchema = z.object({
+  items: z.array(SessionSchema),
+  updated: z.number().int(),
+  failed: z.array(BulkOperationFailureSchema),
+});
+
+export const SessionBulkDeleteResponseSchema = z.object({
+  deleted: z.array(z.string()),
+  failed: z.array(BulkOperationFailureSchema),
 });
 
 // Booking schemas
