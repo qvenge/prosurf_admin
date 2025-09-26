@@ -28,11 +28,12 @@ export const sessionsKeys = {
  */
 
 // Get sessions for an event
-export const useEventSessions = (eventId: string, filters?: SessionFilters) => {
+export const useEventSessions = (eventId?: string, filters?: SessionFilters, enabled?: boolean) => {
   return useQuery({
-    queryKey: sessionsKeys.eventSessions(eventId, filters),
-    queryFn: () => sessionsClient.getEventSessions(eventId, filters),
+    queryKey: sessionsKeys.eventSessions(eventId ?? '', filters),
+    queryFn: () => sessionsClient.getEventSessions(eventId ?? '', filters),
     staleTime: 2 * 60 * 1000, // 2 minutes
+    enabled
   });
 };
 

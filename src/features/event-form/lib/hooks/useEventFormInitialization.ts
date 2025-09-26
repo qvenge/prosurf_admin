@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { sessionsClient, sessionsKeys, eventsClient, eventsKeys } from '@/shared/api';
+import { useEvent, useEventSessions } from '@/shared/api';
 import type { FormData } from '../types';
 import { convertEventDataToFormData } from '../utils';
 import { defaultFormData } from '../constants';
@@ -11,19 +10,8 @@ export function useEventFormInitialization(eventId?: string) {
 
   const isEditMode = !!eventId;
 
-  const { data: eventData, isLoading: eventLoading } = useQuery({
-    queryKey: eventsKeys.detail(eventId || ''),
-    queryFn: () => eventsClient.getEventById(eventId || ''),
-    enabled: isEditMode,
-    staleTime: 10 * 60 * 1000,
-  });
-
-  const { data: sessionsData, isLoading: sessionsLoading } = useQuery({
-    queryKey: sessionsKeys.eventSessions(eventId || ''),
-    queryFn: () => sessionsClient.getEventSessions(eventId || ''),
-    enabled: isEditMode,
-    staleTime: 2 * 60 * 1000,
-  });
+  const { data: eventData, isLoading: eventLoading } = useEvent(eventId, isEditMode);
+  const { data: sessionsData, isLoading: sessionsLoading } = useEventSessions(eventId, undefined, isEditMode);
 
   const initializeFormData = (): FormData | null => {
     if (!isEditMode || !eventData || !sessionsData || isInitialized) {

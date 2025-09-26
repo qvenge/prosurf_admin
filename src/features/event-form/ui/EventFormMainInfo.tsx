@@ -1,16 +1,22 @@
 import { TextInput, Select } from '@/shared/ui';
-import type { FormData, ValidationErrors } from '../lib/types';
-import { disciplineOptions } from '../lib/constants';
+import type { FormData, ValidationErrors, Category } from '../lib/types';
 import styles from './EventForm.module.scss';
 
 interface EventFormMainInfoProps {
   formData: FormData;
   errors: ValidationErrors;
+  categories?: Category[];
   onInputChange: (field: keyof FormData, value: string) => void;
   onClearError: (field: string) => void;
 }
 
-export function EventFormMainInfo({ formData, errors, onInputChange, onClearError }: EventFormMainInfoProps) {
+export function EventFormMainInfo({
+  formData,
+  errors,
+  onInputChange,
+  onClearError,
+  categories
+}: EventFormMainInfoProps) {
   const handleInputChange = (field: keyof FormData, value: string) => {
     onInputChange(field, value);
     if (errors[field]) {
@@ -20,15 +26,17 @@ export function EventFormMainInfo({ formData, errors, onInputChange, onClearErro
 
   return (
     <div className={styles.mainInfo}>
-      <Select
-        label="Дисциплина"
-        options={disciplineOptions}
-        value={formData.discipline}
-        onChange={(value) => handleInputChange('discipline', value)}
-      />
+      {categories && categories.length > 0 && <Select
+        label="Категория"
+        name="categories"
+        options={categories}
+        value={formData.category ?? categories.find(c => c.selected)?.value ?? categories[0].value}
+        onChange={(value) => handleInputChange('category', value)}
+      />}
 
       <TextInput
         label="Название"
+        name="title"
         placeholder="Тренировка на волне"
         value={formData.title}
         onChange={(e) => handleInputChange('title', e.target.value)}
@@ -38,6 +46,7 @@ export function EventFormMainInfo({ formData, errors, onInputChange, onClearErro
 
       <TextInput
         label="Место"
+        name="location"
         placeholder="Ставропольская ул., 43, Москва"
         value={formData.location}
         onChange={(e) => handleInputChange('location', e.target.value)}
@@ -46,7 +55,21 @@ export function EventFormMainInfo({ formData, errors, onInputChange, onClearErro
       />
 
       <TextInput
-        label="Цена разовой тренировки"
+        label="Бронь"
+        name="prepayment"
+        placeholder="7900"
+        type="number"
+        step="1"
+        min="0"
+        value={formData.price}
+        onChange={(e) => handleInputChange('prepayment', e.target.value)}
+        error={!!errors.price}
+        hint={errors.price}
+      />
+
+      <TextInput
+        label="Цена"
+        name="price"
         placeholder="7900"
         type="number"
         step="1"
@@ -59,6 +82,7 @@ export function EventFormMainInfo({ formData, errors, onInputChange, onClearErro
 
       <TextInput
         label="Кол-во мест"
+        name="capacity"
         type="number"
         placeholder="10"
         value={formData.capacity}

@@ -10,22 +10,30 @@ export interface SessionForm {
   duration: string;
 }
 
+export interface Category {
+  label: string;
+  value: string;
+  selected?: boolean;
+}
+
 export interface FormData {
-  discipline: string;
   title: string;
   location: string;
+  prepayment: string;
   price: string;
   capacity: string;
   sessions: SessionForm[];
   photos: File[];
   description: string;
   whatToBring: string;
+  category?: string;
 }
 
 export interface EventFormProps {
   onClose: () => void;
   eventId?: string; // For edit mode
   rangeMode?: boolean;
+  categories?: Category[];
 }
 
 export interface ValidationErrors {

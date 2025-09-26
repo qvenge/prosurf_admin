@@ -10,7 +10,7 @@ import { EventFormDescription } from './EventFormDescription';
 import { EventFormActions } from './EventFormActions';
 import styles from './EventForm.module.scss';
 
-export function EventForm({ onClose, eventId, rangeMode = false }: EventFormProps) {
+export function EventForm({ onClose, eventId, rangeMode = false, categories }: EventFormProps) {
   const { isEditMode, existingSessions, isInitialLoading, initializeFormData } = useEventFormInitialization(eventId);
 
   const {
@@ -73,6 +73,7 @@ export function EventForm({ onClose, eventId, rangeMode = false }: EventFormProp
         <EventFormMainInfo
           formData={formData}
           errors={errors}
+          categories={categories}
           onInputChange={handleInputChangeWithClearError}
           onClearError={clearError}
         />

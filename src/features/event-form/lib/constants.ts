@@ -1,16 +1,9 @@
 import type { FormData } from './types';
 
-export const disciplineOptions = [
-  { value: 'training:surfing', label: 'Серфинг' },
-  { value: 'training:surfskate', label: 'Серфскейт' },
-  { value: 'tour', label: 'Тур' },
-  { value: 'activity', label: 'Ивент' },
-];
-
 export const defaultFormData: FormData = {
-  discipline: disciplineOptions[0].value,
   title: '',
   location: '',
+  prepayment: '',
   price: '',
   capacity: '',
   sessions: [{

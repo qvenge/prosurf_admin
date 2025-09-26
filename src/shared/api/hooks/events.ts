@@ -36,11 +36,12 @@ export const useEventsInfinite = (filters?: Omit<EventFilters, 'cursor'>) => {
 };
 
 // Get event by ID
-export const useEvent = (id: string) => {
+export function useEvent(id?: string, enabled?: boolean) {
   return useQuery({
-    queryKey: eventsKeys.detail(id),
-    queryFn: () => eventsClient.getEventById(id),
+    queryKey: eventsKeys.detail(id ?? ''),
+    queryFn: () => eventsClient.getEventById(id ?? ''),
     staleTime: 10 * 60 * 1000, // 10 minutes
+    enabled
   });
 };
 

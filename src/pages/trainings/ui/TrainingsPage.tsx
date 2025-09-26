@@ -64,7 +64,14 @@ export function TrainingsPage() {
       </div>
       {isModalOpen && (
         <SideModal onClose={handleClose}>
-          <EventForm onClose={handleClose} eventId={editingEventId} />
+          <EventForm
+            categories={eventTypeOptions.map(option => ({
+              ...option,
+              selected: option.value === selectedEventType
+            }))}
+            onClose={handleClose}
+            eventId={editingEventId}
+          />
         </SideModal>
       )}
     </>

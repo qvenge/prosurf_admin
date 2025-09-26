@@ -1,6 +1,5 @@
-import type { EventCreateDto, EventUpdateDto, SessionCreateDto } from '@/shared/api';
-import type { FormData, SessionForm } from './types';
-import { disciplineOptions } from './constants';
+import type { EventCreateDto, EventUpdateDto, SessionCreateDto, Event, SessionCompact } from '@/shared/api';
+import type { Category, FormData, SessionForm } from './types';
 
 export function convertFormDataToEventCreateDto(formData: FormData): EventCreateDto {
   const priceInKopecks = Math.round(parseFloat(formData.price) * 100);
@@ -9,11 +8,11 @@ export function convertFormDataToEventCreateDto(formData: FormData): EventCreate
     title: formData.title,
     description: [
       {
-        heading: 'Описание тренировки',
+        heading: 'Описание',
         body: formData.description,
       },
       {
-        heading: 'Что с собой?',
+        heading: 'FAQ',
         body: formData.whatToBring,
       },
     ],
@@ -37,7 +36,7 @@ export function convertFormDataToEventCreateDto(formData: FormData): EventCreate
         },
       },
     ],
-    labels: [formData.discipline],
+    labels: formData.category ? [formData.category] : undefined,
     capacity: parseInt(formData.capacity),
   };
 }
@@ -65,37 +64,37 @@ export function convertSessionsToSessionCreateDtos(sessions: SessionForm[]): Ses
   return sessionsData;
 }
 
-interface EventData {
-  labels?: string[];
-  title: string;
-  location?: string;
-  capacity?: number;
-  tickets: Array<{
-    full: {
-      price: {
-        amountMinor: number;
-      };
-    };
-  }>;
-  description?: Array<{
-    heading: string;
-    body: string;
-  }>;
-}
+// interface EventData {
+//   labels?: string[];
+//   title: string;
+//   location?: string;
+//   capacity?: number;
+//   tickets: Array<{
+//     full: {
+//       price: {
+//         amountMinor: number;
+//       };
+//     };
+//   }>;
+//   description?: Array<{
+//     heading: string;
+//     body: string;
+//   }>;
+// }
 
 interface SessionData {
-  items: Array<{
-    id: string;
-    startsAt: string;
-    endsAt?: string;
-  }>;
+  items: SessionCompact[];
 }
 
-export function convertEventDataToFormData(eventData: EventData, sessionsData: SessionData): Partial<FormData> {
+export function convertEventDataToFormData(
+  eventData: Event,
+  sessionsData: SessionData,
+  categories?: Category[]
+): Partial<FormData> {
   // Map discipline from labels
-  const discipline = eventData.labels?.find((label: string) =>
-    disciplineOptions.some(option => option.value === label)
-  ) || disciplineOptions[0].value;
+  const category = categories != null && eventData.labels?.find((label: string) =>
+    categories.some(option => option.value === label)
+  ) || categories?.[0].value;
 
   // Get price from first ticket
   const price = eventData.tickets[0]?.full.price.amountMinor
@@ -139,7 +138,7 @@ export function convertEventDataToFormData(eventData: EventData, sessionsData: S
   const formSessions = Array.from(sessionsMap.values());
 
   return {
-    discipline,
+    category,
     title: eventData.title,
     location: eventData.location || '',
     price,
