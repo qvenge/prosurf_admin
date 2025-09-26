@@ -1,27 +1,20 @@
 import { TextInput } from '@/shared/ui';
-import type { SessionForm, ValidationErrors } from '../lib/types';
 import { EventFormTimeSlots } from './EventFormTimeSlots';
+import { useEventFormContext } from '../lib/context';
 import styles from './EventForm.module.scss';
 
-interface EventFormSessionDetailsProps {
-  session: SessionForm;
-  errors: ValidationErrors;
-  rangeMode?: boolean;
-  onSessionChange: (sessionId: string, field: keyof Omit<SessionForm, 'timeSlots'>, value: string | number) => void;
-  onTimeSlotChange: (sessionId: string, timeSlotId: string, field: keyof import('../lib/types').TimeSlot, value: string) => void;
-  onAddTimeSlot: (sessionId: string) => void;
-  onRemoveTimeSlot: (sessionId: string, timeSlotId: string) => void;
-}
+export function EventFormSessionDetails() {
+  const {
+    formData,
+    selectedSessionId,
+    errors,
+    rangeMode,
+    handleSessionChange
+  } = useEventFormContext();
 
-export function EventFormSessionDetails({
-  session,
-  errors,
-  rangeMode = false,
-  onSessionChange,
-  onTimeSlotChange,
-  onAddTimeSlot,
-  onRemoveTimeSlot
-}: EventFormSessionDetailsProps) {
+  const session = formData.sessions.find(s => s.id === selectedSessionId);
+
+  if (!session) return null;
   return (
     <div className={styles.dateWrapper}>
       <div className={styles.dateAndDuration}>
@@ -29,7 +22,7 @@ export function EventFormSessionDetails({
           label={rangeMode ? 'Дата начала' : 'Дата'}
           type="date"
           value={session.date}
-          onChange={(e) => onSessionChange(session.id, 'date', e.target.value)}
+          onChange={(e) => handleSessionChange(session.id, 'date', e.target.value)}
           error={!!errors[`session_${session.id}_date`]}
           hint={errors[`session_${session.id}_date`]}
         />
@@ -42,20 +35,20 @@ export function EventFormSessionDetails({
             min="0.5"
             max="8"
             value={session.duration}
-            onChange={(e) => onSessionChange(session.id, 'duration', e.target.value)}
+            onChange={(e) => handleSessionChange(session.id, 'duration', e.target.value)}
           />
         )}
       </div>
-      {!rangeMode && (
-        <EventFormTimeSlots
-          sessionId={session.id}
-          timeSlots={session.timeSlots}
-          errors={errors}
-          onTimeSlotChange={onTimeSlotChange}
-          onAddTimeSlot={onAddTimeSlot}
-          onRemoveTimeSlot={onRemoveTimeSlot}
+      {rangeMode ? (
+        <TextInput
+          label='Дата окончания'
+          type="date"
+          value={session.date}
+          onChange={(e) => handleSessionChange(session.id, 'date', e.target.value)}
+          error={!!errors[`session_${session.id}_date`]}
+          hint={errors[`session_${session.id}_date`]}
         />
-      )}
+      ) : <EventFormTimeSlots />}
     </div>
   );
 }

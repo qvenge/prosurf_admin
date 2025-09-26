@@ -1,31 +1,27 @@
 import { Textarea } from '@/shared/ui';
-import type { FormData } from '../lib/types';
 import { maxDescriptionLength } from '../lib/constants';
+import { useEventFormContext } from '../lib/context';
 import styles from './EventForm.module.scss';
 
-interface EventFormDescriptionProps {
-  formData: FormData;
-  onInputChange: (field: keyof FormData, value: string) => void;
-}
-
-export function EventFormDescription({ formData, onInputChange }: EventFormDescriptionProps) {
+export function EventFormDescription() {
+  const { formData, handleInputChange } = useEventFormContext();
   return (
     <div className={styles.description}>
       <Textarea
-        label="Описание тренировки"
+        label="Описание"
         placeholder="Введите текст"
         value={formData.description}
-        onChange={(e) => onInputChange('description', e.target.value)}
+        onChange={(e) => handleInputChange('description', e.target.value)}
         maxLength={maxDescriptionLength}
         showCounter
         autoResize
       />
 
       <Textarea
-        label="Что с собой?"
+        label="FAQ"
         placeholder="Введите текст"
         value={formData.whatToBring}
-        onChange={(e) => onInputChange('whatToBring', e.target.value)}
+        onChange={(e) => handleInputChange('whatToBring', e.target.value)}
         maxLength={maxDescriptionLength}
         showCounter
         autoResize

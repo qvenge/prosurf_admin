@@ -1,27 +1,13 @@
 import { TextInput, Select } from '@/shared/ui';
-import type { FormData, ValidationErrors, Category } from '../lib/types';
+import type { FormData } from '../lib/types';
+import { useEventFormContext } from '../lib/context';
 import styles from './EventForm.module.scss';
 
-interface EventFormMainInfoProps {
-  formData: FormData;
-  errors: ValidationErrors;
-  categories?: Category[];
-  onInputChange: (field: keyof FormData, value: string) => void;
-  onClearError: (field: string) => void;
-}
+export function EventFormMainInfo() {
+  const { formData, errors, handleInputChange, categories } = useEventFormContext();
 
-export function EventFormMainInfo({
-  formData,
-  errors,
-  onInputChange,
-  onClearError,
-  categories
-}: EventFormMainInfoProps) {
-  const handleInputChange = (field: keyof FormData, value: string) => {
-    onInputChange(field, value);
-    if (errors[field]) {
-      onClearError(field);
-    }
+  const handleInputChangeWithClearError = (field: keyof FormData, value: string) => {
+    handleInputChange(field, value);
   };
 
   return (
@@ -31,7 +17,7 @@ export function EventFormMainInfo({
         name="categories"
         options={categories}
         value={formData.category ?? categories.find(c => c.selected)?.value ?? categories[0].value}
-        onChange={(value) => handleInputChange('category', value)}
+        onChange={(value) => handleInputChangeWithClearError('category', value)}
       />}
 
       <TextInput
@@ -39,7 +25,7 @@ export function EventFormMainInfo({
         name="title"
         placeholder="Тренировка на волне"
         value={formData.title}
-        onChange={(e) => handleInputChange('title', e.target.value)}
+        onChange={(e) => handleInputChangeWithClearError('title', e.target.value)}
         error={!!errors.title}
         hint={errors.title}
       />
@@ -49,7 +35,7 @@ export function EventFormMainInfo({
         name="location"
         placeholder="Ставропольская ул., 43, Москва"
         value={formData.location}
-        onChange={(e) => handleInputChange('location', e.target.value)}
+        onChange={(e) => handleInputChangeWithClearError('location', e.target.value)}
         error={!!errors.location}
         hint={errors.location}
       />
@@ -62,7 +48,7 @@ export function EventFormMainInfo({
         step="1"
         min="0"
         value={formData.prepayment}
-        onChange={(e) => handleInputChange('prepayment', e.target.value)}
+        onChange={(e) => handleInputChangeWithClearError('prepayment', e.target.value)}
         error={!!errors.prepayment}
         hint={errors.prepayment}
       />
@@ -75,7 +61,7 @@ export function EventFormMainInfo({
         step="1"
         min="0"
         value={formData.price}
-        onChange={(e) => handleInputChange('price', e.target.value)}
+        onChange={(e) => handleInputChangeWithClearError('price', e.target.value)}
         error={!!errors.price}
         hint={errors.price}
       />
@@ -86,7 +72,7 @@ export function EventFormMainInfo({
         type="number"
         placeholder="10"
         value={formData.capacity}
-        onChange={(e) => handleInputChange('capacity', e.target.value)}
+        onChange={(e) => handleInputChangeWithClearError('capacity', e.target.value)}
         error={!!errors.capacity}
         hint={errors.capacity}
       />

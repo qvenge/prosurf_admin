@@ -29,8 +29,10 @@ export function UsersPage() {
           handleEdit={handleOpen}
         />
       </div>
-      {isModalOpen && (
+      {isModalOpen && userData && (
         <SideModal onClose={handleClose}>
+          {/* TODO: Add user details component */}
+          <div>User: {userData.email}</div>
         </SideModal>
       )}
     </>

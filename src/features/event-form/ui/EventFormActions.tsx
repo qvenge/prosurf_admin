@@ -1,19 +1,15 @@
 import { Button } from '@/shared/ui';
+import { useEventFormContext } from '../lib/context';
 import styles from './EventForm.module.scss';
 
-interface EventFormActionsProps {
-  isEditMode: boolean;
-  isLoading: boolean;
-  onSubmit: () => void;
-}
-
-export function EventFormActions({ isEditMode, isLoading, onSubmit }: EventFormActionsProps) {
+export function EventFormActions() {
+  const { isEditMode, isLoading, handleSubmit } = useEventFormContext();
   return (
     <div className={styles.actions}>
       <Button
         type="primary"
         size="l"
-        onClick={onSubmit}
+        onClick={handleSubmit}
         disabled={isLoading}
       >
         {isLoading ? 'Сохранение...' : (isEditMode ? 'Сохранить' : 'Добавить')}
