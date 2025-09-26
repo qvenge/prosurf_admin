@@ -6,6 +6,7 @@ import { CalendarPage } from '@/pages/calendar';
 import { LoginPage } from '@/pages/login';
 import { SessionsPage } from '@/pages/sessions';
 import { TrainingsPage } from '@/pages/trainings';
+import { ToursAndActivityPage } from '@/pages/tours-and-activity';
 import { UsersPage } from '@/pages/users';
 import { SeasonTicketsPage } from '@/pages/season-tickets';
 
@@ -47,7 +48,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'events',
-            Component: CalendarPage
+            Component: ToursAndActivityPage
           },
           {
             path: 'settings',

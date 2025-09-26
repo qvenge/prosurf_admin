@@ -1,0 +1,1 @@
+export { ToursAndActivityPage } from './ui/ToursAndActivityPage';

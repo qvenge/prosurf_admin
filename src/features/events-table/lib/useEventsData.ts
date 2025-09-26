@@ -6,6 +6,7 @@ export type EventRowData = {
   id: string;
   title: string;
   location: string | null | undefined;
+  prepayment?: string | null;
   price: string | null;
   capacity?: number;
 };
@@ -27,15 +28,19 @@ export function useEventsData({ eventType }: UseEventsDataProps) {
     'labels.any': [eventType]
   });
 
-  const eventsData = useMemo(() => {
+  const eventsData: EventRowData[]  = useMemo(() => {
     if (!_eventsData?.pages) return [];
 
     const allEvents = _eventsData.pages.flatMap(page => page.items);
 
     return allEvents.map((event: Event) => {
-      const minPrice = event.tickets.length > 0
-        ? event.tickets.map(ticket => ticket.full.price).reduce((minPrice, price) => {
-            return price.amountMinor < minPrice.amountMinor ? price : minPrice;
+      const ticket = event.tickets.length > 0
+        ? event.tickets.reduce((minTicket, ticket) => {
+            if (ticket.full.price.amountMinor < minTicket.full.price.amountMinor) {
+              return ticket;
+            }
+
+            return minTicket;
           })
         : null;
 
@@ -43,7 +48,8 @@ export function useEventsData({ eventType }: UseEventsDataProps) {
         id: event.id,
         title: event.title,
         location: event.location,
-        price: minPrice ? formatPrice(minPrice) : null,
+        prepayment: ticket?.prepayment?.price && ticket.prepayment.price.amountMinor > 0 ? formatPrice(ticket.prepayment.price) : null,
+        price: ticket?.full.price && ticket.full.price.amountMinor > 0 ? formatPrice(ticket.full.price) : null,
         capacity: event.capacity ?? 0,
       };
     });

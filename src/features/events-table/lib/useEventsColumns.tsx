@@ -4,6 +4,7 @@ import { PencilSimpleBold } from '@/shared/ds/icons';
 import { IconButton } from '@/shared/ui';
 import { EventSessionDates } from '../ui';
 import { type EventRowData } from './useEventsData';
+import styles from '../ui/EventSessionDates.module.scss'
 
 const columnHelper = createColumnHelper<EventRowData>();
 
@@ -22,11 +23,17 @@ export function useEventsColumns({ handleEdit }: UseEventsColumnsProps) {
         header: 'Место',
         cell: info => info.getValue() || 'Not specified',
       }),
-      columnHelper.accessor('price', {
+      columnHelper.display({
+        id: 'price',
         header: 'Цена',
-        cell: info => {
-          return info.getValue() || 'N/A';
-        },
+        cell: info => (
+          <div className={styles.priceContainer}>
+            <div className={styles.price}>{info.row.original.price}</div>
+            {info.row.original.prepayment && (
+              <div className={styles.prepayment}>{info.row.original.prepayment}</div>
+            )}
+          </div>
+        ),
       }),
       columnHelper.accessor('capacity', {
         header: 'Кол-во мест',

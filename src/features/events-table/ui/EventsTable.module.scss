@@ -125,3 +125,8 @@
   color: ds.color('text/secondary');
   @include ds.typo('body/b4/medium');
 }
+
+.prepayment {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/secondary');
+}
