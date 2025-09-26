@@ -10,6 +10,7 @@ import styles from './EventForm.module.scss';
 interface EventFormProps {
   onClose: () => void;
   eventId?: string; // For edit mode
+  rangeMode?: boolean;
 }
 
 interface TimeSlot {
@@ -43,7 +44,7 @@ const disciplineOptions = [
   { value: 'activity', label: 'Ивент' },
 ];
 
-export function EventForm({ onClose, eventId }: EventFormProps) {
+export function EventForm({ onClose, eventId, rangeMode = false }: EventFormProps) {
   const [formData, setFormData] = useState<FormData>({
     discipline: disciplineOptions[0].value,
     title: '',
@@ -514,7 +515,7 @@ export function EventForm({ onClose, eventId }: EventFormProps) {
           items={formData.sessions.map((session, i) => ({
             label: (
               <>
-                {session.date ? new Intl.DateTimeFormat('ru-RU').format(new Date(session.date)) : `Дата ${i + 1}`}
+                {session.date ? new Intl.DateTimeFormat('ru-RU').format(new Date(session.date)) : `${rangeMode ? 'Даты' : 'Дата'} ${i + 1}`}
                 {formData.sessions.length > 1 && <ButtonContainer onClick={() => removeSession(session.id)}>
                   <Icon className={styles.removeIcon} src={TrashRegular} width={20} height={20} />
                 </ButtonContainer>}
@@ -537,25 +538,51 @@ export function EventForm({ onClose, eventId }: EventFormProps) {
               <div key={selectedSession.id} className={styles.dateWrapper}>
                 <div className={styles.dateAndDuration}>
                   <TextInput
-                    label="Дата"
+                    label={rangeMode ? 'Дата начала' : 'Дата'}
                     type="date"
                     value={selectedSession.date}
                     onChange={(e) => handleSessionChange(selectedSession.id, 'date', e.target.value)}
                     error={!!errors[`session_${selectedSession.id}_date`]}
                     hint={errors[`session_${selectedSession.id}_date`]}
                   />
-                  <TextInput
-                    className={styles.duration}
-                    label="Часов"
-                    type="number"
-                    step="0.5"
-                    min="0.5"
-                    max="8"
-                    value={selectedSession.duration}
-                    onChange={(e) => handleSessionChange(selectedSession.id, 'duration', e.target.value)}
-                  />
+                  {!rangeMode && (
+                    <TextInput
+                      className={styles.duration}
+                      label="Часов"
+                      type="number"
+                      step="0.5"
+                      min="0.5"
+                      max="8"
+                      value={selectedSession.duration}
+                      onChange={(e) => handleSessionChange(selectedSession.id, 'duration', e.target.value)}
+                    />
+                  )}
                 </div>
-                <div className={styles.timesWrapper}>
+                {rangeMode && (
+                  <div className={styles.dateAndDuration}>
+                    <TextInput
+                      label={rangeMode ? 'Дата начала' : 'Дата'}
+                      type="date"
+                      value={selectedSession.date}
+                      onChange={(e) => handleSessionChange(selectedSession.id, 'date', e.target.value)}
+                      error={!!errors[`session_${selectedSession.id}_date`]}
+                      hint={errors[`session_${selectedSession.id}_date`]}
+                    />
+                    {!rangeMode && (
+                      <TextInput
+                        className={styles.duration}
+                        label="Часов"
+                        type="number"
+                        step="0.5"
+                        min="0.5"
+                        max="8"
+                        value={selectedSession.duration}
+                        onChange={(e) => handleSessionChange(selectedSession.id, 'duration', e.target.value)}
+                      />
+                    )}
+                  </div>
+                )}
+                {!rangeMode && <div className={styles.timesWrapper}>
                   <div className={styles.timesLabel}>Время</div>
                     <div className={styles.times}>
                       {selectedSession.timeSlots.map((timeSlot) => (
@@ -591,7 +618,7 @@ export function EventForm({ onClose, eventId }: EventFormProps) {
                         onClick={() => addTimeSlot(selectedSession.id)}
                       />
                   </div>
-                </div>
+                </div>}
               </div>
             );
           })()}

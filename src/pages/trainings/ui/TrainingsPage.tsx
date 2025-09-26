@@ -1,6 +1,6 @@
 import { Header } from '@/shared/ui';
 import { TrainingsTable } from './components/TrainingsTable';
-import { EventForm } from './components/EventForm';
+import { EventForm } from '@/features/events';
 import styles from './TrainingsPage.module.scss';
 import { SegmentedButtons, Button, Icon, SideModal } from '@/shared/ui';
 import { PlusBold } from '@/shared/ds/icons';
