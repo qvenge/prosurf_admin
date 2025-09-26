@@ -126,3 +126,29 @@
 .removeIcon {
   color: ds.color('graphic/secondary');
 }
+
+.removeTimeWrapper {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.removeTime {
+  color: ds.color('graphic/secondary');
+}
+
+.addTime {
+  align-self: flex-start;
+}
+
+.dateTabs {
+  margin-bottom: 16px;
+}
+
+.sessionsSection {
+  margin-bottom: 28px;
+}
+
+.duration {
+  width: 120px;
+}
