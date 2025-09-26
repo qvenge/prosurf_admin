@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { eventsClient } from '../clients/events';
-import type { Event, EventCreateDto, EventFilters, PaginatedResponse } from '../types';
+import type { Event, EventCreateDto, EventUpdateDto, EventFilters, PaginatedResponse } from '../types';
 
 // Query key factory for events
 export const eventsKeys = {
@@ -47,18 +47,38 @@ export const useEvent = (id: string) => {
 // Create event mutation (ADMIN only)
 export const useCreateEvent = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: EventCreateDto) => eventsClient.createEvent(data),
     onSuccess: (newEvent) => {
       // Invalidate events lists to show the new event
       queryClient.invalidateQueries({ queryKey: eventsKeys.lists() });
-      
+
       // Optionally add to cache
       queryClient.setQueryData(eventsKeys.detail(newEvent.id), newEvent);
     },
     onError: (error) => {
       console.error('Failed to create event:', error);
+    },
+  });
+};
+
+// Update event mutation (ADMIN only)
+export const useUpdateEvent = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: EventUpdateDto }) =>
+      eventsClient.updateEvent(id, data),
+    onSuccess: (updatedEvent, variables) => {
+      // Update the specific event in cache
+      queryClient.setQueryData(eventsKeys.detail(variables.id), updatedEvent);
+
+      // Invalidate events lists to show updated event
+      queryClient.invalidateQueries({ queryKey: eventsKeys.lists() });
+    },
+    onError: (error) => {
+      console.error('Failed to update event:', error);
     },
   });
 };

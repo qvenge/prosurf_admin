@@ -1,44 +1,45 @@
 import { Header } from '@/shared/ui';
-import { TrainingsTable } from './components/TrainingsTable';
-import { EventForm } from './components/EventForm';
-import styles from './TrainingsPage.module.scss';
+import { PlansTable } from './components/PlansTable';
+import { PlanForm } from './components/PlanForm';
+import styles from './SeasonTicketsPage.module.scss';
+import type { SeasonTicketPlan } from '@/shared/api';
 import { SegmentedButtons, Button, Icon, SideModal } from '@/shared/ui';
 import { PlusBold } from '@/shared/ds/icons';
 import { useState } from 'react';
 
-const eventTypeOptions = [
-  { value: 'training:surfing', label: 'Серфинг' },
-  { value: 'training:surfskate', label: 'Серфскейт' },
+const tabs = [
+  { value: 'plans', label: 'Абонементы' },
+  { value: 'season-tickets', label: 'Пользователи' },
 ];
 
-export function TrainingsPage() {
-  const [selectedEventType, setSelectedEventType] = useState(eventTypeOptions[0].value);
+export function SeasonTicketsPage() {
+  const [selectedTab, setSelectedTab] = useState(tabs[0].value);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [editingEventId, setEditingEventId] = useState<string | undefined>(undefined);
+  const [editinPlan, setEditingPlan] = useState<SeasonTicketPlan | undefined>(undefined);
 
   const handleCreate = () => {
-    setEditingEventId(undefined);
+    setEditingPlan(undefined);
     setIsModalOpen(true);
   };
 
-  const handleEdit = (eventId: string) => {
-    setEditingEventId(eventId);
+  const handleEdit = (pland: SeasonTicketPlan) => {
+    setEditingPlan(pland);
     setIsModalOpen(true);
   };
 
   const handleClose = () => {
     setIsModalOpen(false);
-    setEditingEventId(undefined);
+    setEditingPlan(undefined);
   };
 
   return (
     <>
-      <Header title={'Тренировки'}>
+      <Header title={'Абонементы'}>
         <SegmentedButtons
-          options={eventTypeOptions}
-          value={selectedEventType}
+          options={tabs}
+          value={selectedTab}
           onChange={(value) => {
-            setSelectedEventType(value);
+            setSelectedTab(value);
           }}
         />
         <Button
@@ -56,15 +57,14 @@ export function TrainingsPage() {
         </Button>
       </Header>
       <div className={styles.page}>
-        <TrainingsTable
+        <PlansTable
           className={styles.table}
-          eventType={selectedEventType}
           handleEdit={handleEdit}
         />
       </div>
       {isModalOpen && (
         <SideModal onClose={handleClose}>
-          <EventForm onClose={handleClose} eventId={editingEventId} />
+          <PlanForm onClose={handleClose} planData={editinPlan} />
         </SideModal>
       )}
     </>

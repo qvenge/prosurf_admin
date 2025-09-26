@@ -10,119 +10,89 @@ import {
 import clsx from 'clsx';
 import { ArrowDownBold, ArrowUpBold, PencilSimpleBold } from '@/shared/ds/icons';
 import { Icon, IconButton } from '@/shared/ui';
-import { capitalize } from '@/shared/lib/string';
-import { useUsersInfinite, type User, type SeasonTicket } from '@/shared/api';
-import { formatDate, formatTime } from '@/shared/lib/format-utils';
-import styles from './UsersTable.module.scss';
+import { capitalize, pluralize } from '@/shared/lib/string';
+import { useSeasonTicketPlansInfinite, type SeasonTicketPlan } from '@/shared/api';
+import { formatPrice } from '@/shared/lib/format-utils';
+import styles from './PlansTable.module.scss';
 
 type PlanRowData = {
-  id: User['id'];
-  telegramId: User['telegramId'];
+  id: string;
   name: string;
-  seasonTickets: SeasonTicket[];
-  createdDate: string;
-  createdTime: string;
-  phone?: string;
-  email?: string;
-  dateOfBirth?: string;
-  photoUrl?: string;
+  passes: number;
+  price: string;
+  endsIn: string; // месяцев
+  description?: string | null;
 };
 
 export interface SessionsTableProps extends React.HTMLAttributes<HTMLDivElement> {
-  handleEdit?: (user: User) => void;
+  handleEdit?: (plan: SeasonTicketPlan) => void;
 }
 
 const columnHelper = createColumnHelper<PlanRowData>();
 
-export function UsersTable({ className, handleEdit }: SessionsTableProps) {
+export function PlansTable({ className, handleEdit }: SessionsTableProps) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const bodyContainerRef = useRef<HTMLDivElement>(null);
-  const [allItems, setAllItems] = useState<User[]>([]);
+  const [allSeasonTickets, setAllSeasonTickets] = useState<SeasonTicketPlan[]>([]);
 
   const {
-    data: rawData,
+    data: _plansData,
     isLoading: trainingLoading,
     error: trainingError,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage
-  } = useUsersInfinite({
+  } = useSeasonTicketPlansInfinite({
     limit: 100
   });
 
-  const normalizeFn = (item: User) => {
+  const plansData = useMemo(() => {
+    if (!_plansData?.pages) return [];
 
-    return {
-      id: item.id,
-      telegramId: item.telegramId,
-      name: [item.lastName, item.firstName].filter(Boolean).join(' '),
-      dateOfBirth: '03.02.1990', // item.dateOfBirth,
-      photoUrl: '/photo.jpeg',
-      seasonTickets: [],
-      phone: '+ 7 999 962-70-70',
-      email: 'lazarevsergei030290@gmail.com',
-      createdDate: formatDate(item.createdAt),
-      createdTime: formatTime(item.createdAt)
-    };
-  }
+    const _allSeasonTickets = _plansData.pages.flatMap(page => page.items);
+    setAllSeasonTickets(_allSeasonTickets);
 
-  const data = useMemo(() => {
-    if (!rawData?.pages) return [];
+    return _allSeasonTickets.map((seasonTicket: SeasonTicketPlan) => {
+      const endsIn = 12;
 
-    const _rawData = rawData.pages.flatMap(page => page.items);
-    setAllItems(_rawData);
-
-    return _rawData.map(normalizeFn);
-  }, [rawData]);
+      return {
+        id: seasonTicket.id,
+        name: seasonTicket.name,
+        passes: seasonTicket.passes,
+        price: formatPrice(seasonTicket.price),
+        endsIn: `${endsIn} ${pluralize(endsIn, ['месяц', 'месяца', 'месяцев'])}`,
+        description: seasonTicket.description
+      };
+    });
+  }, [_plansData]);
 
   const columns = useMemo(
     () => [
       columnHelper.display({
-        id: 'personalInfo',
-        header: 'Личные данные',
+        id: 'name',
+        header: 'Название',
         cell: info => (
-          <div className={styles.personalInfoContainer}>
-            <img src={info.row.original.photoUrl} alt="User Avatar" className={styles.avatar} />
-            <div className={styles.personalInfo}>
-              <div className={styles.name}>{info.row.original.name}</div>
-              <div className={styles.dateOfBirth}>{info.row.original.dateOfBirth}</div>
-            </div>
+          <div className={styles.nameContainer}>
+            <div className={styles.name}>{info.row.original.name}</div>
+            <div className={styles.description}>{info.row.original.description}</div>
           </div>
         ),
       }),
-      columnHelper.display({
-        id: 'seasonTicket',
-        header: 'Абонемент',
-        cell: () => (
-          <div className={styles.seasonTicket}>
-            <div className={styles.seasonTicketSeats}>10 из 20 занятий</div>
-            <div className={styles.seasonTicketExpiration}>До 11 ноября 2024</div>
-          </div>
-        ),
+      columnHelper.accessor('passes', {
+        header: 'Кол-во занятий',
+        cell: info => info.getValue(),
       }),
-      columnHelper.display({
-        id: 'contacts',
-        header: 'Контакты',
-        cell: (info) => (
-          <div className={styles.contacts}>
-            <div className={styles.contactsPhone}>{info.row.original.phone}</div>
-            <div className={styles.contactsEmail}>{info.row.original.email}</div>
-          </div>
-        ),
+      columnHelper.accessor('price', {
+        header: 'Цена',
+        cell: info => info.getValue() || 'N/A'
       }),
       columnHelper.accessor('id', {
         header: 'ID',
         cell: info => info.getValue(),
       }),
-      columnHelper.display({
-        id: 'created',
-        header: 'Дата регистрации',
-        cell: (info) => (
-          <div className={styles.created}>
-            <div className={styles.createdDate}>{info.row.original.createdDate}</div>
-            <div className={styles.createdTime}>{info.row.original.createdTime}</div>
-          </div>
-        ),
+      columnHelper.accessor('endsIn', {
+        header: 'Срок действия',
+        cell: info => info.getValue(),
       }),
       columnHelper.display({
         id: 'actions',
@@ -133,23 +103,23 @@ export function UsersTable({ className, handleEdit }: SessionsTableProps) {
             type="secondary"
             size="s"
             onClick={() => {
-              const user = allItems.find(user => user.id === info.row.original.id);
+              const plan = allSeasonTickets.find(plan => plan.id === info.row.original.id);
 
-              if (user && handleEdit) {
-                handleEdit(user);
+              if (plan && handleEdit) {
+                handleEdit(plan);
               }
             }}
           />
         ),
       }),
     ],
-    [handleEdit, allItems]
+    [handleEdit, allSeasonTickets]
   );
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
-    data,
+    data: plansData,
     columns,
     state: {
       sorting,
@@ -243,7 +213,7 @@ export function UsersTable({ className, handleEdit }: SessionsTableProps) {
         )}
 
         {/* End of list indicator */}
-        {!hasNextPage && data.length > 0 && (
+        {!hasNextPage && plansData.length > 0 && (
           <div className={styles.endOfList}>
             No more trainings to load
           </div>

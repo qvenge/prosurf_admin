@@ -1,22 +1,38 @@
 import { Header } from '@/shared/ui';
 import { UsersTable } from './components/UsersTable';
 import styles from './UsersPage.module.scss';
+import type { User } from '@/shared/api';
 import { SideModal } from '@/shared/ui';
 import { useState } from 'react';
 
 export function UsersPage() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [userData, setUserData] = useState<User | undefined>(undefined);
+
+  const handleOpen = (user: User) => {
+    setUserData(user);
+    setIsModalOpen(true);
+  };
+
+  const handleClose = () => {
+    setIsModalOpen(false);
+    setUserData(undefined);
+  };
 
   return (
     <>
-      <Header title={'Пользователи'}>
+      <Header title={'Абонементы'}>
       </Header>
       <div className={styles.page}>
-        <UsersTable className={styles.table} />
+        <UsersTable
+          className={styles.table}
+          handleEdit={handleOpen}
+        />
       </div>
-      {isModalOpen && <SideModal onClose={() => setIsModalOpen(false)}>
-        {/* Here will be the form to add a new training or edit existing one */}
-      </SideModal>}
+      {isModalOpen && (
+        <SideModal onClose={handleClose}>
+        </SideModal>
+      )}
     </>
   );
 }

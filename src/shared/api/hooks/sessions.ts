@@ -8,7 +8,8 @@ import type {
   SessionUpdateDto,
   SessionFilters,
   PaginatedResponse,
-  IdempotencyKey
+  IdempotencyKey,
+  SessionBulkDeleteDto
 } from '../types';
 
 // Query key factory for sessions
@@ -135,22 +136,49 @@ export const useUpdateSession = () => {
 // Cancel session mutation (ADMIN only)
 export const useCancelSession = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id: string) => sessionsClient.cancelSession(id),
     onSuccess: (cancelledSession, sessionId) => {
       // Update the specific session in cache
       queryClient.setQueryData(sessionsKeys.detail(sessionId), cancelledSession);
-      
+
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
-      queryClient.invalidateQueries({ 
-        predicate: (query) => 
+      queryClient.invalidateQueries({
+        predicate: (query) =>
           query.queryKey.includes('sessions') && query.queryKey.includes(cancelledSession.event.id)
       });
     },
     onError: (error) => {
       console.error('Failed to cancel session:', error);
+    },
+  });
+};
+
+// Bulk delete sessions mutation (ADMIN only)
+export const useBulkDeleteSessions = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      data,
+      idempotencyKey
+    }: {
+      data: SessionBulkDeleteDto;
+      idempotencyKey: IdempotencyKey;
+    }) => sessionsClient.bulkDeleteSessions(data, idempotencyKey),
+    onSuccess: () => {
+      // Invalidate sessions lists
+      queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
+
+      // Invalidate event sessions for all events that had sessions deleted
+      queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey.includes('sessions')
+      });
+    },
+    onError: (error) => {
+      console.error('Failed to bulk delete sessions:', error);
     },
   });
 };

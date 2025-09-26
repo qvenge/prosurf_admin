@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { TextInput, Select, Button, Textarea, AlternativeTabs, IconButton, ButtonContainer } from '@/shared/ui';
-import { useCreateEvent, useCreateEventSessions } from '@/shared/api';
-import type { EventCreateDto, SessionCreateDto } from '@/shared/api';
+import { useCreateEvent, useCreateEventSessions, useUpdateEvent, useBulkDeleteSessions, sessionsClient, sessionsKeys, eventsClient, eventsKeys } from '@/shared/api';
+import type { EventCreateDto, EventUpdateDto, SessionCreateDto } from '@/shared/api';
 import { PlusBold, TrashRegular } from '@/shared/ds/icons';
 import { Icon } from '@/shared/ui';
 import styles from './EventForm.module.scss';
@@ -42,7 +43,7 @@ const disciplineOptions = [
   { value: 'activity', label: 'Ивент' },
 ];
 
-export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
+export function EventForm({ onClose, eventId }: EventFormProps) {
   const [formData, setFormData] = useState<FormData>({
     discipline: disciplineOptions[0].value,
     title: '',
@@ -65,9 +66,104 @@ export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [selectedSessionId, setSelectedSessionId] = useState<string>(formData.sessions[0].id);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [existingSessions, setExistingSessions] = useState<string[]>([]);
 
+  const isEditMode = !!eventId;
+
+  // API hooks
   const createEventMutation = useCreateEvent();
   const createSessionsMutation = useCreateEventSessions();
+  const updateEventMutation = useUpdateEvent();
+  const bulkDeleteSessionsMutation = useBulkDeleteSessions();
+
+  // Fetch event data when in edit mode
+  const { data: eventData, isLoading: eventLoading } = useQuery({
+    queryKey: eventsKeys.detail(eventId || ''),
+    queryFn: () => eventsClient.getEventById(eventId || ''),
+    enabled: isEditMode,
+    staleTime: 10 * 60 * 1000,
+  });
+  const { data: sessionsData, isLoading: sessionsLoading } = useQuery({
+    queryKey: sessionsKeys.eventSessions(eventId || ''),
+    queryFn: () => sessionsClient.getEventSessions(eventId || ''),
+    enabled: isEditMode,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Initialize form with existing data when in edit mode
+  useEffect(() => {
+    if (isEditMode && eventData && sessionsData && !isInitialized) {
+      // Map discipline from labels
+      const discipline = eventData.labels?.find(label =>
+        disciplineOptions.some(option => option.value === label)
+      ) || disciplineOptions[0].value;
+
+      // Get price from first ticket
+      const price = eventData.tickets[0]?.full.price.amountMinor
+        ? (eventData.tickets[0].full.price.amountMinor / 100).toString()
+        : '';
+
+      // Extract description and whatToBring from description array
+      const descriptions = eventData.description || [];
+      const descriptionItem = descriptions.find(d => d.heading === 'Описание тренировки');
+      const whatToBringItem = descriptions.find(d => d.heading === 'Что с собой?');
+
+      // Group sessions by date and convert to form structure
+      const sessionsMap = new Map<string, SessionForm>();
+      sessionsData.items.forEach((session, index) => {
+        const sessionDate = new Date(session.startsAt);
+        const dateKey = sessionDate.toISOString().split('T')[0];
+        const startTime = sessionDate.toTimeString().slice(0, 5);
+
+        if (sessionsMap.has(dateKey)) {
+          sessionsMap.get(dateKey)!.timeSlots.push({
+            id: `time-${session.id}`,
+            startTime,
+          });
+        } else {
+          const duration = session.endsAt
+            ? ((new Date(session.endsAt).getTime() - sessionDate.getTime()) / (1000 * 60 * 60)).toString()
+            : '1.5';
+
+          sessionsMap.set(dateKey, {
+            id: `session-${dateKey}-${index}`,
+            date: dateKey,
+            timeSlots: [{
+              id: `time-${session.id}`,
+              startTime,
+            }],
+            duration,
+          });
+        }
+      });
+
+      const formSessions = Array.from(sessionsMap.values());
+
+      // Store existing session IDs for comparison later
+      setExistingSessions(sessionsData.items.map(s => s.id));
+
+      setFormData({
+        discipline,
+        title: eventData.title,
+        location: eventData.location || '',
+        price,
+        capacity: eventData.capacity?.toString() || '',
+        sessions: formSessions.length > 0 ? formSessions : [{
+          id: '1',
+          date: '',
+          timeSlots: [{ id: 'time-1', startTime: '' }],
+          duration: '1.5',
+        }],
+        photos: [],
+        description: descriptionItem?.body || '',
+        whatToBring: whatToBringItem?.body || '',
+      });
+
+      setSelectedSessionId(formSessions[0]?.id || '1');
+      setIsInitialized(true);
+    }
+  }, [eventData, sessionsData, isEditMode, isInitialized]);
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -206,74 +302,160 @@ export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
       // Convert price to minor units (kopecks)
       const priceInKopecks = Math.round(parseFloat(formData.price) * 100);
 
-      // Create event data
-      const eventData: EventCreateDto = {
-        title: formData.title,
-        description: [
-          {
-            heading: 'Описание тренировки',
-            body: formData.description,
-          },
-          {
-            heading: 'Что с собой?',
-            body: formData.whatToBring,
-          },
-        ],
-        location: formData.location,
-        tickets: [
-          {
-            name: 'Разовое посещение',
-            prepayment: {
-              price: {
-                currency: 'RUB',
-                amountMinor: priceInKopecks,
-              },
-              description: 'Предоплата',
+      if (isEditMode) {
+        // Update mode
+        const eventUpdateData: EventUpdateDto = {
+          title: formData.title,
+          description: [
+            {
+              heading: 'Описание тренировки',
+              body: formData.description,
             },
-            full: {
-              price: {
-                currency: 'RUB',
-                amountMinor: priceInKopecks,
-              },
-              description: 'Полная стоимость',
+            {
+              heading: 'Что с собой?',
+              body: formData.whatToBring,
             },
-          },
-        ],
-        labels: [formData.discipline],
-        capacity: parseInt(formData.capacity),
-      };
+          ],
+          location: formData.location,
+          tickets: [
+            {
+              name: 'Разовое посещение',
+              prepayment: {
+                price: {
+                  currency: 'RUB',
+                  amountMinor: priceInKopecks,
+                },
+                description: 'Предоплата',
+              },
+              full: {
+                price: {
+                  currency: 'RUB',
+                  amountMinor: priceInKopecks,
+                },
+                description: 'Полная стоимость',
+              },
+            },
+          ],
+          labels: [formData.discipline],
+          capacity: parseInt(formData.capacity),
+        };
 
-      // Create event
-      const createdEvent = await createEventMutation.mutateAsync(eventData);
+        // Update event
+        await updateEventMutation.mutateAsync({ id: eventId!, data: eventUpdateData });
 
-      // Create sessions - flatten timeSlots into separate sessions
-      const sessionsData: SessionCreateDto[] = [];
-      formData.sessions.forEach(session => {
-        session.timeSlots.forEach(timeSlot => {
-          const startDateTime = new Date(`${session.date}T${timeSlot.startTime}:00`);
-          const endDateTime = new Date(startDateTime);
-          endDateTime.setHours(endDateTime.getHours() + parseFloat(session.duration));
+        // Handle sessions update
+        // First, delete all existing sessions
+        if (existingSessions.length > 0) {
+          await bulkDeleteSessionsMutation.mutateAsync({
+            data: { ids: existingSessions },
+            idempotencyKey: `delete-sessions-${eventId}-${Date.now()}`,
+          });
+        }
 
-          sessionsData.push({
-            startsAt: startDateTime.toISOString(),
-            endsAt: endDateTime.toISOString()
+        // Create new sessions - flatten timeSlots into separate sessions
+        const sessionsData: SessionCreateDto[] = [];
+        formData.sessions.forEach(session => {
+          session.timeSlots.forEach(timeSlot => {
+            const startDateTime = new Date(`${session.date}T${timeSlot.startTime}:00`);
+            const endDateTime = new Date(startDateTime);
+            endDateTime.setHours(endDateTime.getHours() + parseFloat(session.duration));
+
+            sessionsData.push({
+              startsAt: startDateTime.toISOString(),
+              endsAt: endDateTime.toISOString()
+            });
           });
         });
-      });
 
-      await createSessionsMutation.mutateAsync({
-        eventId: createdEvent.id,
-        data: sessionsData,
-        idempotencyKey: `event-${createdEvent.id}-${Date.now()}`,
-      });
+        if (sessionsData.length > 0) {
+          await createSessionsMutation.mutateAsync({
+            eventId: eventId!,
+            data: sessionsData,
+            idempotencyKey: `update-sessions-${eventId}-${Date.now()}`,
+          });
+        }
+      } else {
+        // Create mode
+        const eventCreateData: EventCreateDto = {
+          title: formData.title,
+          description: [
+            {
+              heading: 'Описание тренировки',
+              body: formData.description,
+            },
+            {
+              heading: 'Что с собой?',
+              body: formData.whatToBring,
+            },
+          ],
+          location: formData.location,
+          tickets: [
+            {
+              name: 'Разовое посещение',
+              prepayment: {
+                price: {
+                  currency: 'RUB',
+                  amountMinor: priceInKopecks,
+                },
+                description: 'Предоплата',
+              },
+              full: {
+                price: {
+                  currency: 'RUB',
+                  amountMinor: priceInKopecks,
+                },
+                description: 'Полная стоимость',
+              },
+            },
+          ],
+          labels: [formData.discipline],
+          capacity: parseInt(formData.capacity),
+        };
+
+        // Create event
+        const createdEvent = await createEventMutation.mutateAsync(eventCreateData);
+
+        // Create sessions - flatten timeSlots into separate sessions
+        const sessionsData: SessionCreateDto[] = [];
+        formData.sessions.forEach(session => {
+          session.timeSlots.forEach(timeSlot => {
+            const startDateTime = new Date(`${session.date}T${timeSlot.startTime}:00`);
+            const endDateTime = new Date(startDateTime);
+            endDateTime.setHours(endDateTime.getHours() + parseFloat(session.duration));
+
+            sessionsData.push({
+              startsAt: startDateTime.toISOString(),
+              endsAt: endDateTime.toISOString()
+            });
+          });
+        });
+
+        await createSessionsMutation.mutateAsync({
+          eventId: createdEvent.id,
+          data: sessionsData,
+          idempotencyKey: `event-${createdEvent.id}-${Date.now()}`,
+        });
+      }
 
       onClose();
     } catch (error) {
-      console.error('Failed to create event:', error);
+      console.error(`Failed to ${isEditMode ? 'update' : 'create'} event:`, error);
     }
   };
 
-  const isLoading = createEventMutation.isPending || createSessionsMutation.isPending;
+  const isLoading = createEventMutation.isPending || createSessionsMutation.isPending || updateEventMutation.isPending || bulkDeleteSessionsMutation.isPending;
+  const isInitialLoading = isEditMode && (eventLoading || sessionsLoading);
+
+  // Show loading state while fetching data in edit mode
+  if (isInitialLoading) {
+    return (
+      <div className={styles.root}>
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          Загрузка данных события...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.root}>
@@ -478,7 +660,7 @@ export function EventForm({ onClose }: Omit<EventFormProps, 'eventId'>) {
           onClick={handleSubmit}
           disabled={isLoading}
         >
-          {isLoading ? 'Сохранение...' : 'Добавить'}
+          {isLoading ? 'Сохранение...' : (isEditMode ? 'Сохранить' : 'Добавить')}
         </Button>
         {/* <Button
           type="secondary"

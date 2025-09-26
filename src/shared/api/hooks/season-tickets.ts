@@ -1,12 +1,14 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { seasonTicketsClient } from '../clients/season-tickets';
 import type { 
   SeasonTicketPlan, 
   SeasonTicketPlanUpdateDto,
+  SeasonTicketPlanCreateDto,
   PaymentMethodRequest,
   SeasonTicketPlanFilters,
   SeasonTicketFilters,
-  IdempotencyKey 
+  PaginatedResponse,
+  IdempotencyKey,
 } from '../types';
 
 export const seasonTicketsKeys = {
@@ -25,11 +27,21 @@ export const useSeasonTicketPlans = (filters?: SeasonTicketPlanFilters) => {
   });
 };
 
+export const useSeasonTicketPlansInfinite = (filters?: Omit<SeasonTicketPlanFilters, 'cursor'>) => {
+  return useInfiniteQuery({
+    queryKey: seasonTicketsKeys.plansList(filters),
+    queryFn: ({ pageParam }) => seasonTicketsClient.getSeasonTicketPlans({ ...filters, cursor: pageParam }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage: PaginatedResponse<SeasonTicketPlan>) => lastPage.next,
+    staleTime: 10 * 60 * 1000,
+  });
+};
+
 export const useCreateSeasonTicketPlan = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (data: SeasonTicketPlan) => seasonTicketsClient.createSeasonTicketPlan(data),
+    mutationFn: (data: SeasonTicketPlanCreateDto) => seasonTicketsClient.createSeasonTicketPlan(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: seasonTicketsKeys.plans() });
     },

@@ -404,6 +404,7 @@ export const SeasonTicketPlanCreateDtoSchema = z.object({
   price: PriceSchema,
   passes: z.number().int().min(1),
   eventIds: z.array(z.string()).optional(),
+  expiresIn: z.number().int().min(1),
 });
 
 export const SeasonTicketPlanUpdateDtoSchema = z.object({
@@ -412,6 +413,7 @@ export const SeasonTicketPlanUpdateDtoSchema = z.object({
   price: PriceSchema.optional(),
   passes: z.number().int().min(1).optional(),
   eventIds: z.array(z.string()).optional(),
+  expiresIn: z.number().int().min(1).optional(),
 });
 
 export const SeasonTicketStatusSchema = z.enum(['ACTIVE', 'EXPIRED', 'CANCELLED']);
