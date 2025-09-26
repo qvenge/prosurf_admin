@@ -97,8 +97,14 @@ export function convertEventDataToFormData(
   ) || categories?.[0].value;
 
   // Get price from first ticket
-  const price = eventData.tickets[0]?.full.price.amountMinor
-    ? (eventData.tickets[0].full.price.amountMinor / 100).toString()
+  const ticketWithPrice = eventData.tickets?.find((ticket) => ticket.full.price.amountMinor > 0);
+
+  const prepayment = ticketWithPrice?.prepayment?.price.amountMinor 
+    ? (ticketWithPrice.prepayment?.price.amountMinor / 100).toString()
+    : '';
+
+  const price = ticketWithPrice
+    ? (ticketWithPrice.full.price.amountMinor / 100).toString()
     : '';
 
   // Extract description and whatToBring from description array
@@ -141,6 +147,7 @@ export function convertEventDataToFormData(
     category,
     title: eventData.title,
     location: eventData.location || '',
+    prepayment,
     price,
     capacity: eventData.capacity?.toString() || '',
     sessions: formSessions.length > 0 ? formSessions : [{

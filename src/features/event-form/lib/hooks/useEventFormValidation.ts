@@ -27,6 +27,14 @@ export function useEventFormValidation() {
       newErrors.price = 'Цена должна быть числом';
     }
 
+    if (
+      !isNaN(Number(formData.price.trim())) &&
+      !isNaN(Number(formData.prepayment.trim())) &&
+      Number(formData.price.trim()) < Number(formData.prepayment.trim())
+    ) {
+      newErrors.prepayment = 'Предоплата не может быть больше цены';
+    }
+
     if (!formData.capacity.trim()) {
       newErrors.capacity = 'Количество мест обязательно';
     } else if (isNaN(Number(formData.capacity)) || Number(formData.capacity) <= 0) {

@@ -36,24 +36,26 @@ export function EventFormSessions({
 
   return (
     <>
-      <AlternativeTabs
-        className={styles.dateTabs}
-        items={sessions.map((session, i) => ({
-          label: (
-            <>
-              {session.date ? formatDateForDisplay(session.date) : `${rangeMode ? 'Даты' : 'Дата'} ${i + 1}`}
-              {sessions.length > 1 && (
-                <ButtonContainer onClick={() => onRemoveSession(session.id)}>
-                  <Icon className={styles.removeIcon} src={TrashRegular} width={20} height={20} />
-                </ButtonContainer>
-              )}
-            </>
-          ),
-          value: session.id
-        }))}
-        value={selectedSessionId}
-        onChange={onSelectedSessionChange}
-      />
+      {!rangeMode && (
+        <AlternativeTabs
+          className={styles.dateTabs}
+          items={sessions.map((session, i) => ({
+            label: (
+              <>
+                {session.date ? formatDateForDisplay(session.date) : `${rangeMode ? 'Даты' : 'Дата'} ${i + 1}`}
+                {sessions.length > 1 && (
+                  <ButtonContainer onClick={() => onRemoveSession(session.id)}>
+                    <Icon className={styles.removeIcon} src={TrashRegular} width={20} height={20} />
+                  </ButtonContainer>
+                )}
+              </>
+            ),
+            value: session.id
+          }))}
+          value={selectedSessionId}
+          onChange={onSelectedSessionChange}
+        />
+      )}
 
       <div className={styles.sessionsSection}>
         {selectedSession && (
@@ -70,16 +72,18 @@ export function EventFormSessions({
         )}
       </div>
 
-      <Button
-        type="secondary"
-        size="l"
-        streched={true}
-        onClick={onAddSession}
-        className={styles.addSessionButton}
-      >
-        <Icon src={PlusBold} width={20} height={20} />
-        Добавить ещё дату
-      </Button>
+      {!rangeMode && (
+        <Button
+          type="secondary"
+          size="l"
+          streched={true}
+          onClick={onAddSession}
+          className={styles.addSessionButton}
+        >
+          <Icon src={PlusBold} width={20} height={20} />
+          Добавить ещё дату
+        </Button>
+      )}
     </>
   );
 }

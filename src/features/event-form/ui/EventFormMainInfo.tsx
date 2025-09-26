@@ -61,10 +61,10 @@ export function EventFormMainInfo({
         type="number"
         step="1"
         min="0"
-        value={formData.price}
+        value={formData.prepayment}
         onChange={(e) => handleInputChange('prepayment', e.target.value)}
-        error={!!errors.price}
-        hint={errors.price}
+        error={!!errors.prepayment}
+        hint={errors.prepayment}
       />
 
       <TextInput

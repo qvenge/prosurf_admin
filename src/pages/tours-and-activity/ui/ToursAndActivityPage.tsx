@@ -65,7 +65,11 @@ export function ToursAndActivityPage() {
       </div>
       {isModalOpen && (
         <SideModal onClose={handleClose}>
-          <EventForm onClose={handleClose} eventId={editingEventId} />
+          <EventForm
+            eventId={editingEventId}
+            onClose={handleClose}
+            rangeMode={selectedEventType === 'tour'}
+          />
         </SideModal>
       )}
     </>
