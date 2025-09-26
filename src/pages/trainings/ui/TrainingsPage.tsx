@@ -1,6 +1,6 @@
 import { Header } from '@/shared/ui';
-import { TrainingsTable } from './components/TrainingsTable';
-import { EventForm } from '@/features/events';
+import { EventsTable } from '@/features/events-table';
+import { EventForm } from '@/features/event-form';
 import styles from './TrainingsPage.module.scss';
 import { SegmentedButtons, Button, Icon, SideModal } from '@/shared/ui';
 import { PlusBold } from '@/shared/ds/icons';
@@ -56,7 +56,7 @@ export function TrainingsPage() {
         </Button>
       </Header>
       <div className={styles.page}>
-        <TrainingsTable
+        <EventsTable
           className={styles.table}
           eventType={selectedEventType}
           handleEdit={handleEdit}
