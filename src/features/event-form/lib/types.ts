@@ -6,6 +6,7 @@ export interface TimeSlot {
 export interface SessionForm {
   id: string;
   date: string;
+  endDate?: string; // For range mode
   timeSlots: TimeSlot[];
   duration: string;
 }

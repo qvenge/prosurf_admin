@@ -45,20 +45,32 @@ export function convertFormDataToEventUpdateDto(formData: FormData): EventUpdate
   return convertFormDataToEventCreateDto(formData) as EventUpdateDto;
 }
 
-export function convertSessionsToSessionCreateDtos(sessions: SessionForm[]): SessionCreateDto[] {
+export function convertSessionsToSessionCreateDtos(sessions: SessionForm[], rangeMode: boolean = false): SessionCreateDto[] {
   const sessionsData: SessionCreateDto[] = [];
 
   sessions.forEach(session => {
-    session.timeSlots.forEach(timeSlot => {
-      const startDateTime = new Date(`${session.date}T${timeSlot.startTime}:00`);
-      const endDateTime = new Date(startDateTime);
-      endDateTime.setHours(endDateTime.getHours() + parseFloat(session.duration));
+    if (rangeMode && session.endDate) {
+      // For range mode, create a single session spanning from start to end date with 00:00 times
+      const startDateTime = new Date(`${session.date}T00:00:00`);
+      const endDateTime = new Date(`${session.endDate}T23:59:59`);
 
       sessionsData.push({
         startsAt: startDateTime.toISOString(),
         endsAt: endDateTime.toISOString()
       });
-    });
+    } else {
+      // For normal mode, create sessions based on time slots
+      session.timeSlots.forEach(timeSlot => {
+        const startDateTime = new Date(`${session.date}T${timeSlot.startTime}:00`);
+        const endDateTime = new Date(startDateTime);
+        endDateTime.setHours(endDateTime.getHours() + parseFloat(session.duration));
+
+        sessionsData.push({
+          startsAt: startDateTime.toISOString(),
+          endsAt: endDateTime.toISOString()
+        });
+      });
+    }
   });
 
   return sessionsData;

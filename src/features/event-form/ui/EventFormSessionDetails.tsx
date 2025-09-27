@@ -43,10 +43,10 @@ export function EventFormSessionDetails() {
         <TextInput
           label='Дата окончания'
           type="date"
-          value={session.date}
-          onChange={(e) => handleSessionChange(session.id, 'date', e.target.value)}
-          error={!!errors[`session_${session.id}_date`]}
-          hint={errors[`session_${session.id}_date`]}
+          value={session.endDate || ''}
+          onChange={(e) => handleSessionChange(session.id, 'endDate', e.target.value)}
+          error={!!errors[`session_${session.id}_endDate`]}
+          hint={errors[`session_${session.id}_endDate`]}
         />
       ) : <EventFormTimeSlots />}
     </div>

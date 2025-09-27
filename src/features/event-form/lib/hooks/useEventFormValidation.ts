@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { FormData, ValidationErrors } from '../types';
 
-export function useEventFormValidation() {
+export function useEventFormValidation(rangeMode: boolean = false) {
   const [errors, setErrors] = useState<ValidationErrors>({});
 
   const clearError = (field: string) => {
@@ -45,11 +45,20 @@ export function useEventFormValidation() {
       if (!session.date) {
         newErrors[`session_${session.id}_date`] = 'Дата обязательна';
       }
-      session.timeSlots.forEach((timeSlot) => {
-        if (!timeSlot.startTime) {
-          newErrors[`session_${session.id}_timeSlot_${timeSlot.id}_time`] = 'Время обязательно';
+
+      if (rangeMode) {
+        if (!session.endDate) {
+          newErrors[`session_${session.id}_endDate`] = 'Дата окончания обязательна';
+        } else if (session.date && session.endDate && new Date(session.endDate) < new Date(session.date)) {
+          newErrors[`session_${session.id}_endDate`] = 'Дата окончания не может быть раньше даты начала';
         }
-      });
+      } else {
+        session.timeSlots.forEach((timeSlot) => {
+          if (!timeSlot.startTime) {
+            newErrors[`session_${session.id}_timeSlot_${timeSlot.id}_time`] = 'Время обязательно';
+          }
+        });
+      }
     });
 
     setErrors(newErrors);

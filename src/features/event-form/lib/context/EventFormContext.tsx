@@ -79,8 +79,8 @@ export function EventFormProvider({
     removeSession,
   } = useEventFormState();
 
-  const { errors, clearError, validateForm } = useEventFormValidation();
-  const { createEvent, updateEvent, isLoading } = useEventFormApi();
+  const { errors, clearError, validateForm } = useEventFormValidation(rangeMode);
+  const { createEvent, updateEvent, isLoading } = useEventFormApi(rangeMode);
 
   useEffect(() => {
     const initialData = initializeFormData();

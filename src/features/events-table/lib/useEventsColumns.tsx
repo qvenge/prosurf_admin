@@ -4,7 +4,7 @@ import { PencilSimpleBold } from '@/shared/ds/icons';
 import { IconButton } from '@/shared/ui';
 import { EventSessionDates } from '../ui';
 import { type EventRowData } from './useEventsData';
-import styles from '../ui/EventSessionDates.module.scss'
+import styles from '../ui/EventsTable.module.scss'
 
 const columnHelper = createColumnHelper<EventRowData>();
 

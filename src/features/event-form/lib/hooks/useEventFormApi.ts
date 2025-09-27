@@ -2,7 +2,7 @@ import { useCreateEvent, useCreateEventSessions, useUpdateEvent, useBulkDeleteSe
 import type { FormData } from '../types';
 import { convertFormDataToEventCreateDto, convertFormDataToEventUpdateDto, convertSessionsToSessionCreateDtos } from '../utils';
 
-export function useEventFormApi() {
+export function useEventFormApi(rangeMode: boolean = false) {
   const createEventMutation = useCreateEvent();
   const createSessionsMutation = useCreateEventSessions();
   const updateEventMutation = useUpdateEvent();
@@ -12,7 +12,7 @@ export function useEventFormApi() {
     const eventCreateData = convertFormDataToEventCreateDto(formData);
     const createdEvent = await createEventMutation.mutateAsync(eventCreateData);
 
-    const sessionsData = convertSessionsToSessionCreateDtos(formData.sessions);
+    const sessionsData = convertSessionsToSessionCreateDtos(formData.sessions, rangeMode);
     await createSessionsMutation.mutateAsync({
       eventId: createdEvent.id,
       data: sessionsData,
@@ -31,7 +31,7 @@ export function useEventFormApi() {
       });
     }
 
-    const sessionsData = convertSessionsToSessionCreateDtos(formData.sessions);
+    const sessionsData = convertSessionsToSessionCreateDtos(formData.sessions, rangeMode);
     if (sessionsData.length > 0) {
       await createSessionsMutation.mutateAsync({
         eventId,
