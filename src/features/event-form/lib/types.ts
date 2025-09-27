@@ -35,6 +35,7 @@ export interface EventFormProps {
   eventId?: string; // For edit mode
   rangeMode?: boolean;
   categories?: Category[];
+  labels?: string[];
 }
 
 export interface ValidationErrors {

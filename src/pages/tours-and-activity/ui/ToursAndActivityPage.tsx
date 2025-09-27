@@ -69,6 +69,7 @@ export function ToursAndActivityPage() {
             eventId={editingEventId}
             onClose={handleClose}
             rangeMode={selectedEventType === 'tour'}
+            labels={[selectedEventType]}
           />
         </SideModal>
       )}

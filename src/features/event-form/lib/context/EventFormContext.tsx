@@ -39,6 +39,7 @@ interface EventFormContextValue {
   // Configuration
   rangeMode: boolean;
   categories?: Category[];
+  labels?: string[];
 
   // Actions
   handleSubmit: () => Promise<void>;
@@ -54,6 +55,7 @@ interface EventFormProviderProps {
   eventId?: string;
   rangeMode?: boolean;
   categories?: Category[];
+  labels?: string[];
 }
 
 export function EventFormProvider({
@@ -61,7 +63,8 @@ export function EventFormProvider({
   onClose,
   eventId,
   rangeMode = false,
-  categories
+  categories,
+  labels
 }: EventFormProviderProps) {
   const { isEditMode, existingSessions, isInitialLoading, initializeFormData } = useEventFormInitialization(eventId);
 
@@ -80,7 +83,7 @@ export function EventFormProvider({
   } = useEventFormState();
 
   const { errors, clearError, validateForm } = useEventFormValidation(rangeMode);
-  const { createEvent, updateEvent, isLoading } = useEventFormApi(rangeMode);
+  const { createEvent, updateEvent, isLoading } = useEventFormApi(rangeMode, labels);
 
   useEffect(() => {
     const initialData = initializeFormData();
@@ -143,6 +146,7 @@ export function EventFormProvider({
     // Configuration
     rangeMode,
     categories,
+    labels,
 
     // Actions
     handleSubmit,

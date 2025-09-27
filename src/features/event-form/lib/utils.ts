@@ -1,7 +1,7 @@
 import type { EventCreateDto, EventUpdateDto, SessionCreateDto, Event, SessionCompact } from '@/shared/api';
 import type { Category, FormData, SessionForm } from './types';
 
-export function convertFormDataToEventCreateDto(formData: FormData): EventCreateDto {
+export function convertFormDataToEventCreateDto(formData: FormData, labels?: string[]): EventCreateDto {
   const priceInKopecks = Math.round(parseFloat(formData.price) * 100);
 
   return {
@@ -36,13 +36,13 @@ export function convertFormDataToEventCreateDto(formData: FormData): EventCreate
         },
       },
     ],
-    labels: formData.category ? [formData.category] : undefined,
+    labels: labels || (formData.category ? [formData.category] : undefined),
     capacity: parseInt(formData.capacity),
   };
 }
 
-export function convertFormDataToEventUpdateDto(formData: FormData): EventUpdateDto {
-  return convertFormDataToEventCreateDto(formData) as EventUpdateDto;
+export function convertFormDataToEventUpdateDto(formData: FormData, labels?: string[]): EventUpdateDto {
+  return convertFormDataToEventCreateDto(formData, labels) as EventUpdateDto;
 }
 
 export function convertSessionsToSessionCreateDtos(sessions: SessionForm[], rangeMode: boolean = false): SessionCreateDto[] {

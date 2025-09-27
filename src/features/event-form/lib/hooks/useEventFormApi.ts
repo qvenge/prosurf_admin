@@ -2,14 +2,14 @@ import { useCreateEvent, useCreateEventSessions, useUpdateEvent, useBulkDeleteSe
 import type { FormData } from '../types';
 import { convertFormDataToEventCreateDto, convertFormDataToEventUpdateDto, convertSessionsToSessionCreateDtos } from '../utils';
 
-export function useEventFormApi(rangeMode: boolean = false) {
+export function useEventFormApi(rangeMode: boolean = false, labels?: string[]) {
   const createEventMutation = useCreateEvent();
   const createSessionsMutation = useCreateEventSessions();
   const updateEventMutation = useUpdateEvent();
   const bulkDeleteSessionsMutation = useBulkDeleteSessions();
 
   const createEvent = async (formData: FormData) => {
-    const eventCreateData = convertFormDataToEventCreateDto(formData);
+    const eventCreateData = convertFormDataToEventCreateDto(formData, labels);
     const createdEvent = await createEventMutation.mutateAsync(eventCreateData);
 
     const sessionsData = convertSessionsToSessionCreateDtos(formData.sessions, rangeMode);
@@ -21,7 +21,7 @@ export function useEventFormApi(rangeMode: boolean = false) {
   };
 
   const updateEvent = async (eventId: string, formData: FormData, existingSessionIds: string[]) => {
-    const eventUpdateData = convertFormDataToEventUpdateDto(formData);
+    const eventUpdateData = convertFormDataToEventUpdateDto(formData, labels);
     await updateEventMutation.mutateAsync({ id: eventId, data: eventUpdateData });
 
     if (existingSessionIds.length > 0) {

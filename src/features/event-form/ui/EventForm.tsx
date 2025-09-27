@@ -31,13 +31,14 @@ function EventFormContent() {
   );
 }
 
-export function EventForm({ onClose, eventId, rangeMode = false, categories }: EventFormProps) {
+export function EventForm({ onClose, eventId, rangeMode = false, categories, labels }: EventFormProps) {
   return (
     <EventFormProvider
       onClose={onClose}
       eventId={eventId}
       rangeMode={rangeMode}
       categories={categories}
+      labels={labels}
     >
       <EventFormContent />
     </EventFormProvider>
