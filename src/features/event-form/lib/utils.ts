@@ -1,8 +1,10 @@
 import type { EventCreateDto, EventUpdateDto, SessionCreateDto, Event, SessionCompact } from '@/shared/api';
 import type { Category, FormData, SessionForm } from './types';
 
-export function convertFormDataToEventCreateDto(formData: FormData, labels?: string[]): EventCreateDto {
+export function convertFormDataToEventCreateDto(formData: FormData, labels: string[] = []): EventCreateDto {
   const priceInKopecks = Math.round(parseFloat(formData.price) * 100);
+  const prepaymentInKopecks = formData.prepayment
+    ? Math.round(parseFloat(formData.prepayment) * 100) : null;
 
   return {
     title: formData.title,
@@ -20,13 +22,13 @@ export function convertFormDataToEventCreateDto(formData: FormData, labels?: str
     tickets: [
       {
         name: 'Разовое посещение',
-        prepayment: {
+        prepayment: prepaymentInKopecks ? {
           price: {
             currency: 'RUB',
-            amountMinor: priceInKopecks,
+            amountMinor: prepaymentInKopecks,
           },
           description: 'Предоплата',
-        },
+        } : undefined,
         full: {
           price: {
             currency: 'RUB',
@@ -36,7 +38,7 @@ export function convertFormDataToEventCreateDto(formData: FormData, labels?: str
         },
       },
     ],
-    labels: labels || (formData.category ? [formData.category] : undefined),
+    labels: [...labels, formData.category].filter((label?: string): label is string => label != null && typeof label === 'string'),
     capacity: parseInt(formData.capacity),
   };
 }
@@ -51,8 +53,8 @@ export function convertSessionsToSessionCreateDtos(sessions: SessionForm[], rang
   sessions.forEach(session => {
     if (rangeMode && session.endDate) {
       // For range mode, create a single session spanning from start to end date with 00:00 times
-      const startDateTime = new Date(`${session.date}T00:00:00`);
-      const endDateTime = new Date(`${session.endDate}T23:59:59`);
+      const startDateTime = new Date(`${session.date}T00:00:00Z`);
+      const endDateTime = new Date(`${session.endDate}T23:59:59Z`);
 
       sessionsData.push({
         startsAt: startDateTime.toISOString(),
@@ -61,7 +63,7 @@ export function convertSessionsToSessionCreateDtos(sessions: SessionForm[], rang
     } else {
       // For normal mode, create sessions based on time slots
       session.timeSlots.forEach(timeSlot => {
-        const startDateTime = new Date(`${session.date}T${timeSlot.startTime}:00`);
+        const startDateTime = new Date(`${session.date}T${timeSlot.startTime}:00Z`);
         const endDateTime = new Date(startDateTime);
         endDateTime.setHours(endDateTime.getHours() + parseFloat(session.duration));
 
@@ -127,29 +129,42 @@ export function convertEventDataToFormData(
   // Group sessions by date and convert to form structure
   const sessionsMap = new Map<string, SessionForm>();
   sessionsData.items.forEach((session, index: number) => {
-    const sessionDate = new Date(session.startsAt);
-    const dateKey = sessionDate.toISOString().split('T')[0];
-    const startTime = sessionDate.toTimeString().slice(0, 5);
+    const sessionStartDate = new Date(session.startsAt);
+    const sessionEndDate = session.endsAt ? new Date(session.endsAt) : null;
+    const startDateKey = sessionStartDate.toISOString().split('T')[0];
+    const endDateKey = sessionEndDate ? sessionEndDate.toISOString().split('T')[0] : startDateKey;
+    const startTime = sessionStartDate.toTimeString().slice(0, 5);
 
-    if (sessionsMap.has(dateKey)) {
-      sessionsMap.get(dateKey)!.timeSlots.push({
+    // Check if this is a range session (spans multiple days)
+    const isRangeSession = startDateKey !== endDateKey;
+
+    if (sessionsMap.has(startDateKey) && !isRangeSession) {
+      // Add to existing single-day session
+      sessionsMap.get(startDateKey)!.timeSlots.push({
         id: `time-${session.id}`,
         startTime,
       });
     } else {
       const duration = session.endsAt
-        ? ((new Date(session.endsAt).getTime() - sessionDate.getTime()) / (1000 * 60 * 60)).toString()
+        ? ((sessionEndDate!.getTime() - sessionStartDate.getTime()) / (1000 * 60 * 60)).toString()
         : '1.5';
 
-      sessionsMap.set(dateKey, {
-        id: `session-${dateKey}-${index}`,
-        date: dateKey,
+      const sessionForm: SessionForm = {
+        id: `session-${startDateKey}-${index}`,
+        date: startDateKey,
         timeSlots: [{
           id: `time-${session.id}`,
           startTime,
         }],
         duration,
-      });
+      };
+
+      // Add endDate for range sessions
+      if (isRangeSession) {
+        sessionForm.endDate = endDateKey;
+      }
+
+      sessionsMap.set(startDateKey, sessionForm);
     }
   });
 

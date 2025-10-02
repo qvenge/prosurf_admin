@@ -2559,17 +2559,21 @@ paths:
         name: sessionId
         schema:
           type: string
-        description: Фильтр по ID сессии. Доступно только ADMIN для получения всех бронирований конкретной сессии.
+        description: Фильтр по ID сессии. Обычные пользователи видят только свои бронирования для данной сессии. ADMIN видит все бронирования сессии.
       - in: query
         name: status
+        style: form
+        explode: false
         schema:
-          type: string
-          enum:
-          - HOLD
-          - CONFIRMED
-          - CANCELLED
-          - EXPIRED
-        description: Фильтр по статусу бронирования. Доступно только ADMIN.
+          type: array
+          items:
+            type: string
+            enum:
+            - HOLD
+            - CONFIRMED
+            - CANCELLED
+            - EXPIRED
+        description: Фильтр по статусам бронирования (можно указать несколько через запятую, например status=HOLD,CONFIRMED).
       - in: query
         name: bookingType
         schema:
@@ -2591,7 +2595,7 @@ paths:
         schema:
           type: boolean
           default: false
-        description: Включить полную информацию о сессии в ответ. Доступно только ADMIN.
+        description: Включить полную информацию о сессии в ответ.
       - in: query
         name: includePaymentInfo
         schema:
@@ -2604,6 +2608,15 @@ paths:
           type: boolean
           default: false
         description: Включить контактные данные гостей в ответ. Доступно только ADMIN.
+      - $ref: '#/components/parameters/LabelsAnyParam'
+      - $ref: '#/components/parameters/LabelsAllParam'
+      - $ref: '#/components/parameters/LabelsNoneParam'
+      - $ref: '#/components/parameters/AttrEqParam'
+      - $ref: '#/components/parameters/AttrInParam'
+      - $ref: '#/components/parameters/AttrGteParam'
+      - $ref: '#/components/parameters/AttrLteParam'
+      - $ref: '#/components/parameters/AttrBoolParam'
+      - $ref: '#/components/parameters/AttrExistsParam'
       - $ref: '#/components/parameters/CursorParam'
       - $ref: '#/components/parameters/LimitParam'
       responses:

@@ -29,7 +29,7 @@ export const RoleSchema = z.enum(['USER', 'ADMIN']);
 
 export const UserSchema = z.object({
   id: z.string(),
-  telegramId: z.number().int().nullable(),
+  telegramId: z.string().nullable(),
   phone: z.string().nullable(),
   firstName: z.string().nullable(),
   lastName: z.string().nullable(),
@@ -65,19 +65,19 @@ export const EventDescriptionSchema = z.object({
 
 export const TicketPriceSchema = z.object({
   price: PriceSchema,
-  description: z.string().nullable().optional(),
+  description: z.string().nullable(),
 });
 
 export const EventTicketSchema = z.object({
   id: z.string(),
   name: z.string(),
-  prepayment: TicketPriceSchema.nullable(),
+  prepayment: TicketPriceSchema.nullable().optional(),
   full: TicketPriceSchema,
 });
 
 export const EventTicketCreateSchema = z.object({
   name: z.string(),
-  prepayment: TicketPriceSchema,
+  prepayment: TicketPriceSchema.nullable().optional(),
   full: TicketPriceSchema,
 });
 
@@ -414,6 +414,15 @@ export const SeasonTicketPlanUpdateDtoSchema = z.object({
   passes: z.number().int().min(1).optional(),
   eventIds: z.array(z.string()).optional(),
   expiresIn: z.number().int().min(1).optional(),
+  'labels.any': z.array(z.string()).optional(),
+  'labels.all': z.array(z.string()).optional(),
+  'labels.none': z.array(z.string()).optional(),
+  'attr.eq': z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional(),
+  'attr.in': z.record(z.string(), z.array(z.union([z.string(), z.number()]))).optional(),
+  'attr.gte': z.record(z.string(), z.number()).optional(),
+  'attr.lte': z.record(z.string(), z.number()).optional(),
+  'attr.bool': z.record(z.string(), z.boolean()).optional(),
+  'attr.exists': z.record(z.string(), z.boolean()).optional(),
 });
 
 export const SeasonTicketStatusSchema = z.enum(['ACTIVE', 'EXPIRED', 'CANCELLED']);

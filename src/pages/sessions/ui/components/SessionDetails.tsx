@@ -18,8 +18,7 @@ export function SessionDetails({ sessionId }: SessionDetailsProps) {
     includeGuestContact: true,
     includeUser: true,
     includePaymentInfo: true,
-    limit: 100,
-    status: 'CONFIRMED'
+    limit: 100
   });
   const [isAddBookingOpen, setIsAddBookingOpen] = useState(false);
 

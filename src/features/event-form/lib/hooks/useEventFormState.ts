@@ -3,7 +3,7 @@ import type { FormData, SessionForm, TimeSlot } from '../types';
 import { defaultFormData } from '../constants';
 import { generateTimeSlotId, generateSessionId } from '../utils';
 
-export function useEventFormState(initialData: FormData = defaultFormData) {
+export function useEventFormState(initialData: FormData = defaultFormData, rangeMode: boolean = false) {
   const [formData, setFormData] = useState<FormData>(initialData);
   const [selectedSessionId, setSelectedSessionId] = useState<string>(initialData.sessions[0].id);
 
@@ -66,6 +66,7 @@ export function useEventFormState(initialData: FormData = defaultFormData) {
     const newSession: SessionForm = {
       id: generateSessionId(),
       date: '',
+      ...(rangeMode && { endDate: '' }),
       timeSlots: [{
         id: generateTimeSlotId(),
         startTime: '',

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { TextInput, Select, Button } from '@/shared/ui';
-import { useCreateSeasonTicketPlan, useUpdateSeasonTicketPlan, eventsClient } from '@/shared/api';
+import { useCreateSeasonTicketPlan, useUpdateSeasonTicketPlan } from '@/shared/api';
 import type { SeasonTicketPlan, SeasonTicketPlanUpdateDto, SeasonTicketPlanCreateDto } from '@/shared/api';
 import styles from './PlanForm.module.scss';
 
@@ -80,21 +80,6 @@ export function PlanForm({ onClose, planData }: PlanFormProps) {
       // Convert price to minor units (kopecks)
       const priceInKopecks = Math.round(parseFloat(formData.price) * 100);
 
-      const eventIds = [];
-
-      let cursor: string | undefined;
-
-      do {
-        const { items, next: nextCursor } = await eventsClient.getEvents({
-          'labels.any': [formData.discipline.value],
-          limit: 100,
-          cursor
-        });
-
-        eventIds.push(...items.map(event => event.id));
-        cursor = nextCursor ? nextCursor : undefined;
-      } while (cursor);
-
       if (isEditMode) {
         // Update mode
         const planUpdateData: SeasonTicketPlanUpdateDto = {
@@ -104,9 +89,9 @@ export function PlanForm({ onClose, planData }: PlanFormProps) {
             ...planData.price,
             amountMinor: priceInKopecks,
           },
+          'labels.any': [formData.discipline.value],
           passes: parseInt(formData.passes),
           expiresIn: parseInt(formData.expiresIn),
-          eventIds
         };
 
         // Update plan
@@ -122,8 +107,8 @@ export function PlanForm({ onClose, planData }: PlanFormProps) {
             amountMinor: priceInKopecks,
           },
           passes: parseInt(formData.passes),
+          'labels.any': [formData.discipline.value],
           expiresIn: parseInt(formData.expiresIn),
-          eventIds
         };
 
         // Create event

@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: Surf Booking Telegram Web App API
-  version: 0.5.4
-  description: "API для сервиса бронирования и оплаты тренировок по (серфинг, скейтсерфинг, вейксерфинг) и многодневных туров. Включает подарочные сертификаты, абонементы, лист ожидания, кэшбэк-кошелёк, админ-аудит и унифицированное создание бронирований"
+  version: 0.6.0
+  description: "API для сервиса бронирования и оплаты тренировок по (серфинг, скейтсерфинг, вейксерфинг) и многодневных туров. Включает подарочные сертификаты, абонементы, лист ожидания, кэшбек-кошелёк, админ-аудит и унифицированное создание бронирований"
 servers:
 - url: https://api.example.com
   description: Production
@@ -249,6 +249,8 @@ components:
           - USER_EXISTS
           - WEAK_PASSWORD
           - INVALID_EMAIL
+          - HAS_ACTIVE_BOOKINGS
+          - HAS_ACTIVE_SESSIONS
         message:
           type: string
         details:
@@ -484,6 +486,46 @@ components:
       required:
       - title
       - tickets
+      properties:
+        title:
+          type: string
+        description:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDescription'
+          nullable: true
+        location:
+          type: string
+          nullable: true
+        capacity:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: Вместимость по умолчанию для сессий этого события
+        tickets:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventTicketCreate'
+        labels:
+          type: array
+          items:
+            type: string
+          description: Ярлыки события.
+        attributes:
+          type: object
+          additionalProperties:
+            oneOf:
+            - type: string
+            - type: number
+            - type: integer
+            - type: boolean
+            - type: array
+              items:
+                type: string
+          description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
+      additionalProperties: false
+    EventUpdateDto:
+      type: object
       properties:
         title:
           type: string
@@ -969,7 +1011,7 @@ components:
         reason:
           type: string
           maxLength: 256
-      description: 'Частичный или полный возврат. Если amount не указан – полный возврат в валюте исходного платежа.
+      description: 'Частичный или полный возврат. Если amount не указан — полный возврат в валюте исходного платежа.
 
         '
       additionalProperties: false
@@ -1068,6 +1110,94 @@ components:
         ownerUserId:
           type: string
       additionalProperties: false
+    EventFilterLabels:
+      type: object
+      nullable: true
+      properties:
+        any:
+          type: array
+          items:
+            type: string
+          description: Хотя бы одна из меток (OR)
+        all:
+          type: array
+          items:
+            type: string
+          description: Все метки обязательны (AND)
+        none:
+          type: array
+          items:
+            type: string
+          description: Исключить события с этими метками (NOT)
+    EventFilterAttributes:
+      type: object
+      nullable: true
+      properties:
+        eq:
+          type: object
+          additionalProperties:
+            oneOf:
+              - type: string
+              - type: number
+              - type: integer
+              - type: boolean
+          description: Равенство по ключам атрибутов
+        in:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              oneOf:
+                - type: string
+                - type: number
+                - type: integer
+            minItems: 1
+          description: Вхождение в набор значений
+        gte:
+          type: object
+          additionalProperties:
+            oneOf:
+              - type: number
+              - type: integer
+          description: Порог ≥ для числовых атрибутов
+        lte:
+          type: object
+          additionalProperties:
+            oneOf:
+              - type: number
+              - type: integer
+          description: Порог ≤ для числовых атрибутов
+        bool:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: Фильтр по булевым атрибутам
+        exists:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: Проверка наличия ключа (true/false)
+    EventFilter:
+      type: object
+      nullable: true
+      properties:
+        labels:
+          $ref: '#/components/schemas/EventFilterLabels'
+        attributes:
+          $ref: '#/components/schemas/EventFilterAttributes'
+    SeasonTicketMatchMode:
+      type: string
+      enum:
+        - IDS_ONLY
+        - FILTER_ONLY
+        - ANY
+        - ALL
+      description: |
+        Режим матчинга абонемента к событиям:
+        - IDS_ONLY: только явный список eventIds
+        - FILTER_ONLY: только фильтры по labels/attrs
+        - ANY: eventIds ИЛИ фильтры (хотя бы одно)
+        - ALL: eventIds И фильтры (оба, если указаны)
     SeasonTicketPlan:
       type: object
       required:
@@ -1075,6 +1205,7 @@ components:
       - name
       - price
       - passes
+      - expiresIn
       properties:
         id:
           type: string
@@ -1088,10 +1219,57 @@ components:
         passes:
           type: integer
           minimum: 1
+        expiresIn:
+          type: integer
+          minimum: 1
+          description: Срок действия абонемента в днях с момента покупки
+        matchMode:
+          $ref: '#/components/schemas/SeasonTicketMatchMode'
+          default: ALL
         eventIds:
           type: array
           items:
             type: string
+          nullable: true
+          description: Явный список Event ID для абонемента (опционально)
+        eventFilter:
+          $ref: '#/components/schemas/EventFilter'
+          description: Гибкие фильтры для матчинга событий (опционально)
+    SeasonTicketPlanCreateDto:
+      type: object
+      required:
+      - name
+      - price
+      - passes
+      - expiresIn
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        price:
+          $ref: '#/components/schemas/Price'
+        passes:
+          type: integer
+          minimum: 1
+        expiresIn:
+          type: integer
+          minimum: 1
+          description: Срок действия абонемента в днях с момента покупки
+        matchMode:
+          $ref: '#/components/schemas/SeasonTicketMatchMode'
+          default: ALL
+        eventIds:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Явный список Event ID для абонемента (опционально)
+        eventFilter:
+          $ref: '#/components/schemas/EventFilter'
+          description: Гибкие фильтры для матчинга событий (опционально)
+      additionalProperties: false
     SeasonTicketPlanUpdateDto:
       type: object
       properties:
@@ -1105,10 +1283,19 @@ components:
         passes:
           type: integer
           minimum: 1
+        expiresIn:
+          type: integer
+          minimum: 1
+          description: Срок действия абонемента в днях с момента покупки
+        matchMode:
+          $ref: '#/components/schemas/SeasonTicketMatchMode'
         eventIds:
           type: array
           items:
             type: string
+          nullable: true
+        eventFilter:
+          $ref: '#/components/schemas/EventFilter'
       additionalProperties: false
     SeasonTicketStatus:
       type: string
@@ -1124,6 +1311,7 @@ components:
       - userId
       - status
       - remainingPasses
+      - validUntil
       properties:
         id:
           type: string
@@ -1139,7 +1327,7 @@ components:
         validUntil:
           type: string
           format: date-time
-          nullable: true
+          description: Дата истечения срока действия абонемента
     CashbackWallet:
       type: object
       required:
@@ -1317,6 +1505,60 @@ components:
               items:
                 type: string
           description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
+      additionalProperties: false
+    SessionBulkUpdateDto:
+      type: object
+      required:
+      - id
+      properties:
+        id:
+          type: string
+          description: ID сессии для обновления
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+          nullable: true
+        capacity:
+          type: integer
+          minimum: 0
+          nullable: true
+        labels:
+          type: array
+          items:
+            type: string
+          description: Ярлыки сессии.
+        attributes:
+          type: object
+          additionalProperties:
+            oneOf:
+            - type: string
+            - type: number
+            - type: integer
+            - type: boolean
+            - type: array
+              items:
+                type: string
+          description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
+      additionalProperties: false
+    SessionBulkDeleteDto:
+      type: object
+      required:
+      - ids
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 100
+          description: Список ID сессий для удаления
+        force:
+          type: boolean
+          default: false
+          description: Принудительное удаление даже при наличии активных бронирований
       additionalProperties: false
     JobExecutionResult:
       type: object
@@ -1941,6 +2183,91 @@ paths:
                 $ref: '#/components/schemas/Event'
         '404':
           $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Events
+      - Admin
+      summary: Обновить событие (ADMIN)
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventUpdateDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Конфликт (например, событие имеет активные сессии)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: HAS_ACTIVE_SESSIONS
+                message: Cannot modify event with active sessions
+    delete:
+      tags:
+      - Events
+      - Admin
+      summary: Удалить событие (ADMIN)
+      description: |
+        Удаляет событие. По умолчанию не позволяет удалить событие, 
+        если у него есть сессии с активными бронированиями.
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: force
+        schema:
+          type: boolean
+          default: false
+        description: Принудительное удаление даже при наличии связанных сессий
+      responses:
+        '204':
+          description: Событие успешно удалено
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Конфликт (событие имеет активные сессии или бронирования)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                hasActiveSessions:
+                  summary: Событие имеет активные сессии
+                  value:
+                    code: HAS_ACTIVE_SESSIONS
+                    message: Cannot delete event with active sessions. Use force=true to override.
+                hasActiveBookings:
+                  summary: Событие имеет активные бронирования
+                  value:
+                    code: HAS_ACTIVE_BOOKINGS
+                    message: Cannot delete event with active bookings
   /events/{id}/sessions:
     get:
       tags:
@@ -2069,6 +2396,138 @@ paths:
                   next:
                     type: string
                     nullable: true
+    patch:
+      tags:
+      - Sessions
+      - Admin
+      summary: Массовое обновление сессий (ADMIN)
+      description: |
+        Позволяет обновить несколько сессий за один запрос.
+        Каждая сессия в массиве должна содержать ID и поля для обновления.
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              minItems: 1
+              maxItems: 100
+              items:
+                $ref: '#/components/schemas/SessionBulkUpdateDto'
+            example:
+              - id: session_123
+                startsAt: "2025-03-01T10:00:00Z"
+                capacity: 20
+              - id: session_456
+                startsAt: "2025-03-02T10:00:00Z"
+                labels: ["sport:surf", "level:intermediate"]
+      responses:
+        '200':
+          description: Сессии успешно обновлены
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - items
+                - updated
+                - failed
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Session'
+                    description: Успешно обновленные сессии
+                  updated:
+                    type: integer
+                    description: Количество успешно обновленных сессий
+                  failed:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - id
+                      - error
+                      properties:
+                        id:
+                          type: string
+                          description: ID сессии, которую не удалось обновить
+                        error:
+                          type: string
+                          description: Описание ошибки
+                    description: Список сессий, которые не удалось обновить
+        '400':
+          description: Неверный формат запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    delete:
+      tags:
+      - Sessions
+      - Admin
+      summary: Массовое удаление сессий (ADMIN)
+      description: |
+        Позволяет удалить несколько сессий за один запрос.
+        По умолчанию не позволяет удалить сессии с активными бронированиями.
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionBulkDeleteDto'
+            example:
+              ids: ["session_123", "session_456", "session_789"]
+              force: false
+      responses:
+        '200':
+          description: Операция выполнена
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - deleted
+                - failed
+                properties:
+                  deleted:
+                    type: array
+                    items:
+                      type: string
+                    description: ID успешно удаленных сессий
+                  failed:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                      - id
+                      - error
+                      properties:
+                        id:
+                          type: string
+                          description: ID сессии, которую не удалось удалить
+                        error:
+                          type: string
+                          description: Причина ошибки
+                    description: Список сессий, которые не удалось удалить
+        '400':
+          description: Неверный формат запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
   /sessions/{id}:
     get:
       tags:
@@ -2246,17 +2705,21 @@ paths:
         name: sessionId
         schema:
           type: string
-        description: Фильтр по ID сессии. Доступно только ADMIN для получения всех бронирований конкретной сессии.
+        description: Фильтр по ID сессии. Обычные пользователи видят только свои бронирования для данной сессии. ADMIN видит все бронирования сессии.
       - in: query
         name: status
+        style: form
+        explode: false
         schema:
-          type: string
-          enum:
-          - HOLD
-          - CONFIRMED
-          - CANCELLED
-          - EXPIRED
-        description: Фильтр по статусу бронирования. Доступно только ADMIN.
+          type: array
+          items:
+            type: string
+            enum:
+            - HOLD
+            - CONFIRMED
+            - CANCELLED
+            - EXPIRED
+        description: Фильтр по статусам бронирования (можно указать несколько через запятую, например status=HOLD,CONFIRMED).
       - in: query
         name: bookingType
         schema:
@@ -2278,7 +2741,7 @@ paths:
         schema:
           type: boolean
           default: false
-        description: Включить полную информацию о сессии в ответ. Доступно только ADMIN.
+        description: Включить полную информацию о сессии в ответ.
       - in: query
         name: includePaymentInfo
         schema:
@@ -2291,6 +2754,15 @@ paths:
           type: boolean
           default: false
         description: Включить контактные данные гостей в ответ. Доступно только ADMIN.
+      - $ref: '#/components/parameters/LabelsAnyParam'
+      - $ref: '#/components/parameters/LabelsAllParam'
+      - $ref: '#/components/parameters/LabelsNoneParam'
+      - $ref: '#/components/parameters/AttrEqParam'
+      - $ref: '#/components/parameters/AttrInParam'
+      - $ref: '#/components/parameters/AttrGteParam'
+      - $ref: '#/components/parameters/AttrLteParam'
+      - $ref: '#/components/parameters/AttrBoolParam'
+      - $ref: '#/components/parameters/AttrExistsParam'
       - $ref: '#/components/parameters/CursorParam'
       - $ref: '#/components/parameters/LimitParam'
       responses:
@@ -2614,7 +3086,7 @@ paths:
         name: userId
         schema:
           type: string
-        description: Только ADMIN – просматривать по userId
+        description: Только ADMIN — просматривать по userId
       - $ref: '#/components/parameters/CursorParam'
       - $ref: '#/components/parameters/LimitParam'
       responses:
@@ -2673,7 +3145,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SeasonTicketPlan'
+              $ref: '#/components/schemas/SeasonTicketPlanCreateDto'
       responses:
         '201':
           description: Created
@@ -2686,6 +3158,25 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
   /season-ticket-plans/{id}:
+    get:
+      tags:
+      - SeasonTickets
+      summary: Получить план абонемента
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeasonTicketPlan'
+        '404':
+          $ref: '#/components/responses/NotFound'
     patch:
       tags:
       - SeasonTickets
@@ -2715,6 +3206,32 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+      - SeasonTickets
+      - Admin
+      summary: Удалить план абонемента (ADMIN)
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: План абонемента успешно удален
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Конфликт (план имеет активные абонементы)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /season-ticket-plans/{id}/purchase:
     post:
       tags:
@@ -2749,6 +3266,39 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+  /season-ticket-plans/{id}/applicable-events:
+    get:
+      tags:
+      - SeasonTickets
+      summary: Получить список событий, к которым применим план абонемента
+      description: |
+        Возвращает список всех событий, которые соответствуют критериям матчинга данного плана абонемента.
+        Применяется логика matchMode плана для определения применимости.
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/CursorParam'
+      - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Event'
+                  next:
+                    type: string
+                    nullable: true
+        '404':
+          $ref: '#/components/responses/NotFound'
   /season-tickets:
     get:
       tags:
@@ -2759,7 +3309,7 @@ paths:
         name: userId
         schema:
           type: string
-        description: Только ADMIN – фильтр по userId
+        description: Только ADMIN — фильтр по userId
       - $ref: '#/components/parameters/CursorParam'
       - $ref: '#/components/parameters/LimitParam'
       responses:

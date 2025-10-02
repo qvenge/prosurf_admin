@@ -4,6 +4,7 @@ import { useEventFormState } from '../hooks/useEventFormState';
 import { useEventFormValidation } from '../hooks/useEventFormValidation';
 import { useEventFormApi } from '../hooks/useEventFormApi';
 import { useEventFormInitialization } from '../hooks/useEventFormInitialization';
+import { defaultFormData } from '../constants';
 
 interface EventFormContextValue {
   // Form state
@@ -68,6 +69,15 @@ export function EventFormProvider({
 }: EventFormProviderProps) {
   const { isEditMode, existingSessions, isInitialLoading, initializeFormData } = useEventFormInitialization(eventId);
 
+  // Initialize form data with default category if categories are provided
+  const initialFormData = (() => {
+    const base = { ...defaultFormData };
+    if (categories && categories.length > 0 && !base.category) {
+      base.category = categories.find(c => c.selected)?.value ?? categories[0].value;
+    }
+    return base;
+  })();
+
   const {
     formData,
     selectedSessionId,
@@ -80,7 +90,7 @@ export function EventFormProvider({
     removeTimeSlot,
     addSession,
     removeSession,
-  } = useEventFormState();
+  } = useEventFormState(initialFormData, rangeMode);
 
   const { errors, clearError, validateForm } = useEventFormValidation(rangeMode);
   const { createEvent, updateEvent, isLoading } = useEventFormApi(rangeMode, labels);
