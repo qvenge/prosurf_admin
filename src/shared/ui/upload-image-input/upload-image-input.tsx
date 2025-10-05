@@ -1,85 +1,72 @@
 'use client';
 
 import clsx from 'clsx';
-import { useEffect, useRef, useState } from 'react';
-
-import { Icon, ButtonContainer } from '@/shared/ui';
-import { CameraRegular } from '@/shared/ds/icons';
-
+import { useRef } from 'react';
+import { ButtonContainer } from '@/shared/ui';
 import styles from './upload-image-input.module.scss';
 
-type InptyProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type' | 'accept' | 'ref'>
+type InputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type' | 'accept' | 'ref' | 'onChange' | 'value'>
 
-export interface UploadImageInputProps extends InptyProps {
-  previewInit?: {
-    src: string;
-    alt: string;
-  }
+export interface UploadImageInputProps extends InputProps {
+  value?: File | File[] | null;
+  onChange?: (data: { file: File; preview: string }[] | { file: File; preview: string } | null) => void;
+  multiple?: boolean;
+  children?: React.ReactNode;
 }
 
 export function UploadImageInput({
   className,
-  previewInit,
+  value,
+  onChange,
+  multiple = false,
+  children,
   ...inputProps
 }: UploadImageInputProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [showPreviewSrc, setShowPreviewSrc] = useState(previewInit != null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (!isMenuOpen) {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+
+    if (!files || files.length === 0) {
+      onChange?.(null);
       return;
     }
 
-    const handleClickOutside = (event: MouseEvent) => {
-      if (ref.current && ref.current.contains(event.target as Node)) {
-        return;
+    if (multiple) {
+      const fileArray = Array.from(files);
+      const processedFiles = await Promise.all(
+        fileArray.map((file) => {
+          return new Promise<{ file: File; preview: string }>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              resolve({ file, preview: reader.result as string });
+            };
+            reader.readAsDataURL(file);
+          });
+        })
+      );
+      onChange?.(processedFiles);
+
+      // Clear input to allow re-selecting same files
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
-
-      setIsMenuOpen(false);
-    }
-
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [isMenuOpen])
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-
-    if (file) {
+    } else {
+      const file = files[0];
       const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result as string);
-      reader.readAsDataURL(file); // Превращает файл в base64 для предпросмотра
-      setShowPreviewSrc(false);
+      reader.onloadend = () => {
+        onChange?.({ file, preview: reader.result as string });
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handlePreviewClick = () => {
-    if (preview != null || showPreviewSrc) {
-      setIsMenuOpen(!isMenuOpen);
-    } else {
-      handleEditClick();
-    }
-  }
-
-  const handleEditClick = () => {
-    setIsMenuOpen(false);
+  const handleClick = () => {
     fileInputRef.current?.click();
-  }
-  const handleRemoveClick = () => {
-    setIsMenuOpen(false);
-    setPreview(null);
-    setShowPreviewSrc(false);
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  }
+  };
 
   return (
-    <div ref={ref} className={clsx(
+    <div className={clsx(
       className,
       styles.root,
       inputProps.disabled && styles.disabled
@@ -89,55 +76,13 @@ export function UploadImageInput({
         className={styles.input}
         type="file"
         accept="image/jpeg,image/png,image/webp,image/gif,image/bmp,image/avif,image/heic"
+        multiple={multiple}
         ref={fileInputRef}
         onChange={handleFileChange}
       />
-      <ButtonContainer
-        className={styles.previewWrapper}
-        onClick={handlePreviewClick}
-      >
-        <div className={styles.preview}>
-          {showPreviewSrc && previewInit ? (
-            <img
-              src={previewInit.src}
-              alt={previewInit.alt}
-              className={styles.previewImg}
-            />
-          ) : (
-            preview ? (
-              <img
-                className={styles.previewImg}
-                src={preview}
-                alt="preview"
-              />  
-            ) : (
-              <Icon
-                // className={styles.previewImg}
-                src={CameraRegular}
-                width={36}
-                height={36}
-              />
-            )
-          )}
-        </div>
+      <ButtonContainer onClick={handleClick}>
+        {children}
       </ButtonContainer>
-      {isMenuOpen && <div className={styles.menu}>
-        <ButtonContainer
-          onClick={handleEditClick}
-        >
-          <div className={styles.menuButton}>
-            Заменить
-          </div>
-        </ButtonContainer>
-        <ButtonContainer
-          onClick={handleRemoveClick}
-        >
-          <div className={clsx(styles.menuButton, styles.menuButtonRed)}>
-            Удалить
-          </div>
-        </ButtonContainer>
-      </div>}
-
     </div>
   );
 }

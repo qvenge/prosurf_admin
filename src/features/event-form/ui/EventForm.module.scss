@@ -4,7 +4,7 @@
 }
 
 .root,
-.form,
+.info,
 .mainInfo,
 .description {
   display: flex;
@@ -12,7 +12,7 @@
   align-items: stretch;
 }
 
-.form {
+.info {
   gap: 28px;
 }
 
@@ -113,6 +113,60 @@
 .photoUpload {
   aspect-ratio: 1;
   min-height: 80px;
+}
+
+.uploadPlaceholder {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  border: 1px solid ds.color('border/primary');
+  color: ds.color('graphic/secondary');
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: ds.color('background/secondary');
+  }
+}
+
+.imagePreview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid ds.color('border/primary');
+  cursor: pointer;
+}
+
+.imagePreviewImg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  aspect-ratio: 1/1;
+}
+
+.imageRemove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 4px;
+  background: ds.color('background/primary');
+  border-radius: 50%;
+  box-shadow: ds.effect('Shadow/M');
+  color: ds.color('graphic/secondary');
+  transition: background-color 0.2s;
+
+  &:hover {
+    background: ds.color('background/secondary');
+    color: ds.color('text/error/primary');
+  }
 }
 
 .actions {

@@ -477,6 +477,12 @@ components:
                 items:
                   type: string
           description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
+        images:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Array of image URLs
     TicketPrice:
       type: object
       required:
@@ -545,6 +551,12 @@ components:
                 items:
                   type: string
           description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
+        images:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Array of image URLs
       additionalProperties: false
     EventUpdateDto:
       type: object
@@ -585,6 +597,12 @@ components:
                 items:
                   type: string
           description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
+        images:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Array of image URLs
       additionalProperties: false
     EventTicketCreate:
       type: object
@@ -2283,6 +2301,41 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/EventCreateDto"
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - title
+                - tickets
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                  description: JSON string of EventDescription array
+                location:
+                  type: string
+                  nullable: true
+                capacity:
+                  type: integer
+                  minimum: 0
+                  nullable: true
+                tickets:
+                  type: string
+                  description: JSON string of EventTicketCreate array
+                labels:
+                  type: string
+                  description: JSON string array of labels
+                attributes:
+                  type: string
+                  description: JSON string of attributes object
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Image files (max 10 files, 10MB each, formats JPEG/PNG/GIF/WebP)
+                  nullable: true
       responses:
         "201":
           description: Created
@@ -2290,6 +2343,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad Request (e.g., file too large or invalid file type)
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":
@@ -2331,6 +2386,43 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/EventUpdateDto"
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  nullable: true
+                description:
+                  type: string
+                  description: JSON string of EventDescription array
+                  nullable: true
+                location:
+                  type: string
+                  nullable: true
+                capacity:
+                  type: integer
+                  minimum: 0
+                  nullable: true
+                tickets:
+                  type: string
+                  description: JSON string of EventTicketCreate array
+                  nullable: true
+                labels:
+                  type: string
+                  description: JSON string array of labels
+                  nullable: true
+                attributes:
+                  type: string
+                  description: JSON string of attributes object
+                  nullable: true
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: New image files to add (max 10 files, 10MB each, formats JPEG/PNG/GIF/WebP)
+                  nullable: true
       responses:
         "200":
           description: OK
@@ -2338,6 +2430,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad Request (e.g., file too large or invalid file type)
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":

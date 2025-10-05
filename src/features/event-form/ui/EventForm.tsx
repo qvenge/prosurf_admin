@@ -2,6 +2,7 @@ import type { EventFormProps } from '../lib/types';
 import { EventFormProvider, useEventFormContext } from '../lib/context';
 import { EventFormMainInfo } from './EventFormMainInfo';
 import { EventFormSessions } from './EventFormSessions';
+import { EventFormImages } from './EventFormImages';
 import { EventFormDescription } from './EventFormDescription';
 import { EventFormActions } from './EventFormActions';
 import styles from './EventForm.module.scss';
@@ -21,9 +22,10 @@ function EventFormContent() {
 
   return (
     <div className={styles.root}>
-      <div className={styles.form}>
+      <div className={styles.info}>
         <EventFormMainInfo />
         <EventFormSessions />
+        <EventFormImages />
         <EventFormDescription />
       </div>
       <EventFormActions />
