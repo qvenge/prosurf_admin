@@ -24,6 +24,13 @@ const disciplineOptions: Record<DesciplineValue, string> = {
   'training:surfskate': 'Серфскейт'
 };
 
+const monthsToDays = (expiresIn: string): number => {
+  const months = parseInt(expiresIn);
+  const date = new Date();
+  date.setMonth(date.getMonth() + months);
+  return Math.round(Math.abs((date.getTime() - (new Date()).getTime()) / (24 * 60 * 60 * 1000)));
+}
+
 export function PlanForm({ onClose, planData }: PlanFormProps) {
   const [formData, setFormData] = useState<FormData>({
     discipline: { value: 'training:surfing', label: 'Серфинг' },
@@ -89,9 +96,13 @@ export function PlanForm({ onClose, planData }: PlanFormProps) {
             ...planData.price,
             amountMinor: priceInKopecks,
           },
-          'labels.any': [formData.discipline.value],
+          eventFilter: {
+            labels: {
+              any: [formData.discipline.value],
+            },
+          },
           passes: parseInt(formData.passes),
-          expiresIn: parseInt(formData.expiresIn),
+          expiresIn: monthsToDays(formData.expiresIn),
         };
 
         // Update plan
@@ -107,8 +118,12 @@ export function PlanForm({ onClose, planData }: PlanFormProps) {
             amountMinor: priceInKopecks,
           },
           passes: parseInt(formData.passes),
-          'labels.any': [formData.discipline.value],
-          expiresIn: parseInt(formData.expiresIn),
+          eventFilter: {
+            labels: {
+              any: [formData.discipline.value],
+            },
+          },
+          expiresIn: monthsToDays(formData.expiresIn),
         };
 
         // Create event

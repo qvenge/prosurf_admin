@@ -4,27 +4,27 @@ info:
   version: 0.6.0
   description: "API для сервиса бронирования и оплаты тренировок по (серфинг, скейтсерфинг, вейксерфинг) и многодневных туров. Включает подарочные сертификаты, абонементы, лист ожидания, кэшбек-кошелёк, админ-аудит и унифицированное создание бронирований"
 servers:
-- url: https://api.example.com
-  description: Production
-- url: https://staging.api.example.com
-  description: Staging
+  - url: https://api.example.com
+    description: Production
+  - url: https://staging.api.example.com
+    description: Staging
 tags:
-- name: Auth
-- name: Users
-- name: Events
-- name: Sessions
-- name: Bookings
-- name: Payments
-- name: Refunds
-- name: Certificates
-- name: SeasonTickets
-- name: Cashback
-- name: Waitlist
-- name: Admin
-- name: Jobs
-- name: Webhooks
+  - name: Auth
+  - name: Users
+  - name: Events
+  - name: Sessions
+  - name: Bookings
+  - name: Payments
+  - name: Refunds
+  - name: Certificates
+  - name: SeasonTickets
+  - name: Cashback
+  - name: Waitlist
+  - name: Admin
+  - name: Jobs
+  - name: Webhooks
 security:
-- bearerAuth: []
+  - bearerAuth: []
 components:
   securitySchemes:
     bearerAuth:
@@ -113,10 +113,10 @@ components:
         type: object
         additionalProperties:
           oneOf:
-          - type: string
-          - type: number
-          - type: integer
-          - type: boolean
+            - type: string
+            - type: number
+            - type: integer
+            - type: boolean
       description: Равенство по ключам атрибутов, напр. attr.eq[city]=istanbul
     AttrInParam:
       in: query
@@ -129,9 +129,9 @@ components:
           type: array
           items:
             oneOf:
-            - type: string
-            - type: number
-            - type: integer
+              - type: string
+              - type: number
+              - type: integer
           minItems: 1
       description: Вхождение в набор значений, напр. attr.in[level]=[beginner,intermediate]
     AttrGteParam:
@@ -143,8 +143,8 @@ components:
         type: object
         additionalProperties:
           oneOf:
-          - type: number
-          - type: integer
+            - type: number
+            - type: integer
       description: Порог ≥ для числовых атрибутов
     AttrLteParam:
       in: query
@@ -155,8 +155,8 @@ components:
         type: object
         additionalProperties:
           oneOf:
-          - type: number
-          - type: integer
+            - type: number
+            - type: integer
       description: Порог ≤ для числовых атрибутов
     AttrBoolParam:
       in: query
@@ -185,14 +185,20 @@ components:
         type: integer
         minimum: 0
       description: Минимальное количество оставшихся мест
+    OnWaitlistParam:
+      in: query
+      name: onWaitlist
+      schema:
+        type: boolean
+      description: Фильтр сессий, в которых текущий пользователь находится в листе ожидания (требуется авторизация)
     SortByParam:
       in: query
       name: sortBy
       schema:
         type: string
         enum:
-        - createdAt
-        - startsAt
+          - createdAt
+          - startsAt
         default: startsAt
       description: Поле для сортировки
     SortOrderParam:
@@ -201,8 +207,8 @@ components:
       schema:
         type: string
         enum:
-        - asc
-        - desc
+          - asc
+          - desc
         default: asc
       description: Порядок сортировки
   responses:
@@ -211,46 +217,46 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
     Forbidden:
       description: Forbidden
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
     NotFound:
       description: Not Found
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
     Conflict:
       description: Conflict
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
   schemas:
     Error:
       type: object
       required:
-      - code
-      - message
+        - code
+        - message
       properties:
         code:
           type: string
           enum:
-          - AMOUNT_MISMATCH
-          - DUPLICATE_PAYMENT
-          - HOLD_EXPIRED
-          - NO_SEATS
-          - PROVIDER_UNAVAILABLE
-          - INVALID_CREDENTIALS
-          - USER_EXISTS
-          - WEAK_PASSWORD
-          - INVALID_EMAIL
-          - HAS_ACTIVE_BOOKINGS
-          - HAS_ACTIVE_SESSIONS
+            - AMOUNT_MISMATCH
+            - DUPLICATE_PAYMENT
+            - HOLD_EXPIRED
+            - NO_SEATS
+            - PROVIDER_UNAVAILABLE
+            - INVALID_CREDENTIALS
+            - USER_EXISTS
+            - WEAK_PASSWORD
+            - INVALID_EMAIL
+            - HAS_ACTIVE_BOOKINGS
+            - HAS_ACTIVE_SESSIONS
         message:
           type: string
         details:
@@ -259,8 +265,8 @@ components:
     Price:
       type: object
       required:
-      - currency
-      - amountMinor
+        - currency
+        - amountMinor
       properties:
         currency:
           type: string
@@ -271,14 +277,14 @@ components:
     Role:
       type: string
       enum:
-      - USER
-      - ADMIN
+        - USER
+        - ADMIN
     User:
       type: object
       required:
-      - id
-      - createdAt
-      - role
+        - id
+        - createdAt
+        - role
       properties:
         id:
           type: string
@@ -306,17 +312,22 @@ components:
           type: string
           nullable: true
           description: URL фотографии профиля
+        dateOfBirth:
+          type: string
+          format: date-time
+          nullable: true
+          description: Дата рождения пользователя
         role:
-          $ref: '#/components/schemas/Role'
+          $ref: "#/components/schemas/Role"
         createdAt:
           type: string
           format: date-time
         authMethod:
           type: string
           enum:
-          - telegram
-          - email
-          - username
+            - telegram
+            - email
+            - username
           description: Способ авторизации пользователя
     UserUpdateDto:
       type: object
@@ -329,12 +340,23 @@ components:
           type: string
         email:
           type: string
+        dateOfBirth:
+          type: string
+          format: date-time
+          description: Дата рождения пользователя в формате ISO 8601
+        photoUrl:
+          type: string
+          nullable: true
+          description: URL фотографии профиля. Установите null для удаления существующей фотографии.
+        deletePhoto:
+          type: boolean
+          description: Установите true для удаления существующей фотографии. Игнорируется, если загружается новый файл фото.
       additionalProperties: false
     LoginDto:
       type: object
       required:
-      - login
-      - password
+        - login
+        - password
       properties:
         login:
           type: string
@@ -347,7 +369,7 @@ components:
     TelegramLoginDto:
       type: object
       required:
-      - initData
+        - initData
       properties:
         initData:
           type: string
@@ -356,7 +378,7 @@ components:
     RegisterDto:
       type: object
       required:
-      - password
+        - password
       properties:
         email:
           type: string
@@ -381,27 +403,27 @@ components:
           type: string
           pattern: ^\+?[0-9]{7,15}$
         role:
-          $ref: '#/components/schemas/Role'
+          $ref: "#/components/schemas/Role"
           description: Роль пользователя (только ADMIN может указать роль при регистрации)
       additionalProperties: false
     AuthResponse:
       type: object
       required:
-      - accessToken
-      - refreshToken
-      - user
+        - accessToken
+        - refreshToken
+        - user
       properties:
         accessToken:
           type: string
         refreshToken:
           type: string
         user:
-          $ref: '#/components/schemas/User'
+          $ref: "#/components/schemas/User"
     EventDescription:
       type: object
       required:
-      - heading
-      - body
+        - heading
+        - body
       properties:
         heading:
           type: string
@@ -410,9 +432,9 @@ components:
     Event:
       type: object
       required:
-      - id
-      - title
-      - tickets
+        - id
+        - title
+        - tickets
       properties:
         id:
           type: string
@@ -421,7 +443,7 @@ components:
         description:
           type: array
           items:
-            $ref: '#/components/schemas/EventDescription'
+            $ref: "#/components/schemas/EventDescription"
           nullable: true
         location:
           type: string
@@ -434,7 +456,7 @@ components:
         tickets:
           type: array
           items:
-            $ref: '#/components/schemas/EventTicket'
+            $ref: "#/components/schemas/EventTicket"
         createdAt:
           type: string
           format: date-time
@@ -447,52 +469,52 @@ components:
           type: object
           additionalProperties:
             oneOf:
-            - type: string
-            - type: number
-            - type: integer
-            - type: boolean
-            - type: array
-              items:
-                type: string
+              - type: string
+              - type: number
+              - type: integer
+              - type: boolean
+              - type: array
+                items:
+                  type: string
           description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
     TicketPrice:
       type: object
       required:
-      - price
+        - price
       properties:
         price:
-          $ref: '#/components/schemas/Price'
+          $ref: "#/components/schemas/Price"
         description:
           type: string
           nullable: true
     EventTicket:
       type: object
       required:
-      - id
-      - name
-      - prepayment
-      - full
+        - id
+        - name
+        - prepayment
+        - full
       properties:
         id:
           type: string
         name:
           type: string
         prepayment:
-          $ref: '#/components/schemas/TicketPrice'
+          $ref: "#/components/schemas/TicketPrice"
         full:
-          $ref: '#/components/schemas/TicketPrice'
+          $ref: "#/components/schemas/TicketPrice"
     EventCreateDto:
       type: object
       required:
-      - title
-      - tickets
+        - title
+        - tickets
       properties:
         title:
           type: string
         description:
           type: array
           items:
-            $ref: '#/components/schemas/EventDescription'
+            $ref: "#/components/schemas/EventDescription"
           nullable: true
         location:
           type: string
@@ -505,7 +527,7 @@ components:
         tickets:
           type: array
           items:
-            $ref: '#/components/schemas/EventTicketCreate'
+            $ref: "#/components/schemas/EventTicketCreate"
         labels:
           type: array
           items:
@@ -515,13 +537,13 @@ components:
           type: object
           additionalProperties:
             oneOf:
-            - type: string
-            - type: number
-            - type: integer
-            - type: boolean
-            - type: array
-              items:
-                type: string
+              - type: string
+              - type: number
+              - type: integer
+              - type: boolean
+              - type: array
+                items:
+                  type: string
           description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
       additionalProperties: false
     EventUpdateDto:
@@ -532,7 +554,7 @@ components:
         description:
           type: array
           items:
-            $ref: '#/components/schemas/EventDescription'
+            $ref: "#/components/schemas/EventDescription"
           nullable: true
         location:
           type: string
@@ -545,7 +567,7 @@ components:
         tickets:
           type: array
           items:
-            $ref: '#/components/schemas/EventTicketCreate'
+            $ref: "#/components/schemas/EventTicketCreate"
         labels:
           type: array
           items:
@@ -555,40 +577,40 @@ components:
           type: object
           additionalProperties:
             oneOf:
-            - type: string
-            - type: number
-            - type: integer
-            - type: boolean
-            - type: array
-              items:
-                type: string
+              - type: string
+              - type: number
+              - type: integer
+              - type: boolean
+              - type: array
+                items:
+                  type: string
           description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
       additionalProperties: false
     EventTicketCreate:
       type: object
       required:
-      - name
-      - prepayment
-      - full
+        - name
+        - prepayment
+        - full
       properties:
         name:
           type: string
         prepayment:
-          $ref: '#/components/schemas/TicketPrice'
+          $ref: "#/components/schemas/TicketPrice"
         full:
-          $ref: '#/components/schemas/TicketPrice'
+          $ref: "#/components/schemas/TicketPrice"
     Session:
       type: object
       required:
-      - id
-      - event
-      - startsAt
-      - remainingSeats
+        - id
+        - event
+        - startsAt
+        - remainingSeats
       properties:
         id:
           type: string
         event:
-          $ref: '#/components/schemas/Event'
+          $ref: "#/components/schemas/Event"
         startsAt:
           type: string
           format: date-time
@@ -611,7 +633,7 @@ components:
           type: boolean
           description: Текущий пользователь в листе ожидания
         status:
-          $ref: '#/components/schemas/SessionStatus'
+          $ref: "#/components/schemas/SessionStatus"
         labels:
           type: array
           items:
@@ -622,13 +644,13 @@ components:
           type: object
           additionalProperties:
             oneOf:
-            - type: string
-            - type: number
-            - type: integer
-            - type: boolean
-            - type: array
-              items:
-                type: string
+              - type: string
+              - type: number
+              - type: integer
+              - type: boolean
+              - type: array
+                items:
+                  type: string
           description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
         effectiveLabels:
           type: array
@@ -641,13 +663,13 @@ components:
           readOnly: true
           additionalProperties:
             oneOf:
-            - type: string
-            - type: number
-            - type: integer
-            - type: boolean
-            - type: array
-              items:
-                type: string
+              - type: string
+              - type: number
+              - type: integer
+              - type: boolean
+              - type: array
+                items:
+                  type: string
           description: Денормализованные атрибуты (Event ⊕ Session).
         createdAt:
           type: string
@@ -655,10 +677,10 @@ components:
     SessionCompact:
       type: object
       required:
-      - id
-      - eventId
-      - startsAt
-      - remainingSeats
+        - id
+        - eventId
+        - startsAt
+        - remainingSeats
       properties:
         id:
           type: string
@@ -687,7 +709,7 @@ components:
           type: boolean
           description: Текущий пользователь в листе ожидания
         status:
-          $ref: '#/components/schemas/SessionStatus'
+          $ref: "#/components/schemas/SessionStatus"
         labels:
           type: array
           items:
@@ -698,13 +720,13 @@ components:
           type: object
           additionalProperties:
             oneOf:
-            - type: string
-            - type: number
-            - type: integer
-            - type: boolean
-            - type: array
-              items:
-                type: string
+              - type: string
+              - type: number
+              - type: integer
+              - type: boolean
+              - type: array
+                items:
+                  type: string
           description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
         effectiveLabels:
           type: array
@@ -717,13 +739,13 @@ components:
           readOnly: true
           additionalProperties:
             oneOf:
-            - type: string
-            - type: number
-            - type: integer
-            - type: boolean
-            - type: array
-              items:
-                type: string
+              - type: string
+              - type: number
+              - type: integer
+              - type: boolean
+              - type: array
+                items:
+                  type: string
           description: Денормализованные атрибуты (Event ⊕ Session).
         createdAt:
           type: string
@@ -731,18 +753,18 @@ components:
     BookingStatus:
       type: string
       enum:
-      - HOLD
-      - CONFIRMED
-      - CANCELLED
-      - EXPIRED
+        - HOLD
+        - CONFIRMED
+        - CANCELLED
+        - EXPIRED
     Booking:
       type: object
       required:
-      - id
-      - sessionId
-      - quantity
-      - status
-      - totalPrice
+        - id
+        - sessionId
+        - quantity
+        - status
+        - totalPrice
       properties:
         id:
           type: string
@@ -756,7 +778,7 @@ components:
           type: integer
           minimum: 1
         status:
-          $ref: '#/components/schemas/BookingStatus'
+          $ref: "#/components/schemas/BookingStatus"
         hold:
           type: object
           nullable: true
@@ -765,9 +787,9 @@ components:
               type: string
               format: date-time
         totalPrice:
-          $ref: '#/components/schemas/Price'
+          $ref: "#/components/schemas/Price"
         guestContact:
-          $ref: '#/components/schemas/GuestContact'
+          $ref: "#/components/schemas/GuestContact"
           nullable: true
           description: Контактные данные гостя для бронирований без регистрации (создается админом)
         notes:
@@ -783,17 +805,17 @@ components:
           description: ID пользователя (админа), создавшего бронирование
     BookingExtended:
       allOf:
-        - $ref: '#/components/schemas/Booking'
+        - $ref: "#/components/schemas/Booking"
         - type: object
           properties:
             user:
-              $ref: '#/components/schemas/User'
+              $ref: "#/components/schemas/User"
               description: Информация о пользователе (доступно при запросе с правами ADMIN)
             guestContact:
-              $ref: '#/components/schemas/GuestContact'
+              $ref: "#/components/schemas/GuestContact"
               description: Контактные данные гостя (если бронирование создано админом без привязки к пользователю)
             session:
-              $ref: '#/components/schemas/Session'
+              $ref: "#/components/schemas/Session"
               description: Информация о сессии (включается при использовании параметра includeSession)
             paymentInfo:
               type: object
@@ -819,7 +841,7 @@ components:
     GuestContact:
       type: object
       required:
-      - phone
+        - phone
       properties:
         phone:
           type: string
@@ -848,7 +870,7 @@ components:
     BookingCreateDto:
       type: object
       required:
-      - quantity
+        - quantity
       properties:
         quantity:
           type: integer
@@ -861,7 +883,7 @@ components:
             ID пользователя для бронирования (только ADMIN).
             Если не указан, бронирование создается для текущего пользователя.
         guestContact:
-          $ref: '#/components/schemas/GuestContact'
+          $ref: "#/components/schemas/GuestContact"
           nullable: true
           description: |
             Контактные данные гостя без регистрации (только ADMIN).
@@ -870,8 +892,8 @@ components:
         status:
           type: string
           enum:
-          - HOLD
-          - CONFIRMED
+            - HOLD
+            - CONFIRMED
           default: HOLD
           description: |
             Начальный статус брони (только ADMIN).
@@ -890,37 +912,37 @@ components:
     PaymentStatus:
       type: string
       enum:
-      - PENDING
-      - SUCCEEDED
-      - FAILED
-      - CANCELLED
+        - PENDING
+        - SUCCEEDED
+        - FAILED
+        - CANCELLED
     Payment:
       type: object
       required:
-      - id
-      - bookingId
-      - amount
-      - status
+        - id
+        - bookingId
+        - amount
+        - status
       properties:
         id:
           type: string
         bookingId:
           type: string
         amount:
-          $ref: '#/components/schemas/Price'
+          $ref: "#/components/schemas/Price"
         status:
-          $ref: '#/components/schemas/PaymentStatus'
+          $ref: "#/components/schemas/PaymentStatus"
         createdAt:
           type: string
           format: date-time
         provider:
           type: string
           enum:
-          - telegram
-          - stripe
-          - yookassa
-          - cloudpayments
-          - other
+            - telegram
+            - stripe
+            - yookassa
+            - cloudpayments
+            - other
         providerPaymentId:
           type: string
           nullable: true
@@ -928,77 +950,77 @@ components:
           type: string
           nullable: true
         nextAction:
-          $ref: '#/components/schemas/PaymentNextAction'
+          $ref: "#/components/schemas/PaymentNextAction"
     PaymentMethodRequest:
       oneOf:
-      - type: object
-        title: CardPayment
-        required:
-        - method
-        properties:
-          method:
-            type: string
-            enum:
-            - card
-          returnUrl:
-            type: string
-            format: uri
-            description: Куда вернёт провайдер после оплаты
-      - type: object
-        title: CertificatePayment
-        required:
-        - method
-        - certificateId
-        properties:
-          method:
-            type: string
-            enum:
-            - certificate
-          certificateId:
-            type: string
-      - type: object
-        title: SeasonTicketPayment
-        required:
-        - method
-        - seasonTicketId
-        - passesToSpend
-        properties:
-          method:
-            type: string
-            enum:
-            - pass
-          seasonTicketId:
-            type: string
-          passesToSpend:
-            type: integer
-            minimum: 1
-      - type: object
-        title: CashbackPayment
-        required:
-        - method
-        - amount
-        properties:
-          method:
-            type: string
-            enum:
-            - cashback
-          amount:
-            $ref: '#/components/schemas/Price'
+        - type: object
+          title: CardPayment
+          required:
+            - method
+          properties:
+            method:
+              type: string
+              enum:
+                - card
+            returnUrl:
+              type: string
+              format: uri
+              description: Куда вернёт провайдер после оплаты
+        - type: object
+          title: CertificatePayment
+          required:
+            - method
+            - certificateId
+          properties:
+            method:
+              type: string
+              enum:
+                - certificate
+            certificateId:
+              type: string
+        - type: object
+          title: SeasonTicketPayment
+          required:
+            - method
+            - seasonTicketId
+            - passesToSpend
+          properties:
+            method:
+              type: string
+              enum:
+                - pass
+            seasonTicketId:
+              type: string
+            passesToSpend:
+              type: integer
+              minimum: 1
+        - type: object
+          title: CashbackPayment
+          required:
+            - method
+            - amount
+          properties:
+            method:
+              type: string
+              enum:
+                - cashback
+            amount:
+              $ref: "#/components/schemas/Price"
       discriminator:
         propertyName: method
         mapping:
-          card: '#/components/schemas/PaymentMethodRequest/oneOf/0'
-          certificate: '#/components/schemas/PaymentMethodRequest/oneOf/1'
-          pass: '#/components/schemas/PaymentMethodRequest/oneOf/2'
-          cashback: '#/components/schemas/PaymentMethodRequest/oneOf/3'
+          card: "#/components/schemas/PaymentMethodRequest/oneOf/0"
+          certificate: "#/components/schemas/PaymentMethodRequest/oneOf/1"
+          pass: "#/components/schemas/PaymentMethodRequest/oneOf/2"
+          cashback: "#/components/schemas/PaymentMethodRequest/oneOf/3"
       properties:
         provider:
           type: string
           enum:
-          - telegram
-          - stripe
-          - yookassa
-          - cloudpayments
+            - telegram
+            - stripe
+            - yookassa
+            - cloudpayments
         returnUrl:
           type: string
           format: uri
@@ -1007,68 +1029,116 @@ components:
       type: object
       properties:
         amount:
-          $ref: '#/components/schemas/Price'
+          $ref: "#/components/schemas/Price"
         reason:
           type: string
           maxLength: 256
-      description: 'Частичный или полный возврат. Если amount не указан — полный возврат в валюте исходного платежа.
+      description:
+        "Частичный или полный возврат. Если amount не указан — полный возврат в валюте исходного платежа.
 
-        '
+        "
       additionalProperties: false
     Refund:
       type: object
       required:
-      - id
-      - paymentId
-      - amount
-      - createdAt
+        - id
+        - paymentId
+        - amount
+        - createdAt
       properties:
         id:
           type: string
         paymentId:
           type: string
         amount:
-          $ref: '#/components/schemas/Price'
+          $ref: "#/components/schemas/Price"
         createdAt:
           type: string
           format: date-time
+    PaymentListItem:
+      type: object
+      required:
+        - id
+        - category
+        - price
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          nullable: true
+          description: Session title or season ticket name
+        category:
+          type: string
+          enum:
+            - session
+            - seasonTicket
+            - certificate
+          description: Payment category
+        labels:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Labels from session or season ticket plan event filter, null for certificates
+        attrs:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Attributes from session or season ticket plan event filter, null for certificates
+        price:
+          $ref: "#/components/schemas/Price"
+          description: Amount spent on this payment
+        cashback:
+          $ref: "#/components/schemas/Price"
+          nullable: true
+          description: Cashback earned from this payment
+        status:
+          $ref: "#/components/schemas/PaymentStatus"
+          description: Payment status
+        createdAt:
+          type: string
+          format: date-time
+          description: Payment creation timestamp
     CertificateType:
       type: string
       enum:
-      - denomination
-      - passes
+        - denomination
+        - passes
     Certificate:
       type: object
       required:
-      - id
-      - type
+        - id
+        - type
       properties:
         id:
           type: string
         type:
-          $ref: '#/components/schemas/CertificateType'
+          $ref: "#/components/schemas/CertificateType"
         data:
           oneOf:
-          - type: object
-            title: DenominationCert
-            required:
-            - amount
-            properties:
-              amount:
-                $ref: '#/components/schemas/Price'
-          - type: object
-            title: PassesCert
-            required:
-            - passes
-            properties:
-              passes:
-                type: integer
-                minimum: 1
+            - type: object
+              title: DenominationCert
+              required:
+                - amount
+              properties:
+                amount:
+                  $ref: "#/components/schemas/Price"
+            - type: object
+              title: PassesCert
+              required:
+                - passes
+              properties:
+                passes:
+                  type: integer
+                  minimum: 1
           discriminator:
             propertyName: type
             mapping:
-              denomination: '#/components/schemas/Certificate/properties/data/oneOf/0'
-              passes: '#/components/schemas/Certificate/properties/data/oneOf/1'
+              denomination: "#/components/schemas/Certificate/properties/data/oneOf/0"
+              passes: "#/components/schemas/Certificate/properties/data/oneOf/1"
         expiresAt:
           type: string
           format: date-time
@@ -1078,31 +1148,31 @@ components:
     CertificateCreateDto:
       type: object
       required:
-      - type
-      - data
+        - type
+        - data
       properties:
         type:
-          $ref: '#/components/schemas/CertificateType'
+          $ref: "#/components/schemas/CertificateType"
         data:
           oneOf:
-          - type: object
-            required:
-            - amount
-            properties:
-              amount:
-                $ref: '#/components/schemas/Price'
-          - type: object
-            required:
-            - passes
-            properties:
-              passes:
-                type: integer
-                minimum: 1
+            - type: object
+              required:
+                - amount
+              properties:
+                amount:
+                  $ref: "#/components/schemas/Price"
+            - type: object
+              required:
+                - passes
+              properties:
+                passes:
+                  type: integer
+                  minimum: 1
           discriminator:
             propertyName: type
             mapping:
-              denomination: '#/components/schemas/CertificateCreateDto/properties/data/oneOf/0'
-              passes: '#/components/schemas/CertificateCreateDto/properties/data/oneOf/1'
+              denomination: "#/components/schemas/CertificateCreateDto/properties/data/oneOf/0"
+              passes: "#/components/schemas/CertificateCreateDto/properties/data/oneOf/1"
         expiresAt:
           type: string
           format: date-time
@@ -1182,9 +1252,9 @@ components:
       nullable: true
       properties:
         labels:
-          $ref: '#/components/schemas/EventFilterLabels'
+          $ref: "#/components/schemas/EventFilterLabels"
         attributes:
-          $ref: '#/components/schemas/EventFilterAttributes'
+          $ref: "#/components/schemas/EventFilterAttributes"
     SeasonTicketMatchMode:
       type: string
       enum:
@@ -1201,11 +1271,11 @@ components:
     SeasonTicketPlan:
       type: object
       required:
-      - id
-      - name
-      - price
-      - passes
-      - expiresIn
+        - id
+        - name
+        - price
+        - passes
+        - expiresIn
       properties:
         id:
           type: string
@@ -1215,7 +1285,7 @@ components:
           type: string
           nullable: true
         price:
-          $ref: '#/components/schemas/Price'
+          $ref: "#/components/schemas/Price"
         passes:
           type: integer
           minimum: 1
@@ -1224,7 +1294,7 @@ components:
           minimum: 1
           description: Срок действия абонемента в днях с момента покупки
         matchMode:
-          $ref: '#/components/schemas/SeasonTicketMatchMode'
+          $ref: "#/components/schemas/SeasonTicketMatchMode"
           default: ALL
         eventIds:
           type: array
@@ -1233,15 +1303,15 @@ components:
           nullable: true
           description: Явный список Event ID для абонемента (опционально)
         eventFilter:
-          $ref: '#/components/schemas/EventFilter'
+          $ref: "#/components/schemas/EventFilter"
           description: Гибкие фильтры для матчинга событий (опционально)
     SeasonTicketPlanCreateDto:
       type: object
       required:
-      - name
-      - price
-      - passes
-      - expiresIn
+        - name
+        - price
+        - passes
+        - expiresIn
       properties:
         name:
           type: string
@@ -1249,7 +1319,7 @@ components:
           type: string
           nullable: true
         price:
-          $ref: '#/components/schemas/Price'
+          $ref: "#/components/schemas/Price"
         passes:
           type: integer
           minimum: 1
@@ -1258,7 +1328,7 @@ components:
           minimum: 1
           description: Срок действия абонемента в днях с момента покупки
         matchMode:
-          $ref: '#/components/schemas/SeasonTicketMatchMode'
+          $ref: "#/components/schemas/SeasonTicketMatchMode"
           default: ALL
         eventIds:
           type: array
@@ -1267,7 +1337,7 @@ components:
           nullable: true
           description: Явный список Event ID для абонемента (опционально)
         eventFilter:
-          $ref: '#/components/schemas/EventFilter'
+          $ref: "#/components/schemas/EventFilter"
           description: Гибкие фильтры для матчинга событий (опционально)
       additionalProperties: false
     SeasonTicketPlanUpdateDto:
@@ -1279,7 +1349,7 @@ components:
           type: string
           nullable: true
         price:
-          $ref: '#/components/schemas/Price'
+          $ref: "#/components/schemas/Price"
         passes:
           type: integer
           minimum: 1
@@ -1288,39 +1358,39 @@ components:
           minimum: 1
           description: Срок действия абонемента в днях с момента покупки
         matchMode:
-          $ref: '#/components/schemas/SeasonTicketMatchMode'
+          $ref: "#/components/schemas/SeasonTicketMatchMode"
         eventIds:
           type: array
           items:
             type: string
           nullable: true
         eventFilter:
-          $ref: '#/components/schemas/EventFilter'
+          $ref: "#/components/schemas/EventFilter"
       additionalProperties: false
     SeasonTicketStatus:
       type: string
       enum:
-      - ACTIVE
-      - EXPIRED
-      - CANCELLED
+        - ACTIVE
+        - EXPIRED
+        - CANCELLED
     SeasonTicket:
       type: object
       required:
-      - id
-      - planId
-      - userId
-      - status
-      - remainingPasses
-      - validUntil
+        - id
+        - plan
+        - userId
+        - status
+        - remainingPasses
+        - validUntil
       properties:
         id:
           type: string
-        planId:
-          type: string
+        plan:
+          $ref: "#/components/schemas/SeasonTicketPlan"
         userId:
           type: string
         status:
-          $ref: '#/components/schemas/SeasonTicketStatus'
+          $ref: "#/components/schemas/SeasonTicketStatus"
         remainingPasses:
           type: integer
           minimum: 0
@@ -1331,30 +1401,30 @@ components:
     CashbackWallet:
       type: object
       required:
-      - balance
+        - balance
       properties:
         balance:
-          $ref: '#/components/schemas/Price'
+          $ref: "#/components/schemas/Price"
         history:
           type: array
           items:
             type: object
             required:
-            - id
-            - amount
-            - type
-            - createdAt
+              - id
+              - amount
+              - type
+              - createdAt
             properties:
               id:
                 type: string
               type:
                 type: string
                 enum:
-                - EARN
-                - REDEEM
-                - ADJUST
+                  - EARN
+                  - REDEEM
+                  - ADJUST
               amount:
-                $ref: '#/components/schemas/Price'
+                $ref: "#/components/schemas/Price"
               createdAt:
                 type: string
                 format: date-time
@@ -1364,23 +1434,23 @@ components:
     CashbackRules:
       type: object
       required:
-      - earnRates
-      - maxRedeemRate
+        - earnRates
+        - maxRedeemRate
       properties:
         earnRates:
           type: array
           items:
             type: object
             required:
-            - product
-            - rate
+              - product
+              - rate
             properties:
               product:
                 type: string
                 enum:
-                - single
-                - certificate
-                - seasonTicket
+                  - single
+                  - certificate
+                  - seasonTicket
               rate:
                 type: number
                 minimum: 0
@@ -1394,10 +1464,10 @@ components:
     WaitlistEntry:
       type: object
       required:
-      - id
-      - sessionId
-      - userId
-      - createdAt
+        - id
+        - sessionId
+        - userId
+        - createdAt
       properties:
         id:
           type: string
@@ -1414,12 +1484,12 @@ components:
     AuditLog:
       type: object
       required:
-      - id
-      - ts
-      - actorUserId
-      - action
-      - subjectType
-      - subjectId
+        - id
+        - ts
+        - actorUserId
+        - action
+        - subjectType
+        - subjectId
       properties:
         id:
           type: string
@@ -1437,12 +1507,12 @@ components:
     SessionStatus:
       type: string
       enum:
-      - SCHEDULED
-      - CANCELLED
+        - SCHEDULED
+        - CANCELLED
     SessionCreateDto:
       type: object
       required:
-      - startsAt
+        - startsAt
       properties:
         startsAt:
           type: string
@@ -1465,13 +1535,13 @@ components:
           type: object
           additionalProperties:
             oneOf:
-            - type: string
-            - type: number
-            - type: integer
-            - type: boolean
-            - type: array
-              items:
-                type: string
+              - type: string
+              - type: number
+              - type: integer
+              - type: boolean
+              - type: array
+                items:
+                  type: string
           description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
       additionalProperties: false
     SessionUpdateDto:
@@ -1497,19 +1567,19 @@ components:
           type: object
           additionalProperties:
             oneOf:
-            - type: string
-            - type: number
-            - type: integer
-            - type: boolean
-            - type: array
-              items:
-                type: string
+              - type: string
+              - type: number
+              - type: integer
+              - type: boolean
+              - type: array
+                items:
+                  type: string
           description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
       additionalProperties: false
     SessionBulkUpdateDto:
       type: object
       required:
-      - id
+        - id
       properties:
         id:
           type: string
@@ -1534,19 +1604,19 @@ components:
           type: object
           additionalProperties:
             oneOf:
-            - type: string
-            - type: number
-            - type: integer
-            - type: boolean
-            - type: array
-              items:
-                type: string
+              - type: string
+              - type: number
+              - type: integer
+              - type: boolean
+              - type: array
+                items:
+                  type: string
           description: Произвольные атрибуты (типизированная карта ключ→значение). Управляются админом.
       additionalProperties: false
     SessionBulkDeleteDto:
       type: object
       required:
-      - ids
+        - ids
       properties:
         ids:
           type: array
@@ -1563,66 +1633,66 @@ components:
     JobExecutionResult:
       type: object
       required:
-      - expired
+        - expired
       properties:
         expired:
           type: integer
           description: Количество обработанных записей
     PaymentNextAction:
       oneOf:
-      - $ref: '#/components/schemas/PaymentNextActionOpenInvoice'
-      - $ref: '#/components/schemas/PaymentNextActionRedirect'
-      - $ref: '#/components/schemas/PaymentNextActionNone'
+        - $ref: "#/components/schemas/PaymentNextActionOpenInvoice"
+        - $ref: "#/components/schemas/PaymentNextActionRedirect"
+        - $ref: "#/components/schemas/PaymentNextActionNone"
       discriminator:
         propertyName: type
         mapping:
-          openInvoice: '#/components/schemas/PaymentNextActionOpenInvoice'
-          redirect: '#/components/schemas/PaymentNextActionRedirect'
-          none: '#/components/schemas/PaymentNextActionNone'
+          openInvoice: "#/components/schemas/PaymentNextActionOpenInvoice"
+          redirect: "#/components/schemas/PaymentNextActionRedirect"
+          none: "#/components/schemas/PaymentNextActionNone"
     PaymentNextActionOpenInvoice:
       type: object
       required:
-      - type
-      - slugOrUrl
+        - type
+        - slugOrUrl
       properties:
         type:
           type: string
           enum:
-          - openInvoice
+            - openInvoice
         slugOrUrl:
           type: string
     PaymentNextActionRedirect:
       type: object
       required:
-      - type
-      - url
+        - type
+        - url
       properties:
         type:
           type: string
           enum:
-          - redirect
+            - redirect
         url:
           type: string
           format: uri
     PaymentNextActionNone:
       type: object
       required:
-      - type
+        - type
       properties:
         type:
           type: string
           enum:
-          - none
+            - none
     CompositePaymentMethodRequest:
       type: object
       required:
-      - methods
+        - methods
       properties:
         methods:
           type: array
           minItems: 1
           items:
-            $ref: '#/components/schemas/PaymentMethodRequest'
+            $ref: "#/components/schemas/PaymentMethodRequest"
     TelegramUser:
       type: object
       properties:
@@ -1650,24 +1720,24 @@ components:
         provider_payment_charge_id:
           type: string
       required:
-      - currency
-      - total_amount
-      - invoice_payload
-      - telegram_payment_charge_id
+        - currency
+        - total_amount
+        - invoice_payload
+        - telegram_payment_charge_id
     Message:
       type: object
       properties:
         message_id:
           type: integer
         from:
-          $ref: '#/components/schemas/TelegramUser'
+          $ref: "#/components/schemas/TelegramUser"
         date:
           type: integer
         chat:
           type: object
           additionalProperties: true
         successful_payment:
-          $ref: '#/components/schemas/SuccessfulPayment'
+          $ref: "#/components/schemas/SuccessfulPayment"
     OrderInfo:
       type: object
       additionalProperties: true
@@ -1677,7 +1747,7 @@ components:
         id:
           type: string
         from:
-          $ref: '#/components/schemas/TelegramUser'
+          $ref: "#/components/schemas/TelegramUser"
         currency:
           type: string
         total_amount:
@@ -1687,22 +1757,22 @@ components:
         shipping_option_id:
           type: string
         order_info:
-          $ref: '#/components/schemas/OrderInfo'
+          $ref: "#/components/schemas/OrderInfo"
       required:
-      - id
-      - from
-      - currency
-      - total_amount
-      - invoice_payload
+        - id
+        - from
+        - currency
+        - total_amount
+        - invoice_payload
     TelegramUpdate:
       type: object
       properties:
         update_id:
           type: integer
         pre_checkout_query:
-          $ref: '#/components/schemas/PreCheckoutQuery'
+          $ref: "#/components/schemas/PreCheckoutQuery"
         message:
-          $ref: '#/components/schemas/Message'
+          $ref: "#/components/schemas/Message"
       additionalProperties: true
   examples:
     TelegramUpdatePreCheckout:
@@ -1710,7 +1780,7 @@ components:
       value:
         update_id: 123456789
         pre_checkout_query:
-          id: '9047436821904'
+          id: "9047436821904"
           from:
             id: 11111111
             is_bot: false
@@ -1804,7 +1874,7 @@ paths:
   /auth/telegram:
     post:
       tags:
-      - Auth
+        - Auth
       summary: Логин через Telegram initData
       security: []
       requestBody:
@@ -1812,20 +1882,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TelegramLoginDto'
+              $ref: "#/components/schemas/TelegramLoginDto"
       responses:
-        '200':
+        "200":
           description: Успешная аутентификация через Telegram
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /auth/login:
     post:
       tags:
-      - Auth
+        - Auth
       summary: Логин по email/username и паролю
       security: []
       requestBody:
@@ -1833,7 +1903,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginDto'
+              $ref: "#/components/schemas/LoginDto"
             examples:
               emailLogin:
                 summary: Логин по email
@@ -1846,25 +1916,25 @@ paths:
                   login: johndoe
                   password: SecurePassword123
       responses:
-        '200':
+        "200":
           description: Успешная аутентификация
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
-        '401':
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
           description: Неверные учетные данные
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 code: INVALID_CREDENTIALS
                 message: Invalid login credentials
   /auth/register:
     post:
       tags:
-      - Auth
+        - Auth
       summary: Регистрация нового пользователя
       security: []
       requestBody:
@@ -1872,7 +1942,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegisterDto'
+              $ref: "#/components/schemas/RegisterDto"
             examples:
               regularUserByEmail:
                 summary: Регистрация обычного пользователя по email
@@ -1900,18 +1970,18 @@ paths:
                   lastName: User
                   role: ADMIN
       responses:
-        '201':
+        "201":
           description: Пользователь успешно зарегистрирован
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
-        '400':
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
           description: Ошибка валидации данных
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               examples:
                 weakPassword:
                   summary: Слабый пароль
@@ -1923,28 +1993,28 @@ paths:
                   value:
                     code: INVALID_EMAIL
                     message: Invalid email format
-        '403':
+        "403":
           description: Недостаточно прав для указания роли
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 code: FORBIDDEN
                 message: Only admins can specify user role during registration
-        '409':
+        "409":
           description: Пользователь уже существует
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 code: USER_EXISTS
                 message: User with this email or username already exists
   /auth/refresh:
     post:
       tags:
-      - Auth
+        - Auth
       summary: Обновление accessToken по refreshToken (ротация refresh)
       security: []
       requestBody:
@@ -1954,181 +2024,242 @@ paths:
             schema:
               type: object
               required:
-              - refreshToken
+                - refreshToken
               properties:
                 refreshToken:
                   type: string
       responses:
-        '200':
+        "200":
           description: Новые токены
           content:
             application/json:
               schema:
                 type: object
                 required:
-                - accessToken
-                - refreshToken
+                  - accessToken
+                  - refreshToken
                 properties:
                   accessToken:
                     type: string
                   refreshToken:
                     type: string
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /auth/logout:
     post:
       tags:
-      - Auth
+        - Auth
       summary: Инвалидация refresh токена (logout)
       responses:
-        '204':
+        "204":
           description: Логаут выполнен
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /users:
     get:
       tags:
-      - Users
+        - Users
       summary: Список пользователей (ADMIN)
       parameters:
-      - $ref: '#/components/parameters/CursorParam'
-      - $ref: '#/components/parameters/LimitParam'
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 type: object
                 required:
-                - items
+                  - items
                 properties:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/User'
+                      $ref: "#/components/schemas/User"
                   next:
                     type: string
                     nullable: true
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
   /users/{id}:
     get:
       tags:
-      - Users
+        - Users
       summary: Получить пользователя (self или ADMIN)
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
     patch:
       tags:
-      - Users
+        - Users
       summary: Обновить профиль (self)
+      description: |
+        Обновление профиля пользователя. Поддерживает два формата запросов:
+
+        **1. application/json** - для обновления текстовых полей и удаления фото:
+        - Для удаления фото отправьте `{"photoUrl": null}` или `{"deletePhoto": true}`
+        - Для установки внешнего URL отправьте `{"photoUrl": "https://example.com/photo.jpg"}`
+
+        **2. multipart/form-data** - для загрузки или удаления фото:
+        - Для загрузки: загрузите файл в поле `photo` (макс. 10MB, JPEG/PNG/GIF/WebP)
+        - Для удаления: установите поле `deletePhoto=true`
+        - Можно комбинировать с обновлением других полей
+
+        **Приоритет операций**: Загрузка фото > deletePhoto > photoUrl
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserUpdateDto'
+              $ref: "#/components/schemas/UserUpdateDto"
+            examples:
+              deletePhotoWithFlag:
+                summary: Удаление фото профиля (deletePhoto)
+                value:
+                  deletePhoto: true
+              deletePhotoWithNull:
+                summary: Удаление фото профиля (photoUrl null)
+                value:
+                  photoUrl: null
+              updateFields:
+                summary: Обновление полей профиля
+                value:
+                  firstName: Иван
+                  lastName: Иванов
+                  email: ivan@example.com
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  nullable: true
+                firstName:
+                  type: string
+                  nullable: true
+                lastName:
+                  type: string
+                  nullable: true
+                email:
+                  type: string
+                  format: email
+                  nullable: true
+                dateOfBirth:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  description: Дата рождения в формате ISO 8601
+                photo:
+                  type: string
+                  format: binary
+                  nullable: true
+                  description: Фото профиля (макс. 10MB, форматы - JPEG, PNG, GIF, WebP)
+                deletePhoto:
+                  type: boolean
+                  nullable: true
+                  description: Установите true для удаления существующей фотографии
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Bad Request (например, файл слишком большой или неверный формат)
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
   /users/{id}/cashback:
     get:
       tags:
-      - Cashback
+        - Cashback
       summary: Баланс кэшбэка пользователя (self или ADMIN)
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CashbackWallet'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
+                $ref: "#/components/schemas/CashbackWallet"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
   /cashback/rules:
     get:
       tags:
-      - Cashback
+        - Cashback
       summary: Правила начисления/списания кэшбэка (read-only)
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CashbackRules'
+                $ref: "#/components/schemas/CashbackRules"
   /events:
     get:
       tags:
-      - Events
+        - Events
       summary: Каталог событий
       parameters:
-      - in: query
-        name: q
-        schema:
-          type: string
-        description: Поиск по названию/описанию
-      - $ref: '#/components/parameters/StartsAfterParam'
-      - $ref: '#/components/parameters/EndsBeforeParam'
-      - $ref: '#/components/parameters/CursorParam'
-      - $ref: '#/components/parameters/LimitParam'
-      - $ref: '#/components/parameters/LabelsAnyParam'
-      - $ref: '#/components/parameters/LabelsAllParam'
-      - $ref: '#/components/parameters/LabelsNoneParam'
-      - $ref: '#/components/parameters/AttrEqParam'
-      - $ref: '#/components/parameters/AttrInParam'
-      - $ref: '#/components/parameters/AttrGteParam'
-      - $ref: '#/components/parameters/AttrLteParam'
-      - $ref: '#/components/parameters/AttrBoolParam'
-      - $ref: '#/components/parameters/AttrExistsParam'
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Поиск по названию/описанию
+        - $ref: "#/components/parameters/StartsAfterParam"
+        - $ref: "#/components/parameters/EndsBeforeParam"
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - $ref: "#/components/parameters/LabelsAnyParam"
+        - $ref: "#/components/parameters/LabelsAllParam"
+        - $ref: "#/components/parameters/LabelsNoneParam"
+        - $ref: "#/components/parameters/AttrEqParam"
+        - $ref: "#/components/parameters/AttrInParam"
+        - $ref: "#/components/parameters/AttrGteParam"
+        - $ref: "#/components/parameters/AttrLteParam"
+        - $ref: "#/components/parameters/AttrBoolParam"
+        - $ref: "#/components/parameters/AttrExistsParam"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -2138,125 +2269,125 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Event'
+                      $ref: "#/components/schemas/Event"
                   next:
                     type: string
                     nullable: true
     post:
       tags:
-      - Events
+        - Events
       summary: Создать событие (ADMIN)
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EventCreateDto'
+              $ref: "#/components/schemas/EventCreateDto"
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Event'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+                $ref: "#/components/schemas/Event"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
   /events/{id}:
     get:
       tags:
-      - Events
+        - Events
       summary: Получить событие
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Event'
-        '404':
-          $ref: '#/components/responses/NotFound'
+                $ref: "#/components/schemas/Event"
+        "404":
+          $ref: "#/components/responses/NotFound"
     patch:
       tags:
-      - Events
-      - Admin
+        - Events
+        - Admin
       summary: Обновить событие (ADMIN)
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EventUpdateDto'
+              $ref: "#/components/schemas/EventUpdateDto"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Event'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
+                $ref: "#/components/schemas/Event"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
           description: Конфликт (например, событие имеет активные сессии)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               example:
                 code: HAS_ACTIVE_SESSIONS
                 message: Cannot modify event with active sessions
     delete:
       tags:
-      - Events
-      - Admin
+        - Events
+        - Admin
       summary: Удалить событие (ADMIN)
       description: |
         Удаляет событие. По умолчанию не позволяет удалить событие, 
         если у него есть сессии с активными бронированиями.
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      - in: query
-        name: force
-        schema:
-          type: boolean
-          default: false
-        description: Принудительное удаление даже при наличии связанных сессий
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: force
+          schema:
+            type: boolean
+            default: false
+          description: Принудительное удаление даже при наличии связанных сессий
       responses:
-        '204':
+        "204":
           description: Событие успешно удалено
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
           description: Конфликт (событие имеет активные сессии или бронирования)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               examples:
                 hasActiveSessions:
                   summary: Событие имеет активные сессии
@@ -2271,32 +2402,32 @@ paths:
   /events/{id}/sessions:
     get:
       tags:
-      - Sessions
+        - Sessions
       summary: Сессии события (возвращает eventId вместо полного события)
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      - $ref: '#/components/parameters/StartsAfterParam'
-      - $ref: '#/components/parameters/EndsBeforeParam'
-      - $ref: '#/components/parameters/MinRemainingSeatsParam'
-      - $ref: '#/components/parameters/SortByParam'
-      - $ref: '#/components/parameters/SortOrderParam'
-      - $ref: '#/components/parameters/CursorParam'
-      - $ref: '#/components/parameters/LimitParam'
-      - $ref: '#/components/parameters/LabelsAnyParam'
-      - $ref: '#/components/parameters/LabelsAllParam'
-      - $ref: '#/components/parameters/LabelsNoneParam'
-      - $ref: '#/components/parameters/AttrEqParam'
-      - $ref: '#/components/parameters/AttrInParam'
-      - $ref: '#/components/parameters/AttrGteParam'
-      - $ref: '#/components/parameters/AttrLteParam'
-      - $ref: '#/components/parameters/AttrBoolParam'
-      - $ref: '#/components/parameters/AttrExistsParam'
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/StartsAfterParam"
+        - $ref: "#/components/parameters/EndsBeforeParam"
+        - $ref: "#/components/parameters/MinRemainingSeatsParam"
+        - $ref: "#/components/parameters/SortByParam"
+        - $ref: "#/components/parameters/SortOrderParam"
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - $ref: "#/components/parameters/LabelsAnyParam"
+        - $ref: "#/components/parameters/LabelsAllParam"
+        - $ref: "#/components/parameters/LabelsNoneParam"
+        - $ref: "#/components/parameters/AttrEqParam"
+        - $ref: "#/components/parameters/AttrInParam"
+        - $ref: "#/components/parameters/AttrGteParam"
+        - $ref: "#/components/parameters/AttrLteParam"
+        - $ref: "#/components/parameters/AttrBoolParam"
+        - $ref: "#/components/parameters/AttrExistsParam"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -2306,83 +2437,84 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/SessionCompact'
+                      $ref: "#/components/schemas/SessionCompact"
                   next:
                     type: string
                     nullable: true
     post:
       tags:
-      - Sessions
-      - Admin
+        - Sessions
+        - Admin
       summary: Создать сессии для события (ADMIN)
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      - $ref: '#/components/parameters/IdempotencyKeyHeader'
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/IdempotencyKeyHeader"
       requestBody:
         required: true
         content:
           application/json:
             schema:
               oneOf:
-              - $ref: '#/components/schemas/SessionCreateDto'
-              - type: array
-                minItems: 1
-                items:
-                  $ref: '#/components/schemas/SessionCreateDto'
+                - $ref: "#/components/schemas/SessionCreateDto"
+                - type: array
+                  minItems: 1
+                  items:
+                    $ref: "#/components/schemas/SessionCreateDto"
       responses:
-        '201':
+        "201":
           description: Сессии созданы
           content:
             application/json:
               schema:
                 type: object
                 required:
-                - items
+                  - items
                 properties:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/SessionCompact'
-        '401': &id001
-          $ref: '#/components/responses/Unauthorized'
-        '403': &id002
-          $ref: '#/components/responses/Forbidden'
-        '404': &id003
-          $ref: '#/components/responses/NotFound'
-        '409': &id004
-          $ref: '#/components/responses/Conflict'
+                      $ref: "#/components/schemas/SessionCompact"
+        "401": &id001
+          $ref: "#/components/responses/Unauthorized"
+        "403": &id002
+          $ref: "#/components/responses/Forbidden"
+        "404": &id003
+          $ref: "#/components/responses/NotFound"
+        "409": &id004
+          $ref: "#/components/responses/Conflict"
   /sessions:
     get:
       tags:
-      - Sessions
+        - Sessions
       summary: Поиск сессий (возвращает полное событие)
       parameters:
-      - in: query
-        name: eventId
-        schema:
-          type: string
-      - $ref: '#/components/parameters/StartsAfterParam'
-      - $ref: '#/components/parameters/EndsBeforeParam'
-      - $ref: '#/components/parameters/MinRemainingSeatsParam'
-      - $ref: '#/components/parameters/SortByParam'
-      - $ref: '#/components/parameters/SortOrderParam'
-      - $ref: '#/components/parameters/CursorParam'
-      - $ref: '#/components/parameters/LimitParam'
-      - $ref: '#/components/parameters/LabelsAnyParam'
-      - $ref: '#/components/parameters/LabelsAllParam'
-      - $ref: '#/components/parameters/LabelsNoneParam'
-      - $ref: '#/components/parameters/AttrEqParam'
-      - $ref: '#/components/parameters/AttrInParam'
-      - $ref: '#/components/parameters/AttrGteParam'
-      - $ref: '#/components/parameters/AttrLteParam'
-      - $ref: '#/components/parameters/AttrBoolParam'
-      - $ref: '#/components/parameters/AttrExistsParam'
+        - in: query
+          name: eventId
+          schema:
+            type: string
+        - $ref: "#/components/parameters/StartsAfterParam"
+        - $ref: "#/components/parameters/EndsBeforeParam"
+        - $ref: "#/components/parameters/MinRemainingSeatsParam"
+        - $ref: "#/components/parameters/OnWaitlistParam"
+        - $ref: "#/components/parameters/SortByParam"
+        - $ref: "#/components/parameters/SortOrderParam"
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - $ref: "#/components/parameters/LabelsAnyParam"
+        - $ref: "#/components/parameters/LabelsAllParam"
+        - $ref: "#/components/parameters/LabelsNoneParam"
+        - $ref: "#/components/parameters/AttrEqParam"
+        - $ref: "#/components/parameters/AttrInParam"
+        - $ref: "#/components/parameters/AttrGteParam"
+        - $ref: "#/components/parameters/AttrLteParam"
+        - $ref: "#/components/parameters/AttrBoolParam"
+        - $ref: "#/components/parameters/AttrExistsParam"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -2392,20 +2524,20 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Session'
+                      $ref: "#/components/schemas/Session"
                   next:
                     type: string
                     nullable: true
     patch:
       tags:
-      - Sessions
-      - Admin
+        - Sessions
+        - Admin
       summary: Массовое обновление сессий (ADMIN)
       description: |
         Позволяет обновить несколько сессий за один запрос.
         Каждая сессия в массиве должна содержать ID и поля для обновления.
       parameters:
-      - $ref: '#/components/parameters/IdempotencyKeyHeader'
+        - $ref: "#/components/parameters/IdempotencyKeyHeader"
       requestBody:
         required: true
         content:
@@ -2415,7 +2547,7 @@ paths:
               minItems: 1
               maxItems: 100
               items:
-                $ref: '#/components/schemas/SessionBulkUpdateDto'
+                $ref: "#/components/schemas/SessionBulkUpdateDto"
             example:
               - id: session_123
                 startsAt: "2025-03-01T10:00:00Z"
@@ -2424,21 +2556,21 @@ paths:
                 startsAt: "2025-03-02T10:00:00Z"
                 labels: ["sport:surf", "level:intermediate"]
       responses:
-        '200':
+        "200":
           description: Сессии успешно обновлены
           content:
             application/json:
               schema:
                 type: object
                 required:
-                - items
-                - updated
-                - failed
+                  - items
+                  - updated
+                  - failed
                 properties:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Session'
+                      $ref: "#/components/schemas/Session"
                     description: Успешно обновленные сессии
                   updated:
                     type: integer
@@ -2448,8 +2580,8 @@ paths:
                     items:
                       type: object
                       required:
-                      - id
-                      - error
+                        - id
+                        - error
                       properties:
                         id:
                           type: string
@@ -2458,45 +2590,45 @@ paths:
                           type: string
                           description: Описание ошибки
                     description: Список сессий, которые не удалось обновить
-        '400':
+        "400":
           description: Неверный формат запроса
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
     delete:
       tags:
-      - Sessions
-      - Admin
+        - Sessions
+        - Admin
       summary: Массовое удаление сессий (ADMIN)
       description: |
         Позволяет удалить несколько сессий за один запрос.
         По умолчанию не позволяет удалить сессии с активными бронированиями.
       parameters:
-      - $ref: '#/components/parameters/IdempotencyKeyHeader'
+        - $ref: "#/components/parameters/IdempotencyKeyHeader"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SessionBulkDeleteDto'
+              $ref: "#/components/schemas/SessionBulkDeleteDto"
             example:
               ids: ["session_123", "session_456", "session_789"]
               force: false
       responses:
-        '200':
+        "200":
           description: Операция выполнена
           content:
             application/json:
               schema:
                 type: object
                 required:
-                - deleted
-                - failed
+                  - deleted
+                  - failed
                 properties:
                   deleted:
                     type: array
@@ -2508,8 +2640,8 @@ paths:
                     items:
                       type: object
                       required:
-                      - id
-                      - error
+                        - id
+                        - error
                       properties:
                         id:
                           type: string
@@ -2518,117 +2650,117 @@ paths:
                           type: string
                           description: Причина ошибки
                     description: Список сессий, которые не удалось удалить
-        '400':
+        "400":
           description: Неверный формат запроса
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
   /sessions/{id}:
     get:
       tags:
-      - Sessions
+        - Sessions
       summary: Получить сессию
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Session'
-        '404':
-          $ref: '#/components/responses/NotFound'
+                $ref: "#/components/schemas/Session"
+        "404":
+          $ref: "#/components/responses/NotFound"
     patch:
       tags:
-      - Sessions
-      - Admin
+        - Sessions
+        - Admin
       summary: Обновить сессию (ADMIN)
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SessionUpdateDto'
+              $ref: "#/components/schemas/SessionUpdateDto"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Session'
-        '401': *id001
-        '403': *id002
-        '404': *id003
-        '409': *id004
+                $ref: "#/components/schemas/Session"
+        "401": *id001
+        "403": *id002
+        "404": *id003
+        "409": *id004
     delete:
       tags:
-      - Sessions
-      - Admin
+        - Sessions
+        - Admin
       summary: Отменить сессию (перевод в статус CANCELLED) (ADMIN)
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
-        '200':
+        "200":
           description: Отменено
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Session'
-        '401': *id001
-        '403': *id002
-        '404': *id003
-        '409': *id004
+                $ref: "#/components/schemas/Session"
+        "401": *id001
+        "403": *id002
+        "404": *id003
+        "409": *id004
   /sessions/{id}/book:
     post:
       tags:
-      - Bookings
+        - Bookings
       summary: Забронировать места в сессии
       description: |
         Создает бронирование для сессии. Поведение зависит от роли пользователя:
-        
+
         **Для обычных пользователей (USER):**
         - Создает бронирование для текущего пользователя
         - Принимает только поле `quantity`
         - Всегда создает статус HOLD
-        
+
         **Для администраторов (ADMIN):**
         - Может создать бронирование для любого пользователя или гостя
         - Поддерживает дополнительные поля: `userId`, `guestContact`, `status`, `notes`
         - Может сразу подтвердить бронирование (status: CONFIRMED) для офлайн оплаты
         - Если не указан userId или guestContact, создает для текущего пользователя
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      - $ref: '#/components/parameters/IdempotencyKeyHeader'
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/IdempotencyKeyHeader"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BookingCreateDto'
+              $ref: "#/components/schemas/BookingCreateDto"
             examples:
               userBooking:
                 summary: Обычное бронирование пользователем
@@ -2659,7 +2791,7 @@ paths:
                   status: CONFIRMED
                   notes: Тестовое бронирование
       responses:
-        '201':
+        "201":
           description: Бронирование создано
           headers:
             X-Hold-TTL:
@@ -2670,103 +2802,103 @@ paths:
             application/json:
               schema:
                 oneOf:
-                - $ref: '#/components/schemas/Booking'
-                - $ref: '#/components/schemas/BookingExtended'
-        '400':
+                  - $ref: "#/components/schemas/Booking"
+                  - $ref: "#/components/schemas/BookingExtended"
+        "400":
           description: Некорректные данные
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
+                $ref: "#/components/schemas/Error"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
           description: Недостаточно прав (попытка использовать админские поля без роли ADMIN)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
+                $ref: "#/components/schemas/Error"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
   /bookings:
     get:
       tags:
-      - Bookings
+        - Bookings
       summary: Список бронирований (self или ADMIN с расширенными возможностями фильтрации)
       parameters:
-      - in: query
-        name: userId
-        schema:
-          type: string
-        description: Фильтр по ID пользователя. Доступно только ADMIN для просмотра чужих бронирований. По умолчанию возвращаются бронирования текущего пользователя.
-      - in: query
-        name: sessionId
-        schema:
-          type: string
-        description: Фильтр по ID сессии. Обычные пользователи видят только свои бронирования для данной сессии. ADMIN видит все бронирования сессии.
-      - in: query
-        name: status
-        style: form
-        explode: false
-        schema:
-          type: array
-          items:
+        - in: query
+          name: userId
+          schema:
+            type: string
+          description: Фильтр по ID пользователя. Доступно только ADMIN для просмотра чужих бронирований. По умолчанию возвращаются бронирования текущего пользователя.
+        - in: query
+          name: sessionId
+          schema:
+            type: string
+          description: Фильтр по ID сессии. Обычные пользователи видят только свои бронирования для данной сессии. ADMIN видит все бронирования сессии.
+        - in: query
+          name: status
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - HOLD
+                - CONFIRMED
+                - CANCELLED
+                - EXPIRED
+          description: Фильтр по статусам бронирования (можно указать несколько через запятую, например status=HOLD,CONFIRMED).
+        - in: query
+          name: bookingType
+          schema:
             type: string
             enum:
-            - HOLD
-            - CONFIRMED
-            - CANCELLED
-            - EXPIRED
-        description: Фильтр по статусам бронирования (можно указать несколько через запятую, например status=HOLD,CONFIRMED).
-      - in: query
-        name: bookingType
-        schema:
-          type: string
-          enum:
-          - registered
-          - guest
-          - all
-          default: all
-        description: Фильтр по типу бронирования (зарегистрированные пользователи / гости / все). Доступно только ADMIN.
-      - in: query
-        name: includeUser
-        schema:
-          type: boolean
-          default: false
-        description: Включить информацию о пользователе в ответ. Доступно только ADMIN.
-      - in: query
-        name: includeSession
-        schema:
-          type: boolean
-          default: false
-        description: Включить полную информацию о сессии в ответ.
-      - in: query
-        name: includePaymentInfo
-        schema:
-          type: boolean
-          default: false
-        description: Включить информацию об оплате в ответ. Доступно только ADMIN.
-      - in: query
-        name: includeGuestContact
-        schema:
-          type: boolean
-          default: false
-        description: Включить контактные данные гостей в ответ. Доступно только ADMIN.
-      - $ref: '#/components/parameters/LabelsAnyParam'
-      - $ref: '#/components/parameters/LabelsAllParam'
-      - $ref: '#/components/parameters/LabelsNoneParam'
-      - $ref: '#/components/parameters/AttrEqParam'
-      - $ref: '#/components/parameters/AttrInParam'
-      - $ref: '#/components/parameters/AttrGteParam'
-      - $ref: '#/components/parameters/AttrLteParam'
-      - $ref: '#/components/parameters/AttrBoolParam'
-      - $ref: '#/components/parameters/AttrExistsParam'
-      - $ref: '#/components/parameters/CursorParam'
-      - $ref: '#/components/parameters/LimitParam'
+              - registered
+              - guest
+              - all
+            default: all
+          description: Фильтр по типу бронирования (зарегистрированные пользователи / гости / все). Доступно только ADMIN.
+        - in: query
+          name: includeUser
+          schema:
+            type: boolean
+            default: false
+          description: Включить информацию о пользователе в ответ. Доступно только ADMIN.
+        - in: query
+          name: includeSession
+          schema:
+            type: boolean
+            default: false
+          description: Включить полную информацию о сессии в ответ.
+        - in: query
+          name: includePaymentInfo
+          schema:
+            type: boolean
+            default: false
+          description: Включить информацию об оплате в ответ. Доступно только ADMIN.
+        - in: query
+          name: includeGuestContact
+          schema:
+            type: boolean
+            default: false
+          description: Включить контактные данные гостей в ответ. Доступно только ADMIN.
+        - $ref: "#/components/parameters/LabelsAnyParam"
+        - $ref: "#/components/parameters/LabelsAllParam"
+        - $ref: "#/components/parameters/LabelsNoneParam"
+        - $ref: "#/components/parameters/AttrEqParam"
+        - $ref: "#/components/parameters/AttrInParam"
+        - $ref: "#/components/parameters/AttrGteParam"
+        - $ref: "#/components/parameters/AttrLteParam"
+        - $ref: "#/components/parameters/AttrBoolParam"
+        - $ref: "#/components/parameters/AttrExistsParam"
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -2777,41 +2909,41 @@ paths:
                     type: array
                     items:
                       oneOf:
-                        - $ref: '#/components/schemas/Booking'
-                        - $ref: '#/components/schemas/BookingExtended'
+                        - $ref: "#/components/schemas/Booking"
+                        - $ref: "#/components/schemas/BookingExtended"
                   next:
                     type: string
                     nullable: true
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
   /bookings/{id}:
     get:
       tags:
-      - Bookings
+        - Bookings
       summary: Получить бронирование
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Booking'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
+                $ref: "#/components/schemas/Booking"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
     patch:
       tags:
-      - Bookings
-      - Admin
+        - Bookings
+        - Admin
       summary: Обновить бронирование (ADMIN)
       description: |
         Позволяет администратору обновить данные бронирования:
@@ -2819,11 +2951,11 @@ paths:
         - Заметки администратора
         - Количество мест (при наличии свободных)
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -2836,7 +2968,7 @@ paths:
                   minimum: 1
                   description: Новое количество мест
                 guestContact:
-                  $ref: '#/components/schemas/GuestContact'
+                  $ref: "#/components/schemas/GuestContact"
                   description: Обновленные контактные данные гостя
                 notes:
                   type: string
@@ -2844,103 +2976,103 @@ paths:
                   description: Обновленные заметки администратора
               additionalProperties: false
       responses:
-        '200':
+        "200":
           description: Бронирование обновлено
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BookingExtended'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
+                $ref: "#/components/schemas/BookingExtended"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
           description: Конфликт (например, недостаточно мест для увеличения количества)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
   /bookings/{id}/cancel:
     post:
       tags:
-      - Bookings
+        - Bookings
       summary: Отмена брони (self для HOLD/CONFIRMED в рамках политики, либо ADMIN)
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
-        '200':
+        "200":
           description: Отменено
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Booking'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
+                $ref: "#/components/schemas/Booking"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
   /bookings/{id}/confirm:
     post:
       tags:
-      - Bookings
+        - Bookings
       summary: Подтвердить бронирование (офлайн оплата, ADMIN)
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
-        '200':
+        "200":
           description: Подтверждено
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Booking'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
+                $ref: "#/components/schemas/Booking"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
   /bookings/{id}/payment:
     post:
       tags:
-      - Payments
+        - Payments
       summary: Оплата бронирования одной из стратегий (card|certificate|pass|cashback)
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      - $ref: '#/components/parameters/IdempotencyKeyHeader'
-      - name: Idempotency-Key
-        in: header
-        required: false
-        schema:
-          type: string
-        description: Idempotency key for safely retrying payment creation.
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/IdempotencyKeyHeader"
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema:
+            type: string
+          description: Idempotency key for safely retrying payment creation.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PaymentMethodRequest'
+              $ref: "#/components/schemas/PaymentMethodRequest"
               oneOf:
-              - $ref: '#/components/schemas/PaymentMethodRequest'
-              - $ref: '#/components/schemas/CompositePaymentMethodRequest'
+                - $ref: "#/components/schemas/PaymentMethodRequest"
+                - $ref: "#/components/schemas/CompositePaymentMethodRequest"
             examples:
               card_telegram:
                 summary: Card via Telegram invoice
@@ -2954,143 +3086,231 @@ paths:
                   provider: stripe
                   returnUrl: https://app.example.com/payments/return
               composite:
-                summary: 'Composite: certificate + cashback + card(telegram)'
+                summary: "Composite: certificate + cashback + card(telegram)"
                 value:
                   methods:
-                  - method: certificate
-                    certificateId: cert_123
-                  - method: cashback
-                    amount: 1500
-                  - method: card
-                    provider: telegram
+                    - method: certificate
+                      certificateId: cert_123
+                    - method: cashback
+                      amount: 1500
+                    - method: card
+                      provider: telegram
       responses:
-        '201':
+        "201":
           description: Платёж создан/инициирован
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Payment'
+                $ref: "#/components/schemas/Payment"
               examples:
                 openInvoice:
-                  $ref: '#/components/examples/PaymentNextActionOpenInvoice'
+                  $ref: "#/components/examples/PaymentNextActionOpenInvoice"
                 redirect:
-                  $ref: '#/components/examples/PaymentNextActionRedirect'
+                  $ref: "#/components/examples/PaymentNextActionRedirect"
                 succeededNone:
-                  $ref: '#/components/examples/PaymentSucceededNone'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
+                  $ref: "#/components/examples/PaymentSucceededNone"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
               examples:
                 holdExpired:
-                  $ref: '#/components/examples/ErrHoldExpired'
+                  $ref: "#/components/examples/ErrHoldExpired"
                 noSeats:
-                  $ref: '#/components/examples/ErrNoSeats'
+                  $ref: "#/components/examples/ErrNoSeats"
                 amountMismatch:
-                  $ref: '#/components/examples/ErrAmountMismatch'
+                  $ref: "#/components/examples/ErrAmountMismatch"
                 providerUnavailable:
-                  $ref: '#/components/examples/ErrProviderUnavailable'
-      description: "Creates or continues a payment for the specified booking (booking must be in HOLD state).\n\nScenarios:\n1) **Telegram invoice (Mini App)**\n   Request: `{\"method\":\"card\",\"provider\":\"telegram\"}`\n   Response `201`: `Payment{ status:PENDING, provider:'telegram', nextAction:{ type:'openInvoice', slugOrUrl } }`\n   Client: call `Telegram.WebApp.openInvoice(slugOrUrl)`, then on `invoiceClosed('paid')` or via polling call `GET /payments/{id}`.\n   Server: via `/webhooks/telegram/bot` handles `pre_checkout_query` (≤10s) and `successful_payment`, sets `Payment=SUCCEEDED` and `Booking=CONFIRMED`.\n\n2) **External PSP (redirect or embedded)**\n   Request: `{\"method\":\"card\",\"provider\":\"stripe\",\"returnUrl\":\"https://...\"}`\n   Response `201`: `Payment{ status:PENDING, provider:'stripe', nextAction:{ type:'redirect', url } }`\n   Client: open `url` inside WebApp; on return to `returnUrl`, poll `GET /payments/{id}`.\n   Server: confirms via `/webhooks/payments/provider`.\n\
+                  $ref: "#/components/examples/ErrProviderUnavailable"
+      description:
+        "Creates or continues a payment for the specified booking (booking must be in HOLD state).\n\nScenarios:\n1) **Telegram invoice (Mini App)**\n   Request: `{\"method\":\"card\",\"provider\":\"telegram\"}`\n   Response `201`: `Payment{ status:PENDING, provider:'telegram', nextAction:{ type:'openInvoice', slugOrUrl } }`\n   Client: call `Telegram.WebApp.openInvoice(slugOrUrl)`, then on `invoiceClosed('paid')` or via polling call `GET /payments/{id}`.\n   Server: via `/webhooks/telegram/bot` handles `pre_checkout_query` (≤10s) and `successful_payment`, sets `Payment=SUCCEEDED` and `Booking=CONFIRMED`.\n\n2) **External PSP (redirect or embedded)**\n   Request: `{\"method\":\"card\",\"provider\":\"stripe\",\"returnUrl\":\"https://...\"}`\n   Response `201`: `Payment{ status:PENDING, provider:'stripe', nextAction:{ type:'redirect', url } }`\n   Client: open `url` inside WebApp; on return to `returnUrl`, poll `GET /payments/{id}`.\n   Server: confirms via `/webhooks/payments/provider`.\n\
         \n3) **Composite payments (certificate/pass/cashback + card)**\n   Request:\n   {\n     \"methods\": [\n       {\"method\":\"certificate\",\"certificateId\":\"cert_123\"},\n       {\"method\":\"cashback\",\"amount\": 1500},\n       {\"method\":\"card\",\"provider\":\"telegram\"}\n     ]\n   }\n   Response `201`: \n     - If remainder > 0 → `nextAction.openInvoice` (or `redirect`).\n     - If fully covered → `status:SUCCEEDED`, `nextAction:'none'`.\n\nConflicts (409):\n- `HOLD_EXPIRED` – hold TTL elapsed; re-book required.\n- `NO_SEATS` – seats not available anymore.\n- `AMOUNT_MISMATCH` – server-calculated amount differs from invoice amount.\n- `PROVIDER_UNAVAILABLE` – payment provider is temporarily unavailable.\n\nAll create/continue calls SHOULD be sent with `Idempotency-Key`.\n"
+  /payments:
+    get:
+      tags:
+        - Payments
+      summary: Get current user payments
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - in: query
+          name: status
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/PaymentStatus"
+          description: Filter by payment status (can specify multiple, e.g. status=PENDING,SUCCEEDED)
+        - in: query
+          name: category
+          schema:
+            type: string
+            enum:
+              - session
+              - seasonTicket
+              - certificate
+          description: Filter by payment category
+        - in: query
+          name: createdAfter
+          schema:
+            type: string
+            format: date-time
+          description: Return payments created AFTER this moment (RFC3339)
+        - in: query
+          name: createdBefore
+          schema:
+            type: string
+            format: date-time
+          description: Return payments created BEFORE this moment (RFC3339)
+        - $ref: "#/components/parameters/LabelsAnyParam"
+        - $ref: "#/components/parameters/LabelsAllParam"
+        - $ref: "#/components/parameters/LabelsNoneParam"
+        - $ref: "#/components/parameters/AttrEqParam"
+        - $ref: "#/components/parameters/AttrInParam"
+        - $ref: "#/components/parameters/AttrGteParam"
+        - $ref: "#/components/parameters/AttrLteParam"
+        - $ref: "#/components/parameters/AttrBoolParam"
+        - $ref: "#/components/parameters/AttrExistsParam"
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            enum:
+              - createdAt
+              - price
+              - status
+            default: createdAt
+          description: Field to sort by
+        - in: query
+          name: sortOrder
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+          description: Sort order
+      responses:
+        "200":
+          description: List of user payments
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PaymentListItem"
+                  next:
+                    type: string
+                    nullable: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /payments/{id}:
     get:
       tags:
-      - Payments
+        - Payments
       summary: Получить платёж
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Payment'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
+                $ref: "#/components/schemas/Payment"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
   /payments/{id}/refunds:
     post:
       tags:
-      - Refunds
+        - Refunds
       summary: Создать возврат
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      - $ref: '#/components/parameters/IdempotencyKeyHeader'
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/IdempotencyKeyHeader"
       requestBody:
         required: false
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RefundRequest'
+              $ref: "#/components/schemas/RefundRequest"
       responses:
-        '201':
+        "201":
           description: Refund создан
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Refund'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
+                $ref: "#/components/schemas/Refund"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
   /certificates:
     post:
       tags:
-      - Certificates
+        - Certificates
       summary: Выпустить сертификат (ADMIN)
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CertificateCreateDto'
+              $ref: "#/components/schemas/CertificateCreateDto"
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Certificate'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+                $ref: "#/components/schemas/Certificate"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
     get:
       tags:
-      - Certificates
+        - Certificates
       summary: Мои сертификаты (self) или все (ADMIN)
       parameters:
-      - in: query
-        name: userId
-        schema:
-          type: string
-        description: Только ADMIN — просматривать по userId
-      - $ref: '#/components/parameters/CursorParam'
-      - $ref: '#/components/parameters/LimitParam'
+        - in: query
+          name: userId
+          schema:
+            type: string
+          description: Только ADMIN — просматривать по userId
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -3100,29 +3320,34 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Certificate'
+                      $ref: "#/components/schemas/Certificate"
                   next:
                     type: string
                     nullable: true
   /season-ticket-plans:
     get:
       tags:
-      - SeasonTickets
+        - SeasonTickets
       summary: Каталог планов абонементов
       parameters:
-      - in: query
-        name: eventIds
-        style: form
-        explode: false
-        schema:
-          type: array
-          items:
+        - in: query
+          name: eventIds
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+          description: Фильтр по событиям. Вернёт планы, применимые хотя бы к одному из указанных событий (OR).
+        - in: query
+          name: sessionId
+          schema:
             type: string
-        description: Фильтр по событиям. Вернёт планы, применимые хотя бы к одному из указанных событий (OR).
-      - $ref: '#/components/parameters/CursorParam'
-      - $ref: '#/components/parameters/LimitParam'
+          description: Фильтр по сессии. Вернёт планы, применимые к данной сессии.
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -3132,158 +3357,183 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/SeasonTicketPlan'
+                      $ref: "#/components/schemas/SeasonTicketPlan"
                   next:
                     type: string
                     nullable: true
     post:
       tags:
-      - SeasonTickets
+        - SeasonTickets
       summary: Создать план (ADMIN)
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SeasonTicketPlanCreateDto'
+              $ref: "#/components/schemas/SeasonTicketPlanCreateDto"
       responses:
-        '201':
+        "201":
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SeasonTicketPlan'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+                $ref: "#/components/schemas/SeasonTicketPlan"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
   /season-ticket-plans/{id}:
     get:
       tags:
-      - SeasonTickets
+        - SeasonTickets
       summary: Получить план абонемента
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SeasonTicketPlan'
-        '404':
-          $ref: '#/components/responses/NotFound'
+                $ref: "#/components/schemas/SeasonTicketPlan"
+        "404":
+          $ref: "#/components/responses/NotFound"
     patch:
       tags:
-      - SeasonTickets
+        - SeasonTickets
       summary: Обновить план (ADMIN, безопасный PATCH)
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SeasonTicketPlanUpdateDto'
+              $ref: "#/components/schemas/SeasonTicketPlanUpdateDto"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SeasonTicketPlan'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
+                $ref: "#/components/schemas/SeasonTicketPlan"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
     delete:
       tags:
-      - SeasonTickets
-      - Admin
+        - SeasonTickets
+        - Admin
       summary: Удалить план абонемента (ADMIN)
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
-        '204':
+        "204":
           description: План абонемента успешно удален
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
           description: Конфликт (план имеет активные абонементы)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
   /season-ticket-plans/{id}/purchase:
     post:
       tags:
-      - SeasonTickets
-      - Payments
+        - SeasonTickets
+        - Payments
       summary: Покупка абонемента (userId берётся из токена)
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      - $ref: '#/components/parameters/IdempotencyKeyHeader'
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/IdempotencyKeyHeader"
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PaymentMethodRequest'
+              $ref: "#/components/schemas/PaymentMethodRequest"
+              oneOf:
+                - $ref: "#/components/schemas/PaymentMethodRequest"
+                - $ref: "#/components/schemas/CompositePaymentMethodRequest"
+            examples:
+              card_telegram:
+                summary: Card via Telegram invoice
+                value:
+                  method: card
+                  provider: telegram
+              card_yookassa:
+                summary: Card via YooKassa
+                value:
+                  method: card
+                  provider: yookassa
+                  returnUrl: https://app.example.com/payments/return
+              composite:
+                summary: "Composite: cashback + card(telegram)"
+                value:
+                  methods:
+                    - method: cashback
+                      amount:
+                        currency: RUB
+                        amountMinor: 5000
+                    - method: card
+                      provider: telegram
       responses:
-        '201':
+        "201":
           description: Платёж на покупку абонемента создан
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Payment'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
+                $ref: "#/components/schemas/Payment"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
   /season-ticket-plans/{id}/applicable-events:
     get:
       tags:
-      - SeasonTickets
+        - SeasonTickets
       summary: Получить список событий, к которым применим план абонемента
       description: |
         Возвращает список всех событий, которые соответствуют критериям матчинга данного плана абонемента.
         Применяется логика matchMode плана для определения применимости.
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      - $ref: '#/components/parameters/CursorParam'
-      - $ref: '#/components/parameters/LimitParam'
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -3293,27 +3543,55 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Event'
+                      $ref: "#/components/schemas/Event"
                   next:
                     type: string
                     nullable: true
-        '404':
-          $ref: '#/components/responses/NotFound'
+        "404":
+          $ref: "#/components/responses/NotFound"
   /season-tickets:
     get:
       tags:
-      - SeasonTickets
+        - SeasonTickets
       summary: Список абонементов (self или ADMIN)
       parameters:
-      - in: query
-        name: userId
-        schema:
-          type: string
-        description: Только ADMIN — фильтр по userId
-      - $ref: '#/components/parameters/CursorParam'
-      - $ref: '#/components/parameters/LimitParam'
+        - in: query
+          name: userId
+          schema:
+            type: string
+          description: Только ADMIN — фильтр по userId
+        - in: query
+          name: sessionId
+          schema:
+            type: string
+          description: Фильтр по сессии. Вернёт абонементы, применимые к данной сессии.
+        - in: query
+          name: eventId
+          schema:
+            type: string
+          description: Фильтр по событию. Вернёт абонементы, применимые к данному событию.
+        - in: query
+          name: status
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - ACTIVE
+                - EXPIRED
+                - CANCELLED
+          description: Фильтр по статусу абонемента (можно указать несколько).
+        - in: query
+          name: hasRemainingPasses
+          schema:
+            type: boolean
+          description: Фильтр абонементов с оставшимися посещениями (true) или без них (false).
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -3323,50 +3601,50 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/SeasonTicket'
+                      $ref: "#/components/schemas/SeasonTicket"
                   next:
                     type: string
                     nullable: true
   /sessions/{id}/waitlist:
     post:
       tags:
-      - Waitlist
+        - Waitlist
       summary: Встать в лист ожидания
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      - $ref: '#/components/parameters/IdempotencyKeyHeader'
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/IdempotencyKeyHeader"
       responses:
-        '201':
+        "201":
           description: Добавлен в waitlist
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WaitlistEntry'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
+                $ref: "#/components/schemas/WaitlistEntry"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
   /users/{id}/waitlist:
     get:
       tags:
-      - Waitlist
+        - Waitlist
       summary: Лист ожидания пользователя (self или ADMIN)
       parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-      - $ref: '#/components/parameters/CursorParam'
-      - $ref: '#/components/parameters/LimitParam'
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -3376,24 +3654,24 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/WaitlistEntry'
+                      $ref: "#/components/schemas/WaitlistEntry"
                   next:
                     type: string
                     nullable: true
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
   /admin/audit-logs:
     get:
       tags:
-      - Admin
+        - Admin
       summary: Аудит-логи (ADMIN)
       parameters:
-      - $ref: '#/components/parameters/CursorParam'
-      - $ref: '#/components/parameters/LimitParam'
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -3403,78 +3681,173 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: '#/components/schemas/AuditLog'
+                      $ref: "#/components/schemas/AuditLog"
                   next:
                     type: string
                     nullable: true
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /admin/payments:
+    get:
+      tags:
+        - Admin
+        - Payments
+      summary: Get all payments (admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/LimitParam"
+        - in: query
+          name: userId
+          schema:
+            type: string
+          description: Filter by user ID (admin only)
+        - in: query
+          name: status
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/PaymentStatus"
+          description: Filter by payment status (can specify multiple, e.g. status=PENDING,SUCCEEDED)
+        - in: query
+          name: category
+          schema:
+            type: string
+            enum:
+              - session
+              - seasonTicket
+              - certificate
+          description: Filter by payment category
+        - in: query
+          name: createdAfter
+          schema:
+            type: string
+            format: date-time
+          description: Return payments created AFTER this moment (RFC3339)
+        - in: query
+          name: createdBefore
+          schema:
+            type: string
+            format: date-time
+          description: Return payments created BEFORE this moment (RFC3339)
+        - $ref: "#/components/parameters/LabelsAnyParam"
+        - $ref: "#/components/parameters/LabelsAllParam"
+        - $ref: "#/components/parameters/LabelsNoneParam"
+        - $ref: "#/components/parameters/AttrEqParam"
+        - $ref: "#/components/parameters/AttrInParam"
+        - $ref: "#/components/parameters/AttrGteParam"
+        - $ref: "#/components/parameters/AttrLteParam"
+        - $ref: "#/components/parameters/AttrBoolParam"
+        - $ref: "#/components/parameters/AttrExistsParam"
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            enum:
+              - createdAt
+              - price
+              - status
+            default: createdAt
+          description: Field to sort by
+        - in: query
+          name: sortOrder
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: desc
+          description: Sort order
+      responses:
+        "200":
+          description: List of all payments
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PaymentListItem"
+                  next:
+                    type: string
+                    nullable: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
   /admin/jobs/run/booking-expiry:
     post:
       tags:
-      - Jobs
-      - Admin
+        - Jobs
+        - Admin
       summary: Запустить задачу истечения броней (ADMIN)
       responses:
-        '200':
+        "200":
           description: Задача выполнена
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JobExecutionResult'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+                $ref: "#/components/schemas/JobExecutionResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
   /admin/jobs/run/certificate-expiry:
     post:
       tags:
-      - Jobs
-      - Admin
+        - Jobs
+        - Admin
       summary: Запустить задачу истечения сертификатов (ADMIN)
       responses:
-        '200':
+        "200":
           description: Задача выполнена
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JobExecutionResult'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+                $ref: "#/components/schemas/JobExecutionResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
   /admin/jobs/run/season-ticket-expiry:
     post:
       tags:
-      - Jobs
-      - Admin
+        - Jobs
+        - Admin
       summary: Запустить задачу истечения абонементов (ADMIN)
       responses:
-        '200':
+        "200":
           description: Задача выполнена
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JobExecutionResult'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
+                $ref: "#/components/schemas/JobExecutionResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
   /webhooks/payments/provider:
     post:
       tags:
-      - Webhooks
+        - Webhooks
       summary: Вебхук от платёжного провайдера
       security: []
       parameters:
-      - in: header
-        name: X-Signature
-        required: true
-        schema:
-          type: string
-        description: Сигнатура запроса от провайдера
+        - in: header
+          name: X-Signature
+          required: true
+          schema:
+            type: string
+          description: Сигнатура запроса от провайдера
       requestBody:
         required: true
         content:
@@ -3483,53 +3856,53 @@ paths:
               type: object
               description: Payload провайдера (зависит от интеграции)
       responses:
-        '200':
+        "200":
           description: OK (идемпотентная обработка; повторы допустимы)
-        '400':
+        "400":
           description: Bad signature/payload
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
   /webhooks/telegram/bot:
     post:
       summary: Telegram Bot webhook for payments
-      description: 'Receives Telegram Bot API updates (payments).
+      description: "Receives Telegram Bot API updates (payments).
 
         - On `pre_checkout_query`: verify booking hold & amount, then call Bot API `answerPreCheckoutQuery` within 10 seconds.
 
         - On `successful_payment`: set Payment=SUCCEEDED and Booking=CONFIRMED.
 
-        '
+        "
       security: []
       parameters:
-      - name: X-Telegram-Bot-Api-Secret-Token
-        in: header
-        required: true
-        schema:
-          type: string
-        description: Secret token set via setWebhook to verify Telegram as the sender.
+        - name: X-Telegram-Bot-Api-Secret-Token
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Secret token set via setWebhook to verify Telegram as the sender.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TelegramUpdate'
+              $ref: "#/components/schemas/TelegramUpdate"
             examples:
               pre_checkout_query:
-                $ref: '#/components/examples/TelegramUpdatePreCheckout'
+                $ref: "#/components/examples/TelegramUpdatePreCheckout"
               successful_payment:
-                $ref: '#/components/examples/TelegramUpdateSuccessfulPayment'
+                $ref: "#/components/examples/TelegramUpdateSuccessfulPayment"
       responses:
-        '200':
+        "200":
           description: OK
-        '400':
+        "400":
           description: Bad request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-        '401':
+                $ref: "#/components/schemas/Error"
+        "401":
           description: Unauthorized (missing/invalid secret token)
-        '500':
+        "500":
           description: Server error

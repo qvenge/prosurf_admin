@@ -15,6 +15,9 @@ export const seasonTicketsKeys = {
   all: ['season-tickets'] as const,
   plans: () => [...seasonTicketsKeys.all, 'plans'] as const,
   plansList: (filters?: SeasonTicketPlanFilters) => [...seasonTicketsKeys.plans(), filters] as const,
+  plan: (id: string) => [...seasonTicketsKeys.plans(), id] as const,
+  planApplicableEvents: (id: string, filters?: { cursor?: string; limit?: number }) =>
+    [...seasonTicketsKeys.plan(id), 'applicable-events', filters] as const,
   tickets: () => [...seasonTicketsKeys.all, 'tickets'] as const,
   ticketsList: (filters?: SeasonTicketFilters) => [...seasonTicketsKeys.tickets(), filters] as const,
 } as const;
@@ -23,6 +26,14 @@ export const useSeasonTicketPlans = (filters?: SeasonTicketPlanFilters) => {
   return useQuery({
     queryKey: seasonTicketsKeys.plansList(filters),
     queryFn: () => seasonTicketsClient.getSeasonTicketPlans(filters),
+    staleTime: 10 * 60 * 1000,
+  });
+};
+
+export const useSeasonTicketPlan = (id: string) => {
+  return useQuery({
+    queryKey: seasonTicketsKeys.plan(id),
+    queryFn: () => seasonTicketsClient.getSeasonTicketPlan(id),
     staleTime: 10 * 60 * 1000,
   });
 };
@@ -50,13 +61,35 @@ export const useCreateSeasonTicketPlan = () => {
 
 export const useUpdateSeasonTicketPlan = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: SeasonTicketPlanUpdateDto }) => 
+    mutationFn: ({ id, data }: { id: string; data: SeasonTicketPlanUpdateDto }) =>
       seasonTicketsClient.updateSeasonTicketPlan(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: seasonTicketsKeys.plans() });
     },
+  });
+};
+
+export const useDeleteSeasonTicketPlan = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => seasonTicketsClient.deleteSeasonTicketPlan(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: seasonTicketsKeys.plans() });
+    },
+  });
+};
+
+export const useSeasonTicketPlanApplicableEvents = (
+  id: string,
+  filters?: { cursor?: string; limit?: number }
+) => {
+  return useQuery({
+    queryKey: seasonTicketsKeys.planApplicableEvents(id, filters),
+    queryFn: () => seasonTicketsClient.getSeasonTicketPlanApplicableEvents(id, filters),
+    staleTime: 10 * 60 * 1000,
   });
 };
 
@@ -83,6 +116,16 @@ export const useSeasonTickets = (filters?: SeasonTicketFilters) => {
   return useQuery({
     queryKey: seasonTicketsKeys.ticketsList(filters),
     queryFn: () => seasonTicketsClient.getSeasonTickets(filters),
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
+export const useSeasonTicketsInfinite = (filters?: Omit<SeasonTicketFilters, 'cursor'>) => {
+  return useInfiniteQuery({
+    queryKey: seasonTicketsKeys.ticketsList(filters),
+    queryFn: ({ pageParam }) => seasonTicketsClient.getSeasonTickets({ ...filters, cursor: pageParam }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage: PaginatedResponse<SeasonTicket>) => lastPage.next,
     staleTime: 5 * 60 * 1000,
   });
 };
