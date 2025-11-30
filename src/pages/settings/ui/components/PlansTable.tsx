@@ -8,7 +8,7 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 import clsx from 'clsx';
-import { ArrowDownBold, ArrowUpBold, PencilSimpleBold } from '@/shared/ds/icons';
+import { ArrowDownBold, ArrowUpBold, PencilSimpleBold, TrashBold } from '@/shared/ds/icons';
 import { Icon, IconButton } from '@/shared/ui';
 import { capitalize, pluralize } from '@/shared/lib/string';
 import { useSeasonTicketPlansInfinite, type SeasonTicketPlan } from '@/shared/api';
@@ -20,17 +20,18 @@ type PlanRowData = {
   name: string;
   passes: number;
   price: string;
-  endsIn: string; // месяцев
+  endsIn: string;
   description?: string | null;
 };
 
-export interface SessionsTableProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface PlansTableProps extends React.HTMLAttributes<HTMLDivElement> {
   handleEdit?: (plan: SeasonTicketPlan) => void;
+  handleDelete?: (plan: SeasonTicketPlan) => void;
 }
 
 const columnHelper = createColumnHelper<PlanRowData>();
 
-export function PlansTable({ className, handleEdit }: SessionsTableProps) {
+export function PlansTable({ className, handleEdit, handleDelete }: PlansTableProps) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const bodyContainerRef = useRef<HTMLDivElement>(null);
   const [allSeasonTickets, setAllSeasonTickets] = useState<SeasonTicketPlan[]>([]);
@@ -96,24 +97,38 @@ export function PlansTable({ className, handleEdit }: SessionsTableProps) {
       }),
       columnHelper.display({
         id: 'actions',
-        cell: info => (
-          <IconButton
-            className={styles.editButton}
-            src={PencilSimpleBold}
-            type="secondary"
-            size="s"
-            onClick={() => {
-              const plan = allSeasonTickets.find(plan => plan.id === info.row.original.id);
-
-              if (plan && handleEdit) {
-                handleEdit(plan);
-              }
-            }}
-          />
-        ),
+        cell: info => {
+          const plan = allSeasonTickets.find(plan => plan.id === info.row.original.id);
+          return (
+            <div className={styles.actionsButtons}>
+              <IconButton
+                className={styles.editButton}
+                src={PencilSimpleBold}
+                type="secondary"
+                size="s"
+                onClick={() => {
+                  if (plan && handleEdit) {
+                    handleEdit(plan);
+                  }
+                }}
+              />
+              <IconButton
+                className={styles.deleteButton}
+                src={TrashBold}
+                type="secondary"
+                size="s"
+                onClick={() => {
+                  if (plan && handleDelete) {
+                    handleDelete(plan);
+                  }
+                }}
+              />
+            </div>
+          );
+        },
       }),
     ],
-    [handleEdit, allSeasonTickets]
+    [handleEdit, handleDelete, allSeasonTickets]
   );
 
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -138,7 +153,7 @@ export function PlansTable({ className, handleEdit }: SessionsTableProps) {
 
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = container;
-      const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100; // 100px threshold
+      const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100;
 
       if (isNearBottom && hasNextPage && !isFetchingNextPage) {
         fetchNextPage();
@@ -150,11 +165,11 @@ export function PlansTable({ className, handleEdit }: SessionsTableProps) {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (trainingLoading) {
-    return <div className={styles.loading}>Loading training data...</div>;
+    return <div className={styles.loading}>Загрузка...</div>;
   }
 
   if (trainingError) {
-    return <div className={styles.error}>Error loading training data</div>;
+    return <div className={styles.error}>Ошибка загрузки данных</div>;
   }
 
   return (
@@ -208,14 +223,14 @@ export function PlansTable({ className, handleEdit }: SessionsTableProps) {
         {/* Loading state for pagination */}
         {isFetchingNextPage && (
           <div className={styles.paginationLoading}>
-            Loading more trainings...
+            Загрузка...
           </div>
         )}
 
         {/* End of list indicator */}
         {!hasNextPage && plansData.length > 0 && (
           <div className={styles.endOfList}>
-            No more trainings to load
+            Все абонементы загружены
           </div>
         )}
       </div>

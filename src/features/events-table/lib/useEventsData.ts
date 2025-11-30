@@ -12,10 +12,10 @@ export type EventRowData = {
 };
 
 interface UseEventsDataProps {
-  eventType: string;
+  eventType?: string;
 }
 
-export function useEventsData({ eventType }: UseEventsDataProps) {
+export function useEventsData({ eventType }: UseEventsDataProps = {}) {
   const {
     data: _eventsData,
     isLoading,
@@ -23,10 +23,11 @@ export function useEventsData({ eventType }: UseEventsDataProps) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage
-  } = useEventsInfinite({
-    limit: 15,
-    'labels.any': [eventType]
-  });
+  } = useEventsInfinite(
+    eventType
+      ? { limit: 15, 'labels.any': [eventType] }
+      : { limit: 15 }
+  );
 
   const eventsData: EventRowData[]  = useMemo(() => {
     if (!_eventsData?.pages) return [];

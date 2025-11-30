@@ -1,19 +1,18 @@
-import { Header } from '@/shared/ui';
+import { useState } from 'react';
 import { EventsTable } from '@/features/events-table';
 import { EventForm } from '@/features/event-form';
-import { SegmentedButtons, Button, Icon, SideModal } from '@/shared/ui';
+import { Button, Icon, SideModal, Header } from '@/shared/ui';
 import { PlusBold } from '@/shared/ds/icons';
-import { useState } from 'react';
+import styles from './TemplatesPage.module.scss';
 
-import styles from './ToursAndActivityPage.module.scss';
-
-const eventTypeOptions = [
-  { value: 'tour', label: 'Туры' },
-  { value: 'activity', label: 'Ивенты' },
+const categoryOptions = [
+  { value: 'training:surfing', label: 'Серфинг' },
+  { value: 'training:surfskate', label: 'Серфскейт' },
+  { value: 'tour', label: 'Тур' },
+  { value: 'activity', label: 'Активность' },
 ];
 
-export function ToursAndActivityPage() {
-  const [selectedEventType, setSelectedEventType] = useState(eventTypeOptions[0].value);
+export function TemplatesPage() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingEventId, setEditingEventId] = useState<string | undefined>(undefined);
 
@@ -34,14 +33,7 @@ export function ToursAndActivityPage() {
 
   return (
     <>
-      <Header title={'События'}>
-        <SegmentedButtons
-          options={eventTypeOptions}
-          value={selectedEventType}
-          onChange={(value) => {
-            setSelectedEventType(value);
-          }}
-        />
+      <Header title={'Шаблоны'}>
         <Button
           type="primary"
           size="l"
@@ -53,22 +45,24 @@ export function ToursAndActivityPage() {
             width={20}
             height={20}
           />
-          {selectedEventType === 'tour' ? 'Добавить тур' : 'Добавить ивент'}
+          Добавить
         </Button>
       </Header>
       <div className={styles.page}>
         <EventsTable
           className={styles.table}
-          eventType={selectedEventType}
           handleEdit={handleEdit}
         />
       </div>
       {isModalOpen && (
         <SideModal onClose={handleClose}>
           <EventForm
-            eventId={editingEventId}
+            categories={categoryOptions.map(option => ({
+              ...option,
+              selected: option.value === categoryOptions[0].value
+            }))}
             onClose={handleClose}
-            labels={[selectedEventType]}
+            eventId={editingEventId}
           />
         </SideModal>
       )}

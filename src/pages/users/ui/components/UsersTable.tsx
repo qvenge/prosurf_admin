@@ -8,7 +8,7 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 import clsx from 'clsx';
-import { ArrowDownBold, ArrowUpBold, PencilSimpleBold } from '@/shared/ds/icons';
+import { ArrowDownBold, ArrowUpBold, CaretRightBold } from '@/shared/ds/icons';
 import { Icon, IconButton } from '@/shared/ui';
 import { capitalize } from '@/shared/lib/string';
 import { useClientsInfinite, type Client, type SeasonTicket } from '@/shared/api';
@@ -133,7 +133,7 @@ export function UsersTable({ className, handleEdit }: SessionsTableProps) {
         cell: info => (
           <IconButton
             className={styles.editButton}
-            src={PencilSimpleBold}
+            src={CaretRightBold}
             type="secondary"
             size="s"
             onClick={() => {

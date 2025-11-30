@@ -130,3 +130,8 @@
   @include ds.typo('body/b4/medium');
   color: ds.color('text/secondary');
 }
+
+.link {
+  color: ds.color('text/accent');
+  text-decoration: none;
+}

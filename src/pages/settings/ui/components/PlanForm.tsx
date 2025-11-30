@@ -6,8 +6,8 @@ import styles from './PlanForm.module.scss';
 
 interface PlanFormProps {
   onClose: () => void;
-  planData?: SeasonTicketPlan; // For edit mode
-} 
+  planData?: SeasonTicketPlan;
+}
 
 type DesciplineValue = 'training:surfing' | 'training:surfskate';
 
@@ -46,7 +46,7 @@ export function PlanForm({ onClose, planData }: PlanFormProps) {
   const createPlanMutation = useCreateSeasonTicketPlan();
   const updatePlantMutation = useUpdateSeasonTicketPlan();
 
-  const handleInputChange = (field: keyof FormData, value: any) => {
+  const handleInputChange = (field: keyof FormData, value: FormData[keyof FormData]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -63,7 +63,7 @@ export function PlanForm({ onClose, planData }: PlanFormProps) {
     if (!formData.passes.trim()) {
       newErrors.passes = 'Кол-во занятий обязательно';
     } else if (isNaN(Number(formData.passes)) || Number(formData.passes) <= 0) {
-      newErrors.capacity = 'Количество занятий должно быть положительным числом';
+      newErrors.passes = 'Количество занятий должно быть положительным числом';
     }
 
     if (!formData.price.trim()) {
@@ -71,9 +71,9 @@ export function PlanForm({ onClose, planData }: PlanFormProps) {
     }
 
     if (!formData.expiresIn.trim()) {
-      newErrors.capacity = 'Срок действия обязательно';
+      newErrors.expiresIn = 'Срок действия обязателен';
     } else if (isNaN(Number(formData.expiresIn)) || Number(formData.expiresIn) <= 0) {
-      newErrors.capacity = 'Срок действия должен быть положительным числом';
+      newErrors.expiresIn = 'Срок действия должен быть положительным числом';
     }
 
     setErrors(newErrors);
@@ -105,7 +105,6 @@ export function PlanForm({ onClose, planData }: PlanFormProps) {
           expiresIn: monthsToDays(formData.expiresIn),
         };
 
-        // Update plan
         await updatePlantMutation.mutateAsync({ id: planData.id!, data: planUpdateData });
 
       } else {
@@ -126,7 +125,6 @@ export function PlanForm({ onClose, planData }: PlanFormProps) {
           expiresIn: monthsToDays(formData.expiresIn),
         };
 
-        // Create event
         await createPlanMutation.mutateAsync(planCreateData);
       }
 
@@ -145,7 +143,7 @@ export function PlanForm({ onClose, planData }: PlanFormProps) {
           label="Дисциплина"
           options={Object.entries(disciplineOptions).map(([value, label]) => ({ value, label }))}
           value={formData.discipline.value}
-          onChange={(value) => handleInputChange('discipline', { value, label: disciplineOptions[value as DesciplineValue] })}
+          onChange={(value) => handleInputChange('discipline', { value: value as DesciplineValue, label: disciplineOptions[value as DesciplineValue] })}
         />
 
         <TextInput
@@ -199,14 +197,6 @@ export function PlanForm({ onClose, planData }: PlanFormProps) {
         >
           {isLoading ? 'Сохранение...' : (isEditMode ? 'Изменить' : 'Добавить')}
         </Button>
-        {/* <Button
-          type="secondary"
-          size="l"
-          onClick={onClose}
-          disabled={isLoading}
-        >
-          Удалить
-        </Button> */}
       </div>
     </div>
   );

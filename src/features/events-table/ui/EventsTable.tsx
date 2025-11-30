@@ -12,7 +12,7 @@ import { EventsTableBody } from './EventsTableBody';
 import styles from './EventsTable.module.scss';
 
 export interface EventsTableProps extends React.HTMLAttributes<HTMLDivElement> {
-  eventType: string;
+  eventType?: string;
   handleEdit?: (eventId: string) => void;
 }
 

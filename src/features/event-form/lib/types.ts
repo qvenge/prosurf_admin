@@ -23,7 +23,6 @@ export interface FormData {
   prepayment: string;
   price: string;
   capacity: string;
-  sessions: SessionForm[];
   images: File[];
   description: string;
   whatToBring: string;
@@ -33,7 +32,6 @@ export interface FormData {
 export interface EventFormProps {
   onClose: () => void;
   eventId?: string; // For edit mode
-  rangeMode?: boolean;
   categories?: Category[];
   labels?: string[];
 }

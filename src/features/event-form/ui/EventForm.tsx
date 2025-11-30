@@ -1,7 +1,6 @@
 import type { EventFormProps } from '../lib/types';
 import { EventFormProvider, useEventFormContext } from '../lib/context';
 import { EventFormMainInfo } from './EventFormMainInfo';
-import { EventFormSessions } from './EventFormSessions';
 import { EventFormImages } from './EventFormImages';
 import { EventFormDescription } from './EventFormDescription';
 import { EventFormActions } from './EventFormActions';
@@ -24,7 +23,6 @@ function EventFormContent() {
     <form className={styles.root}>
       <div className={styles.info}>
         <EventFormMainInfo />
-        <EventFormSessions />
         <EventFormImages />
         <EventFormDescription />
       </div>
@@ -33,12 +31,11 @@ function EventFormContent() {
   );
 }
 
-export function EventForm({ onClose, eventId, rangeMode = false, categories, labels }: EventFormProps) {
+export function EventForm({ onClose, eventId, categories, labels }: EventFormProps) {
   return (
     <EventFormProvider
       onClose={onClose}
       eventId={eventId}
-      rangeMode={rangeMode}
       categories={categories}
       labels={labels}
     >

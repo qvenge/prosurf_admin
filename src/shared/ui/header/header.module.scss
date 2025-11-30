@@ -3,7 +3,7 @@
   min-height: 88px;
 
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
 }
 
@@ -13,5 +13,6 @@
 
 .rightContent {
   display: flex;
+  align-items: center;
   gap: 8px;
 }

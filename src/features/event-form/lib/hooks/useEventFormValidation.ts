@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { FormData, ValidationErrors } from '../types';
 
-export function useEventFormValidation(rangeMode: boolean = false) {
+export function useEventFormValidation() {
   const [errors, setErrors] = useState<ValidationErrors>({});
 
   const clearError = (field: string) => {
@@ -40,26 +40,6 @@ export function useEventFormValidation(rangeMode: boolean = false) {
     } else if (isNaN(Number(formData.capacity)) || Number(formData.capacity) <= 0) {
       newErrors.capacity = 'Количество мест должно быть положительным числом';
     }
-
-    formData.sessions.forEach((session) => {
-      if (!session.date) {
-        newErrors[`session_${session.id}_date`] = 'Дата обязательна';
-      }
-
-      if (rangeMode) {
-        if (!session.endDate) {
-          newErrors[`session_${session.id}_endDate`] = 'Дата окончания обязательна';
-        } else if (session.date && session.endDate && new Date(session.endDate) < new Date(session.date)) {
-          newErrors[`session_${session.id}_endDate`] = 'Дата окончания не может быть раньше даты начала';
-        }
-      } else {
-        session.timeSlots.forEach((timeSlot) => {
-          if (!timeSlot.startTime) {
-            newErrors[`session_${session.id}_timeSlot_${timeSlot.id}_time`] = 'Время обязательно';
-          }
-        });
-      }
-    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

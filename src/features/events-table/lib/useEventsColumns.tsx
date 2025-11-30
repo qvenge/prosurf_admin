@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
+import { Link } from 'react-router';
 import { PencilSimpleBold } from '@/shared/ds/icons';
 import { IconButton } from '@/shared/ui';
-import { EventSessionDates } from '../ui';
 import { type EventRowData } from './useEventsData';
 import styles from '../ui/EventsTable.module.scss'
 
@@ -41,9 +41,11 @@ export function useEventsColumns({ handleEdit }: UseEventsColumnsProps) {
       }),
       columnHelper.display({
         id: 'dates',
-        header: 'Даты',
+        header: 'Сеансы',
         cell: info => (
-          <EventSessionDates eventId={info.row.original.id} />
+          <Link className={styles.link} to={`/sessions?eventId=${info.row.original.id}`}>
+              Перейти
+          </Link>
         ),
       }),
       columnHelper.display({

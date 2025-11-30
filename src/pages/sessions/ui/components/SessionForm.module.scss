@@ -1,0 +1,90 @@
+.root {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.title {
+  @include ds.typo('header/h3/semibold');
+  color: ds.color('text/primary');
+  margin: 0;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dateTabs {
+  margin-bottom: 16px;
+}
+
+.sessionsSection {
+  margin-bottom: 28px;
+}
+
+.dateWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dateAndDuration {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.duration {
+  width: 120px;
+}
+
+.timesWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 4px;
+}
+
+.timesLabel {
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/primary');
+}
+
+.times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.addSessionButton {
+  align-self: flex-start;
+  gap: 8px;
+}
+
+.addTime {
+  align-self: flex-start;
+}
+
+.removeIcon {
+  color: ds.color('graphic/secondary');
+}
+
+.removeTimeWrapper {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.removeTime {
+  color: ds.color('graphic/secondary');
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

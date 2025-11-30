@@ -1,41 +1,37 @@
 import { useState } from 'react';
-import { useEvent, useEventSessions } from '@/shared/api';
+import { useEvent } from '@/shared/api';
 import type { FormData } from '../types';
 import { convertEventDataToFormData } from '../utils';
 import { defaultFormData } from '../constants';
 
 export function useEventFormInitialization(eventId?: string) {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [existingSessions, setExistingSessions] = useState<string[]>([]);
 
   const isEditMode = !!eventId;
 
   const { data: eventData, isLoading: eventLoading } = useEvent(eventId, isEditMode);
-  const { data: sessionsData, isLoading: sessionsLoading } = useEventSessions(eventId, undefined, isEditMode);
 
   const initializeFormData = (): FormData | null => {
-    if (!isEditMode || !eventData || !sessionsData || isInitialized) {
+    if (!isEditMode || !eventData || isInitialized) {
       return null;
     }
 
-    const convertedData = convertEventDataToFormData(eventData, sessionsData);
+    const convertedData = convertEventDataToFormData(eventData);
     const newFormData: FormData = {
       ...defaultFormData,
       ...convertedData,
     };
 
-    setExistingSessions(sessionsData.items.map((s: { id: string }) => s.id));
     setIsInitialized(true);
 
     return newFormData;
   };
 
-  const isInitialLoading = isEditMode && (eventLoading || sessionsLoading);
+  const isInitialLoading = isEditMode && eventLoading;
 
   return {
     isEditMode,
     isInitialized,
-    existingSessions,
     isInitialLoading,
     initializeFormData,
   };

@@ -1,4 +1,4 @@
-import type { EventCreateDto, EventUpdateDto, SessionCreateDto, Event, SessionCompact } from '@/shared/api';
+import type { EventCreateDto, EventUpdateDto, SessionCreateDto, Event } from '@/shared/api';
 import type { Category, FormData, SessionForm } from './types';
 
 export function convertFormDataToEventCreateDto(formData: FormData, labels: string[] = []): EventCreateDto {
@@ -48,6 +48,7 @@ export function convertFormDataToEventUpdateDto(formData: FormData, labels?: str
   return convertFormDataToEventCreateDto(formData, labels) as EventUpdateDto;
 }
 
+// Session-related utilities (kept for separate session management)
 export function convertSessionsToSessionCreateDtos(sessions: SessionForm[], rangeMode: boolean = false): SessionCreateDto[] {
   const sessionsData: SessionCreateDto[] = [];
 
@@ -79,31 +80,8 @@ export function convertSessionsToSessionCreateDtos(sessions: SessionForm[], rang
   return sessionsData;
 }
 
-// interface EventData {
-//   labels?: string[];
-//   title: string;
-//   location?: string;
-//   capacity?: number;
-//   tickets: Array<{
-//     full: {
-//       price: {
-//         amountMinor: number;
-//       };
-//     };
-//   }>;
-//   description?: Array<{
-//     heading: string;
-//     body: string;
-//   }>;
-// }
-
-interface SessionData {
-  items: SessionCompact[];
-}
-
 export function convertEventDataToFormData(
   eventData: Event,
-  sessionsData: SessionData,
   categories?: Category[]
 ): Partial<FormData> {
   // Map discipline from labels
@@ -114,7 +92,7 @@ export function convertEventDataToFormData(
   // Get price from first ticket
   const ticketWithPrice = eventData.tickets?.find((ticket) => ticket.full.price.amountMinor > 0);
 
-  const prepayment = ticketWithPrice?.prepayment?.price.amountMinor 
+  const prepayment = ticketWithPrice?.prepayment?.price.amountMinor
     ? (ticketWithPrice.prepayment?.price.amountMinor / 100).toString()
     : '';
 
@@ -124,52 +102,8 @@ export function convertEventDataToFormData(
 
   // Extract description and whatToBring from description array
   const descriptions = eventData.description || [];
-  const descriptionItem = descriptions.find(d => d.heading === 'Описание тренировки');
-  const whatToBringItem = descriptions.find(d => d.heading === 'Что с собой?');
-
-  // Group sessions by date and convert to form structure
-  const sessionsMap = new Map<string, SessionForm>();
-  sessionsData.items.forEach((session, index: number) => {
-    const sessionStartDate = new Date(session.startsAt);
-    const sessionEndDate = session.endsAt ? new Date(session.endsAt) : null;
-    const startDateKey = sessionStartDate.toISOString().split('T')[0];
-    const endDateKey = sessionEndDate ? sessionEndDate.toISOString().split('T')[0] : startDateKey;
-    const startTime = sessionStartDate.toTimeString().slice(0, 5);
-
-    // Check if this is a range session (spans multiple days)
-    const isRangeSession = startDateKey !== endDateKey;
-
-    if (sessionsMap.has(startDateKey) && !isRangeSession) {
-      // Add to existing single-day session
-      sessionsMap.get(startDateKey)!.timeSlots.push({
-        id: `time-${session.id}`,
-        startTime,
-      });
-    } else {
-      const duration = session.endsAt
-        ? ((sessionEndDate!.getTime() - sessionStartDate.getTime()) / (1000 * 60 * 60)).toString()
-        : '1.5';
-
-      const sessionForm: SessionForm = {
-        id: `session-${startDateKey}-${index}`,
-        date: startDateKey,
-        timeSlots: [{
-          id: `time-${session.id}`,
-          startTime,
-        }],
-        duration,
-      };
-
-      // Add endDate for range sessions
-      if (isRangeSession) {
-        sessionForm.endDate = endDateKey;
-      }
-
-      sessionsMap.set(startDateKey, sessionForm);
-    }
-  });
-
-  const formSessions = Array.from(sessionsMap.values());
+  const descriptionItem = descriptions.find(d => d.heading === 'Описание тренировки' || d.heading === 'Описание');
+  const whatToBringItem = descriptions.find(d => d.heading === 'Что с собой?' || d.heading === 'FAQ');
 
   return {
     category,
@@ -178,12 +112,6 @@ export function convertEventDataToFormData(
     prepayment,
     price,
     capacity: eventData.capacity?.toString() || '',
-    sessions: formSessions.length > 0 ? formSessions : [{
-      id: '1',
-      date: '',
-      timeSlots: [{ id: 'time-1', startTime: '' }],
-      duration: '1.5',
-    }],
     images: [],
     description: descriptionItem?.body || '',
     whatToBring: whatToBringItem?.body || '',

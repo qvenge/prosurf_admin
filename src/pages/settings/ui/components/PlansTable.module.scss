@@ -16,7 +16,7 @@
 .bodyContainer {
   flex: 1;
   overflow-y: auto;
-  min-height: 0; // Allow flex item to shrink below content size
+  min-height: 0;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
@@ -24,7 +24,7 @@
 .gridHeader,
 .gridRow {
   display: grid;
-  grid-template-columns: 2fr 2fr minmax(170px, 1fr) minmax(170px, 1fr) minmax(170px, 1fr) minmax(100px, 1fr);
+  grid-template-columns: 2fr 2fr minmax(170px, 1fr) minmax(170px, 1fr) minmax(170px, 1fr) minmax(120px, 1fr);
   width: 100%;
 }
 
@@ -66,11 +66,7 @@
 .gridRow {
   @include ds.typo('body/b4/medium');
   color: ds.color('text/primary');
-  min-height: 60px; // Use min-height to prevent shrinking
-
-  // &:hover .cell {
-  //   background: ds.color('background/secondary');
-  // }
+  min-height: 60px;
 }
 
 .cell {
@@ -85,6 +81,15 @@
 
 .cellActions {
   justify-content: flex-end;
+}
+
+.actionsButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.deleteButton {
+  color: ds.color('text/error/primary');
 }
 
 .loading {
@@ -106,8 +111,6 @@
   padding: ds.number('paddings & gaps/S') ds.number('paddings & gaps/M');
 }
 
-
-// Specific column styling
 .headerCellActions,
 .cellActions {
   justify-content: flex-end;

@@ -1,5 +1,5 @@
 import { createContext, useEffect, type ReactNode } from 'react';
-import type { FormData, ValidationErrors, Category, SessionForm, TimeSlot } from '../types';
+import type { FormData, ValidationErrors, Category } from '../types';
 import { useEventFormState } from '../hooks/useEventFormState';
 import { useEventFormValidation } from '../hooks/useEventFormValidation';
 import { useEventFormApi } from '../hooks/useEventFormApi';
@@ -9,20 +9,12 @@ import { defaultFormData } from '../constants';
 interface EventFormContextValue {
   // Form state
   formData: FormData;
-  selectedSessionId: string;
-  setSelectedSessionId: (sessionId: string) => void;
   setFormData: (data: FormData) => void;
 
   // Form handlers
   handleInputChange: (field: keyof FormData, value: string | File[]) => void;
   handleImageAdd: (files: File[]) => void;
   handleImageRemove: (index: number) => void;
-  handleSessionChange: (sessionId: string, field: keyof Omit<SessionForm, 'timeSlots'>, value: string | number) => void;
-  handleTimeSlotChange: (sessionId: string, timeSlotId: string, field: keyof TimeSlot, value: string) => void;
-  addTimeSlot: (sessionId: string) => void;
-  removeTimeSlot: (sessionId: string, timeSlotId: string) => void;
-  addSession: () => void;
-  removeSession: (sessionId: string) => void;
 
   // Validation
   errors: ValidationErrors;
@@ -31,16 +23,14 @@ interface EventFormContextValue {
 
   // API
   createEvent: (data: FormData) => Promise<void>;
-  updateEvent: (eventId: string, data: FormData, existingSessions: string[]) => Promise<void>;
+  updateEvent: (eventId: string, data: FormData) => Promise<void>;
   isLoading: boolean;
 
   // Initialization
   isEditMode: boolean;
-  existingSessions: string[];
   isInitialLoading: boolean;
 
   // Configuration
-  rangeMode: boolean;
   categories?: Category[];
   labels?: string[];
 
@@ -56,7 +46,6 @@ interface EventFormProviderProps {
   children: ReactNode;
   onClose: () => void;
   eventId?: string;
-  rangeMode?: boolean;
   categories?: Category[];
   labels?: string[];
 }
@@ -65,11 +54,10 @@ export function EventFormProvider({
   children,
   onClose,
   eventId,
-  rangeMode = false,
   categories,
   labels
 }: EventFormProviderProps) {
-  const { isEditMode, existingSessions, isInitialLoading, initializeFormData } = useEventFormInitialization(eventId);
+  const { isEditMode, isInitialLoading, initializeFormData } = useEventFormInitialization(eventId);
 
   // Initialize form data with default category if categories are provided
   const initialFormData = (() => {
@@ -82,22 +70,14 @@ export function EventFormProvider({
 
   const {
     formData,
-    selectedSessionId,
-    setSelectedSessionId,
     setFormData,
     handleInputChange,
     handleImageAdd,
     handleImageRemove,
-    handleSessionChange,
-    handleTimeSlotChange,
-    addTimeSlot,
-    removeTimeSlot,
-    addSession,
-    removeSession,
-  } = useEventFormState(initialFormData, rangeMode);
+  } = useEventFormState(initialFormData);
 
-  const { errors, clearError, validateForm } = useEventFormValidation(rangeMode);
-  const { createEvent, updateEvent, isLoading } = useEventFormApi(rangeMode, labels);
+  const { errors, clearError, validateForm } = useEventFormValidation();
+  const { createEvent, updateEvent, isLoading } = useEventFormApi(labels);
 
   useEffect(() => {
     const initialData = initializeFormData();
@@ -116,7 +96,7 @@ export function EventFormProvider({
 
     try {
       if (isEditMode) {
-        await updateEvent(eventId!, formData, existingSessions);
+        await updateEvent(eventId!, formData);
       } else {
         await createEvent(formData);
       }
@@ -129,20 +109,12 @@ export function EventFormProvider({
   const contextValue: EventFormContextValue = {
     // Form state
     formData,
-    selectedSessionId,
-    setSelectedSessionId,
     setFormData,
 
     // Form handlers
     handleInputChange: handleInputChangeWithClearError,
     handleImageAdd,
     handleImageRemove,
-    handleSessionChange,
-    handleTimeSlotChange,
-    addTimeSlot,
-    removeTimeSlot,
-    addSession,
-    removeSession,
 
     // Validation
     errors,
@@ -156,11 +128,9 @@ export function EventFormProvider({
 
     // Initialization
     isEditMode,
-    existingSessions,
     isInitialLoading,
 
     // Configuration
-    rangeMode,
     categories,
     labels,
 

@@ -12,7 +12,7 @@ import IMask, { type InputMask } from 'imask';
 type Parent = React.InputHTMLAttributes<HTMLInputElement>;
 
 interface TextInputProps extends Omit<Parent, 'type' | 'size'> {
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'date' | 'time';
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'date' | 'time' | 'datetime-local';
   inputId?: string;
   label?: string;
   hint?: string;

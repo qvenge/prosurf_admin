@@ -5,20 +5,11 @@ import {
   ListChecksRegular,
   ListChecksFill,
 
+  ListBulletsRegular,
+  ListBulletsFill,
+
   UsersFill,
   UserRegular,
-
-  BarbellRegular,
-  BarbellFill,
-
-  TicketRegular,
-  TicketFill,
-
-  CertificateRegular,
-  CertificateFill,
-
-  ConfettiRegular,
-  ConfettiFill,
 
   GearSixRegular,
   GearSixFill,
@@ -35,7 +26,7 @@ export const navItems = [
   },
   {
     id: 'sessions',
-    title: 'Записи',
+    title: 'Сеансы',
     iconDefault: ListChecksRegular,
     iconActive: ListChecksFill,
     path: '/sessions'
@@ -48,32 +39,11 @@ export const navItems = [
     path: '/users'
   },
   {
-    id: 'trainings',
-    title: 'Тренировки',
-    iconDefault: BarbellRegular,
-    iconActive: BarbellFill,
-    path: '/trainings'
-  },
-  {
-    id: 'season-tickets',
-    title: 'Абонементы',
-    iconDefault: TicketRegular,
-    iconActive: TicketFill,
-    path: '/season-tickets'
-  },
-  {
-    id: 'certificates',
-    title: 'Сертификаты',
-    iconDefault: CertificateRegular,
-    iconActive: CertificateFill,
-    path: '/certificates'
-  },
-    {
-    id: 'events',
-    title: 'События',
-    iconDefault: ConfettiRegular,
-    iconActive: ConfettiFill,
-    path: '/events'
+    id: 'templates',
+    title: 'Шаблоны',
+    iconDefault: ListBulletsRegular,
+    iconActive: ListBulletsFill,
+    path: '/templates'
   },
   {
     id: 'settings',

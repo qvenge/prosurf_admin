@@ -3,6 +3,7 @@ import { UsersTable } from './components/UsersTable';
 import styles from './UsersPage.module.scss';
 import type { Client } from '@/shared/api';
 import { SideModal } from '@/shared/ui';
+import { UserCard } from '@/features/user-card';
 import { useState } from 'react';
 
 export function UsersPage() {
@@ -32,13 +33,7 @@ export function UsersPage() {
       {isModalOpen && clientData && (
         <SideModal onClose={handleClose}>
           {/* TODO: Add client details component */}
-          <div>
-            <div>Telegram ID: {clientData.telegramId}</div>
-            {clientData.username && <div>Username: @{clientData.username}</div>}
-            {clientData.firstName && <div>Имя: {clientData.firstName}</div>}
-            {clientData.lastName && <div>Фамилия: {clientData.lastName}</div>}
-            {clientData.phone && <div>Телефон: {clientData.phone}</div>}
-          </div>
+          <UserCard client={clientData} />
         </SideModal>
       )}
     </>

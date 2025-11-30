@@ -28,11 +28,12 @@ type SessionRowData = {
 
 export interface SessionsTableProps extends React.HTMLAttributes<HTMLDivElement> {
   eventType: string;
+  eventId?: string | null;
 }
 
 const columnHelper = createColumnHelper<SessionRowData>();
 
-export function SessionsTable({ className, eventType }: SessionsTableProps) {
+export function SessionsTable({ className, eventType, eventId }: SessionsTableProps) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const bodyContainerRef = useRef<HTMLDivElement>(null);
   const [openedSession, setOpenedSession] = useState<string | null>(null);
@@ -46,7 +47,8 @@ export function SessionsTable({ className, eventType }: SessionsTableProps) {
     isFetchingNextPage
   } = useSessionsInfinite({
     limit: 15,
-    'labels.any': [eventType],
+    'labels.any': eventType ? [eventType] : undefined,
+    eventId: eventId || undefined,
   });
 
   const sessionsData = useMemo(() => {

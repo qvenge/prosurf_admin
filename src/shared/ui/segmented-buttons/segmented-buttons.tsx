@@ -18,6 +18,7 @@ export interface SegmentedButtonsProps<T = string> {
   label?: string;
   className?: string;
   disabled?: boolean;
+  size?: 's' | 'm' | 'l';
 }
 
 export function SegmentedButtons<T = string>({
@@ -26,6 +27,7 @@ export function SegmentedButtons<T = string>({
   onChange,
   label,
   className,
+  size = 'l',
   disabled = false,
 }: SegmentedButtonsProps<T>) {
   const handleOptionClick = (optionValue: T, isDisabled?: boolean) => {
@@ -35,7 +37,7 @@ export function SegmentedButtons<T = string>({
   };
 
   return (
-    <div className={clsx(styles.root, className, {
+    <div className={clsx(styles.root, className, styles[`size${size.toUpperCase()}`], {
       [styles.disabled]: disabled
     })}>
       {label && (

@@ -80,17 +80,24 @@ export { default as ListChecksRegular } from '@/shared/ds/icons/20/list-checks_r
 export { default as ListChecksFill } from '@/shared/ds/icons/20/list-checks_fill.svg';
 export { default as UserRegular } from '@/shared/ds/icons/20/user_regular.svg';
 export { default as UserFill } from '@/shared/ds/icons/20/user_fill.svg';
+export { default as UserBold } from '@/shared/ds/icons/20/user_bold.svg';
 export { default as UsersRegular } from '@/shared/ds/icons/20/users_regular.svg';
 export { default as UsersFill } from '@/shared/ds/icons/20/users_fill.svg';
 export { default as BarbellRegular } from '@/shared/ds/icons/20/barbell_regular.svg';
 export { default as BarbellFill } from '@/shared/ds/icons/20/barbell_fill.svg';
 export { default as TicketRegular } from '@/shared/ds/icons/20/ticket_regular.svg';
 export { default as TicketFill } from '@/shared/ds/icons/20/ticket_fill.svg';
+export { default as TicketBold } from '@/shared/ds/icons/20/ticket_bold.svg';
 export { default as CertificateRegular } from '@/shared/ds/icons/20/certificate_regular.svg';
 export { default as CertificateFill } from '@/shared/ds/icons/20/certificate_fill.svg';
 export { default as ConfettiRegular } from '@/shared/ds/icons/20/confetti_regular.svg';
 export { default as ConfettiFill } from '@/shared/ds/icons/20/confetti_fill.svg';
 
 export { default as TrashRegular } from '@/shared/ds/icons/20/trash_regular.svg';
+export { default as TrashBold } from '@/shared/ds/icons/20/trash_bold.svg';
 export { default as ArrowDownBold } from '@/shared/ds/icons/20/arrow-down_bold.svg';
 export { default as ArrowUpBold } from '@/shared/ds/icons/20/arrow-up_bold.svg';
+
+export { default as WalletBold } from '@/shared/ds/icons/20/wallet_bold.svg';
+export { default as GiftBold } from '@/shared/ds/icons/20/gift_bold.svg';
+export { default as ClockCounterClockwiseBold } from '@/shared/ds/icons/20/clock-counter-clockwise_bold.svg';

@@ -8,7 +8,8 @@ import { SessionsPage } from '@/pages/sessions';
 import { TrainingsPage } from '@/pages/trainings';
 import { ToursAndActivityPage } from '@/pages/tours-and-activity';
 import { UsersPage } from '@/pages/users';
-import { SeasonTicketsPage } from '@/pages/season-tickets';
+import { SettingsPage } from '@/pages/settings';
+import { TemplatesPage } from '@/pages/templates';
 
 export const router = createBrowserRouter([
   {
@@ -39,20 +40,16 @@ export const router = createBrowserRouter([
             Component: TrainingsPage
           },
           {
-            path: 'season-tickets',
-            Component: SeasonTicketsPage
-          },
-          {
-            path: 'certificates',
-            Component: CalendarPage
-          },
-          {
             path: 'events',
             Component: ToursAndActivityPage
           },
           {
+            path: 'templates',
+            Component: TemplatesPage
+          },
+          {
             path: 'settings',
-            Component: CalendarPage
+            Component: SettingsPage
           },
         ],
       },

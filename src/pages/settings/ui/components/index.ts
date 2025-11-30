@@ -1,0 +1,1 @@
+export { SeasonTicketsTab } from './SeasonTicketsTab';

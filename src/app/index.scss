@@ -27,6 +27,7 @@ body {
 }
 
 body {
+  @include ds.typo('body/b3/regular');
   /* color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif; */
