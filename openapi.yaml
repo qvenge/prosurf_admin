@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.0
 paths:
   /:
     get:
@@ -6,8 +6,8 @@ paths:
       parameters: []
       responses:
         '200':
-          description: Returns welcome message
-      summary: Root endpoint
+          description: Возвращает приветственное сообщение
+      summary: Корневой эндпоинт
       tags:
         - System
   /health:
@@ -16,7 +16,7 @@ paths:
       parameters: []
       responses:
         '200':
-          description: Service health status
+          description: Статус здоровья сервиса
           content:
             application/json:
               schema:
@@ -31,7 +31,7 @@ paths:
                       status: healthy
                       responseTime: 5ms
                   responseTime: 10ms
-      summary: Health check endpoint
+      summary: Проверка здоровья сервиса
       tags:
         - System
   /auth/client/telegram:
@@ -159,20 +159,23 @@ paths:
         - name: cursor
           required: false
           in: query
-          description: Cursor for pagination
+          description: Курсор для пагинации
           schema:
+            example: cm4a2b3c4d5e6f7g8h9i0j
             type: string
         - name: limit
           required: false
           in: query
+          description: Количество элементов на странице
           schema:
             minimum: 1
             maximum: 200
             default: 20
+            example: 20
             type: number
       responses:
         '200':
-          description: Clients list
+          description: Список клиентов
           content:
             application/json:
               schema:
@@ -183,7 +186,8 @@ paths:
           description: Forbidden
       security:
         - bearer: []
-      summary: List all clients (ADMIN only)
+        - adminAuth: []
+      summary: Список всех клиентов
       tags:
         - Clients
   /clients/me:
@@ -192,7 +196,7 @@ paths:
       parameters: []
       responses:
         '200':
-          description: Client profile
+          description: Профиль клиента
           content:
             application/json:
               schema:
@@ -200,10 +204,10 @@ paths:
         '401':
           description: Unauthorized
         '403':
-          description: Forbidden - only clients can access this endpoint
+          description: Forbidden - только клиенты могут использовать этот эндпоинт
       security:
         - bearer: []
-      summary: Get current client profile
+      summary: Получить профиль текущего клиента
       tags:
         - Clients
     patch:
@@ -229,16 +233,16 @@ paths:
                   type: string
                   format: date-time
                   nullable: true
-                  description: Date of birth in ISO 8601 format
+                  description: Дата рождения в формате ISO 8601
                 photo:
                   type: string
                   format: binary
                   nullable: true
-                  description: Profile photo (max 10MB)
+                  description: Фото профиля (макс. 10МБ)
                 deletePhoto:
                   type: boolean
                   nullable: true
-                  description: Set to true to delete existing photo. Ignored if photo file is uploaded.
+                  description: Установите true для удаления существующего фото. Игнорируется, если загружен файл фото.
           application/json:
             schema:
               type: object
@@ -256,32 +260,52 @@ paths:
                   type: string
                   format: date-time
                   nullable: true
-                  description: Date of birth in ISO 8601 format
+                  description: Дата рождения в формате ISO 8601
                 photo:
                   type: string
                   format: binary
                   nullable: true
-                  description: Profile photo (max 10MB)
+                  description: Фото профиля (макс. 10МБ)
                 deletePhoto:
                   type: boolean
                   nullable: true
-                  description: Set to true to delete existing photo. Ignored if photo file is uploaded.
+                  description: Установите true для удаления существующего фото. Игнорируется, если загружен файл фото.
       responses:
         '200':
-          description: Updated
+          description: Обновлено
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClientDto'
         '400':
-          description: Bad Request (e.g., file too large)
+          description: Неверный запрос (например, файл слишком большой)
         '401':
           description: Unauthorized
         '403':
-          description: Forbidden - only clients can access this endpoint
+          description: Forbidden - только клиенты могут использовать этот эндпоинт
       security:
         - bearer: []
-      summary: Update current client profile
+      summary: Обновить профиль текущего клиента
+      tags:
+        - Clients
+  /clients/me/cashback:
+    get:
+      operationId: ClientsController_getMyCashback
+      parameters: []
+      responses:
+        '200':
+          description: Кэшбэк-кошелек с балансом и историей
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashbackWalletDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - только клиенты могут использовать этот эндпоинт
+      security:
+        - bearer: []
+      summary: Получить кэшбэк-кошелек текущего клиента
       tags:
         - Clients
   /clients/{id}:
@@ -295,7 +319,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Client
+          description: Клиент
           content:
             application/json:
               schema:
@@ -308,7 +332,7 @@ paths:
           description: Not Found
       security:
         - bearer: []
-      summary: Get client by ID
+      summary: Получить клиента по ID
       tags:
         - Clients
     patch:
@@ -339,16 +363,16 @@ paths:
                   type: string
                   format: date-time
                   nullable: true
-                  description: Date of birth in ISO 8601 format
+                  description: Дата рождения в формате ISO 8601
                 photo:
                   type: string
                   format: binary
                   nullable: true
-                  description: Profile photo (max 10MB)
+                  description: Фото профиля (макс. 10МБ)
                 deletePhoto:
                   type: boolean
                   nullable: true
-                  description: Set to true to delete existing photo. Ignored if photo file is uploaded.
+                  description: Установите true для удаления существующего фото. Игнорируется, если загружен файл фото.
           application/json:
             schema:
               type: object
@@ -366,25 +390,25 @@ paths:
                   type: string
                   format: date-time
                   nullable: true
-                  description: Date of birth in ISO 8601 format
+                  description: Дата рождения в формате ISO 8601
                 photo:
                   type: string
                   format: binary
                   nullable: true
-                  description: Profile photo (max 10MB)
+                  description: Фото профиля (макс. 10МБ)
                 deletePhoto:
                   type: boolean
                   nullable: true
-                  description: Set to true to delete existing photo. Ignored if photo file is uploaded.
+                  description: Установите true для удаления существующего фото. Игнорируется, если загружен файл фото.
       responses:
         '200':
-          description: Updated
+          description: Обновлено
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClientDto'
         '400':
-          description: Bad Request (e.g., file too large)
+          description: Неверный запрос (например, файл слишком большой)
         '401':
           description: Unauthorized
         '403':
@@ -393,14 +417,15 @@ paths:
           description: Not Found
       security:
         - bearer: []
-      summary: Update client profile (ADMIN only)
+        - adminAuth: []
+      summary: Обновить профиль клиента
       tags:
         - Clients
   /clients/me/complete-profile:
     post:
       description: >-
-        Used to complete profile when user logs in for the first time. Requires full name, phone, and all required
-        consents to be provided.
+        Используется для завершения заполнения профиля при первом входе пользователя. Требуется указать полное имя,
+        телефон и все обязательные согласия.
       operationId: ClientsController_completeProfile
       parameters:
         - name: user-agent
@@ -416,24 +441,146 @@ paths:
               $ref: '#/components/schemas/CompleteProfileDto'
       responses:
         '200':
-          description: Profile completed successfully
+          description: Профиль успешно заполнен
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClientDto'
         '400':
-          description: Bad Request - validation error or missing required consents
+          description: Неверный запрос - ошибка валидации или отсутствуют обязательные согласия
         '401':
           description: Unauthorized
         '403':
-          description: Forbidden - only clients can access this endpoint
+          description: Forbidden - только клиенты могут использовать этот эндпоинт
         '404':
-          description: Client not found
+          description: Клиент не найден
       security:
         - bearer: []
-      summary: Complete client profile on first login
+      summary: Завершить заполнение профиля клиента при первом входе
       tags:
         - Clients
+  /users/{id}/cashback:
+    get:
+      operationId: UserCashbackController_getCashback
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashbackWalletDto'
+      security:
+        - bearer: []
+      summary: Баланс кэшбэка пользователя (self или ADMIN)
+      tags:
+        - Users
+        - Cashback
+  /users/{id}/cashback/operations:
+    get:
+      operationId: UserCashbackController_findUserOperations
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Курсор для пагинации. Передайте значение из поля "next" предыдущего ответа.
+          schema:
+            example: cm4a2b3c4d5e6f7g8h9i0j
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Количество элементов на странице
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            example: 20
+            type: number
+      responses:
+        '200':
+          description: История операций
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseDto'
+      security:
+        - bearer: []
+      summary: История операций кэшбэка пользователя
+      tags:
+        - Users
+        - Cashback
+  /cashback/rules:
+    get:
+      operationId: CashbackController_getRules
+      parameters: []
+      responses:
+        '200':
+          description: Правила кэшбэка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashbackRulesDto'
+      summary: Получить правила кэшбэка (только чтение)
+      tags:
+        - Cashback
+  /cashback/settings:
+    get:
+      operationId: CashbackController_getSettings
+      parameters: []
+      responses:
+        '200':
+          description: Список настроек кэшбэка
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CashbackSettingsDto'
+      security:
+        - adminAuth: []
+        - bearer: []
+      summary: Получить все настройки кэшбэка
+      tags:
+        - Cashback
+  /cashback/settings/{product}:
+    put:
+      operationId: CashbackController_updateSettings
+      parameters:
+        - name: product
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCashbackSettingsDto'
+      responses:
+        '200':
+          description: Обновленные настройки кэшбэка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashbackSettingsDto'
+      security:
+        - adminAuth: []
+        - bearer: []
+      summary: Обновить настройки кэшбэка для продукта
+      tags:
+        - Cashback
   /admins:
     get:
       operationId: AdminsController_findAll
@@ -441,20 +588,23 @@ paths:
         - name: cursor
           required: false
           in: query
-          description: Cursor for pagination
+          description: Курсор для пагинации
           schema:
+            example: cm4a2b3c4d5e6f7g8h9i0j
             type: string
         - name: limit
           required: false
           in: query
+          description: Количество элементов на странице
           schema:
             minimum: 1
             maximum: 200
             default: 20
+            example: 20
             type: number
       responses:
         '200':
-          description: Admins list
+          description: Список администраторов
           content:
             application/json:
               schema:
@@ -464,8 +614,9 @@ paths:
         '403':
           description: Forbidden
       security:
+        - adminAuth: []
         - bearer: []
-      summary: List all admins (ADMIN only)
+      summary: Список всех администраторов
       tags:
         - Admins
     post:
@@ -479,7 +630,7 @@ paths:
               $ref: '#/components/schemas/CreateAdminDto'
       responses:
         '201':
-          description: Admin created
+          description: Администратор создан
           content:
             application/json:
               schema:
@@ -491,10 +642,11 @@ paths:
         '403':
           description: Forbidden
         '409':
-          description: Admin with this email already exists
+          description: Администратор с таким email уже существует
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Create a new admin (ADMIN only)
+      summary: Создать нового администратора
       tags:
         - Admins
   /admins/me:
@@ -503,7 +655,7 @@ paths:
       parameters: []
       responses:
         '200':
-          description: Admin profile
+          description: Профиль администратора
           content:
             application/json:
               schema:
@@ -513,8 +665,9 @@ paths:
         '403':
           description: Forbidden
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Get current admin profile
+      summary: Получить профиль текущего администратора
       tags:
         - Admins
     patch:
@@ -528,7 +681,7 @@ paths:
               $ref: '#/components/schemas/AdminUpdateDto'
       responses:
         '200':
-          description: Updated
+          description: Обновлено
           content:
             application/json:
               schema:
@@ -540,8 +693,9 @@ paths:
         '403':
           description: Forbidden
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Update current admin profile
+      summary: Обновить профиль текущего администратора
       tags:
         - Admins
   /admins/{id}:
@@ -555,7 +709,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Admin
+          description: Администратор
           content:
             application/json:
               schema:
@@ -567,8 +721,9 @@ paths:
         '404':
           description: Not Found
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Get admin by ID
+      summary: Получить администратора по ID
       tags:
         - Admins
   /admins/me/password:
@@ -583,16 +738,17 @@ paths:
               $ref: '#/components/schemas/ChangePasswordDto'
       responses:
         '200':
-          description: Password changed successfully
+          description: Пароль успешно изменен
         '400':
-          description: Bad Request (e.g., incorrect current password)
+          description: Неверный запрос (например, неправильный текущий пароль)
         '401':
           description: Unauthorized
         '403':
           description: Forbidden
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Change current admin password
+      summary: Изменить пароль текущего администратора
       tags:
         - Admins
   /events:
@@ -695,12 +851,12 @@ paths:
             $ref: '#/components/schemas/Object'
       responses:
         '200':
-          description: List of events
+          description: Список событий
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedResponseDto'
-      summary: Catalog of events
+      summary: Каталог событий
       tags:
         - Events
     post:
@@ -779,7 +935,7 @@ paths:
                   items:
                     type: string
                     format: binary
-                  description: Image files (max 10 files, 10MB each)
+                  description: Файлы изображений (макс. 10 файлов, 10МБ каждый)
                   nullable: true
               required:
                 - title
@@ -854,21 +1010,22 @@ paths:
                   items:
                     type: string
                     format: binary
-                  description: Image files (max 10 files, 10MB each)
+                  description: Файлы изображений (макс. 10 файлов, 10МБ каждый)
                   nullable: true
               required:
                 - title
                 - tickets
       responses:
         '201':
-          description: Created
+          description: Создано
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EventDto'
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Create event (admin)
+      summary: Создать событие (ADMIN)
       tags:
         - Events
   /events/{id}:
@@ -882,12 +1039,12 @@ paths:
             type: string
       responses:
         '200':
-          description: Event
+          description: Событие
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EventDto'
-      summary: Get event by id
+      summary: Получить событие по ID
       tags:
         - Events
     patch:
@@ -973,7 +1130,7 @@ paths:
                   items:
                     type: string
                     format: binary
-                  description: New image files to add (max 10 files, 10MB each)
+                  description: Новые файлы изображений для добавления (макс. 10 файлов, 10МБ каждый)
                   nullable: true
           application/json:
             schema:
@@ -1047,7 +1204,7 @@ paths:
                   items:
                     type: string
                     format: binary
-                  description: New image files to add (max 10 files, 10MB each)
+                  description: Новые файлы изображений для добавления (макс. 10 файлов, 10МБ каждый)
                   nullable: true
       responses:
         '200':
@@ -1057,12 +1214,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/EventDto'
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Update event (ADMIN)
+      summary: Обновить событие (ADMIN)
       tags:
         - Events
     delete:
-      description: Deletes event. By default does not allow deleting event if it has sessions with active bookings.
+      description: Удаляет событие. По умолчанию не позволяет удалить событие, если у него есть сессии с активными бронированиями.
       operationId: EventsController_delete
       parameters:
         - name: id
@@ -1077,10 +1235,11 @@ paths:
             type: boolean
       responses:
         '204':
-          description: Event successfully deleted
+          description: Событие успешно удалено
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Delete event (ADMIN)
+      summary: Удалить событие (ADMIN)
       tags:
         - Events
   /events/{id}/sessions:
@@ -1209,7 +1368,7 @@ paths:
             $ref: '#/components/schemas/Object'
       responses:
         '200':
-          description: Event sessions
+          description: Сессии события
           content:
             application/json:
               schema:
@@ -1223,12 +1382,12 @@ paths:
         - name: id
           required: true
           in: path
-          description: Event ID
+          description: ID события
           schema:
             type: string
         - name: Idempotency-Key
           in: header
-          description: Unique idempotency key for the request
+          description: Уникальный ключ идемпотентности запроса
           required: true
           schema:
             type: string
@@ -1236,7 +1395,7 @@ paths:
             maxLength: 128
       responses:
         '201':
-          description: Sessions created
+          description: Сессии созданы
           content:
             application/json:
               schema:
@@ -1249,8 +1408,9 @@ paths:
                     items:
                       $ref: '#/components/schemas/SessionCompact'
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Create sessions for event (ADMIN)
+      summary: Создать сессии для события (ADMIN)
       tags:
         - Events
   /sessions:
@@ -1384,18 +1544,18 @@ paths:
             type: boolean
       responses:
         '200':
-          description: List of sessions
+          description: Список сессий
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedResponseDto'
-      summary: Search sessions
+      summary: Поиск сессий
       tags:
         - Sessions
     patch:
       description: >-
-        Allows updating multiple sessions in one request. Each session in the array must contain ID and fields to
-        update.
+        Позволяет обновить несколько сессий за один запрос. Каждая сессия в массиве должна содержать ID и поля для
+        обновления.
       operationId: SessionsController_bulkUpdate
       parameters:
         - name: idempotency-key
@@ -1405,7 +1565,7 @@ paths:
             type: string
         - name: Idempotency-Key
           in: header
-          description: Unique idempotency key for the request
+          description: Уникальный ключ идемпотентности запроса
           required: true
           schema:
             type: string
@@ -1421,7 +1581,7 @@ paths:
                 type: string
       responses:
         '200':
-          description: Sessions updated successfully
+          description: Сессии успешно обновлены
           content:
             application/json:
               schema:
@@ -1435,10 +1595,10 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Session'
-                    description: Successfully updated sessions
+                    description: Успешно обновлённые сессии
                   updated:
                     type: integer
-                    description: Number of successfully updated sessions
+                    description: Количество успешно обновлённых сессий
                   failed:
                     type: array
                     items:
@@ -1449,20 +1609,21 @@ paths:
                       properties:
                         id:
                           type: string
-                          description: ID of session that failed to update
+                          description: ID сессии, которую не удалось обновить
                         error:
                           type: string
-                          description: Error description
-                    description: List of sessions that failed to update
+                          description: Описание ошибки
+                    description: Список сессий, которые не удалось обновить
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Bulk update sessions (ADMIN)
+      summary: Массовое обновление сессий (ADMIN)
       tags:
         - Sessions
     delete:
       description: >-
-        Allows deleting multiple sessions in one request. By default does not allow deleting sessions with active
-        bookings.
+        Позволяет удалить несколько сессий за один запрос. По умолчанию не позволяет удалять сессии с активными
+        бронированиями.
       operationId: SessionsController_bulkDelete
       parameters:
         - name: idempotency-key
@@ -1472,7 +1633,7 @@ paths:
             type: string
         - name: Idempotency-Key
           in: header
-          description: Unique idempotency key for the request
+          description: Уникальный ключ идемпотентности запроса
           required: true
           schema:
             type: string
@@ -1486,7 +1647,7 @@ paths:
               $ref: '#/components/schemas/SessionBulkDeleteDto'
       responses:
         '200':
-          description: Operation completed
+          description: Операция выполнена
           content:
             application/json:
               schema:
@@ -1499,7 +1660,7 @@ paths:
                     type: array
                     items:
                       type: string
-                    description: IDs of successfully deleted sessions
+                    description: ID успешно удалённых сессий
                   failed:
                     type: array
                     items:
@@ -1510,14 +1671,15 @@ paths:
                       properties:
                         id:
                           type: string
-                          description: ID of session that failed to delete
+                          description: ID сессии, которую не удалось удалить
                         error:
                           type: string
-                          description: Reason for failure
-                    description: List of sessions that failed to delete
+                          description: Причина неудачи
+                    description: Список сессий, которые не удалось удалить
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Bulk delete sessions (ADMIN)
+      summary: Массовое удаление сессий (ADMIN)
       tags:
         - Sessions
   /sessions/{id}:
@@ -1531,12 +1693,12 @@ paths:
             type: string
       responses:
         '200':
-          description: Session
+          description: Сессия
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionDto'
-      summary: Get session
+      summary: Получить сессию
       tags:
         - Sessions
     patch:
@@ -1555,14 +1717,15 @@ paths:
               $ref: '#/components/schemas/SessionUpdateDto'
       responses:
         '200':
-          description: Updated session
+          description: Обновлённая сессия
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionDto'
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Update session
+      summary: Обновить сессию
       tags:
         - Sessions
     delete:
@@ -1575,14 +1738,15 @@ paths:
             type: string
       responses:
         '200':
-          description: Session cancelled
+          description: Сессия отменена
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionDto'
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Cancel session (set status to CANCELLED) (ADMIN)
+      summary: Отменить сессию (установить статус CANCELLED) (ADMIN)
       tags:
         - Sessions
   /sessions/{id}/book:
@@ -1601,7 +1765,7 @@ paths:
             type: string
         - name: Idempotency-Key
           in: header
-          description: Idempotency key for safely retrying POST requests
+          description: Ключ идемпотентности для безопасного повтора POST-запросов
           required: true
           schema:
             type: string
@@ -1615,10 +1779,10 @@ paths:
               $ref: '#/components/schemas/CreateBookingDto'
       responses:
         '201':
-          description: Hold created
+          description: Холд создан
           headers:
             X-Hold-TTL:
-              description: Hold time-to-live in seconds
+              description: Время жизни холда в секундах
               schema:
                 type: integer
           content:
@@ -1627,7 +1791,52 @@ paths:
                 $ref: '#/components/schemas/BookingDto'
       security:
         - bearer: []
-      summary: Create booking hold for a session
+      summary: Создать холд бронирования на сессию
+      tags:
+        - Sessions
+  /sessions/{id}/book-deferred:
+    post:
+      description: >-
+        Создаёт бронирование для событий с allowDeferredPayment=true. Бронирование сразу получает статус CONFIRMED, но с
+        флагом isPaid=false. Оплата подтверждается позже администратором.
+      operationId: SessionsController_createDeferredBooking
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: idempotency-key
+          required: true
+          in: header
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          description: Ключ идемпотентности для безопасного повтора POST-запросов
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingDto'
+      responses:
+        '201':
+          description: Бронирование создано (ожидает оплаты)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+        '400':
+          description: Событие не поддерживает отложенную оплату
+      security:
+        - bearer: []
+      summary: Создать бронирование с отложенной оплатой
       tags:
         - Sessions
   /bookings:
@@ -1887,7 +2096,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Bookings list
+          description: Список бронирований
           content:
             application/json:
               schema:
@@ -1901,12 +2110,12 @@ paths:
                     type: string
                     nullable: true
         '401':
-          description: Unauthorized
+          description: Не авторизован
         '403':
-          description: Forbidden
+          description: Доступ запрещен
       security:
         - bearer: []
-      summary: List bookings (self or ADMIN with extended filtering capabilities)
+      summary: Список бронирований (свои или ADMIN с расширенной фильтрацией)
       tags:
         - Bookings
   /bookings/{id}:
@@ -1921,31 +2130,31 @@ paths:
         - name: includeSession
           required: false
           in: query
-          description: Include session information in response
+          description: Включить информацию о сессии в ответ
           schema:
             type: boolean
         - name: includeUser
           required: false
           in: query
-          description: Include user information in response (ADMIN only)
+          description: Включить информацию о пользователе в ответ (только ADMIN)
           schema:
             type: boolean
       responses:
         '200':
-          description: Booking
+          description: Бронирование
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BookingExtendedDto'
         '401':
-          description: Unauthorized
+          description: Не авторизован
         '403':
-          description: Forbidden
+          description: Доступ запрещен
         '404':
-          description: Not Found
+          description: Не найдено
       security:
         - bearer: []
-      summary: Get booking
+      summary: Получить бронирование
       tags:
         - Bookings
     patch:
@@ -1964,24 +2173,25 @@ paths:
               $ref: '#/components/schemas/UpdateBookingDto'
       responses:
         '200':
-          description: Booking updated
+          description: Бронирование обновлено
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BookingExtendedDto'
         '400':
-          description: Bad Request
+          description: Неверный запрос
         '401':
-          description: Unauthorized
+          description: Не авторизован
         '403':
-          description: Forbidden
+          description: Доступ запрещен
         '404':
-          description: Not Found
+          description: Не найдено
         '409':
-          description: Conflict
+          description: Конфликт
       security:
         - bearer: []
-      summary: Update booking (ADMIN only)
+        - adminAuth: []
+      summary: Обновить бронирование (только ADMIN)
       tags:
         - Bookings
   /bookings/{id}/payment:
@@ -2000,30 +2210,36 @@ paths:
             type: string
         - name: Idempotency-Key
           in: header
-          description: Unique idempotency key for the request
+          description: Уникальный ключ идемпотентности запроса
           required: true
           schema:
             type: string
             minLength: 8
             maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingPaymentDto'
       responses:
         '201':
-          description: Payment initiated
+          description: Платёж инициирован
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreateBookingPaymentResponseDto'
         '401':
-          description: Unauthorized
+          description: Не авторизован
         '403':
-          description: Forbidden
+          description: Доступ запрещен
         '404':
-          description: Not Found
+          description: Не найдено
         '409':
-          description: Conflict
+          description: Конфликт
       security:
         - bearer: []
-      summary: Create payment for booking
+      summary: Создать платёж для бронирования
       tags:
         - Bookings
   /bookings/{id}/cancel:
@@ -2037,22 +2253,22 @@ paths:
             type: string
       responses:
         '200':
-          description: Booking cancelled
+          description: Бронирование отменено
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BookingDto'
         '401':
-          description: Unauthorized
+          description: Не авторизован
         '403':
-          description: Forbidden
+          description: Доступ запрещен
         '404':
-          description: Not Found
+          description: Не найдено
         '409':
-          description: Conflict
+          description: Конфликт
       security:
         - bearer: []
-      summary: Cancel booking (self for HOLD/CONFIRMED within policy, or ADMIN)
+      summary: Отменить бронирование (своё для HOLD/CONFIRMED по политике, или ADMIN)
       tags:
         - Bookings
   /bookings/{id}/confirm:
@@ -2066,22 +2282,56 @@ paths:
             type: string
       responses:
         '200':
-          description: Booking confirmed
+          description: Бронирование подтверждено
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BookingDto'
         '401':
-          description: Unauthorized
+          description: Не авторизован
         '403':
-          description: Forbidden
+          description: Доступ запрещен
         '404':
-          description: Not Found
+          description: Не найдено
         '409':
-          description: Conflict
+          description: Конфликт
       security:
         - bearer: []
-      summary: Confirm booking (offline payment, ADMIN only)
+        - adminAuth: []
+      summary: Подтвердить бронирование (оффлайн-оплата, только ADMIN)
+      tags:
+        - Bookings
+  /bookings/{id}/mark-paid:
+    post:
+      description: >-
+        Используется для подтверждения оплаты бронирований с отложенной оплатой (isPaid=false). Устанавливает
+        isPaid=true.
+      operationId: BookingsController_markBookingAsPaid
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Оплата подтверждена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+        '401':
+          description: Не авторизован
+        '403':
+          description: Доступ запрещен
+        '404':
+          description: Не найдено
+        '409':
+          description: Бронирование уже оплачено
+      security:
+        - bearer: []
+        - adminAuth: []
+      summary: Отметить бронирование как оплаченное (только ADMIN)
       tags:
         - Bookings
   /payments:
@@ -2091,16 +2341,19 @@ paths:
         - name: cursor
           required: false
           in: query
-          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          description: Курсор для пагинации. Передайте значение из поля "next" предыдущего ответа.
           schema:
+            example: cm4a2b3c4d5e6f7g8h9i0j
             type: string
         - name: limit
           required: false
           in: query
+          description: Количество элементов на странице
           schema:
             minimum: 1
             maximum: 200
             default: 20
+            example: 20
             type: number
         - name: status
           required: false
@@ -2221,14 +2474,14 @@ paths:
             type: string
       responses:
         '200':
-          description: List of user payments
+          description: Список платежей пользователя
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedResponseDto'
       security:
         - bearer: []
-      summary: Get current user payments
+      summary: Платежи текущего пользователя
       tags:
         - Payments
   /payments/{id}:
@@ -2242,16 +2495,16 @@ paths:
             type: string
       responses:
         '200':
-          description: Payment details
+          description: Детали платежа
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaymentDto'
         '404':
-          description: Payment not found
+          description: Платёж не найден
       security:
         - bearer: []
-      summary: Get payment details
+      summary: Детали платежа
       tags:
         - Payments
   /payments/{id}/refunds:
@@ -2270,7 +2523,7 @@ paths:
             type: string
         - name: Idempotency-Key
           in: header
-          description: Unique idempotency key for the request
+          description: Уникальный ключ идемпотентности запроса
           required: true
           schema:
             type: string
@@ -2278,22 +2531,22 @@ paths:
             maxLength: 128
       responses:
         '201':
-          description: Refund created
+          description: Возврат создан
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RefundDto'
         '401':
-          description: Unauthorized
+          description: Не авторизован
         '403':
-          description: Forbidden
+          description: Доступ запрещен
         '404':
-          description: Payment not found
+          description: Платёж не найден
         '409':
-          description: Conflict
+          description: Конфликт
       security:
         - bearer: []
-      summary: Create refund
+      summary: Создать возврат
       tags:
         - Payments
   /webhooks/payments/provider:
@@ -2307,16 +2560,16 @@ paths:
             type: string
         - name: X-Signature
           in: header
-          description: Signature from provider
+          description: Подпись от провайдера
           required: true
           schema:
             type: string
       responses:
         '200':
-          description: OK (idempotent processing; duplicates allowed)
+          description: OK (идемпотентная обработка; дубликаты разрешены)
         '400':
-          description: Bad signature/payload
-      summary: Webhook from payment provider
+          description: Неверная подпись или данные
+      summary: Вебхук от платёжного провайдера
       tags:
         - Webhooks
   /webhooks/telegram/bot:
@@ -2368,22 +2621,22 @@ paths:
         - Webhooks
   /certificates/products:
     get:
-      description: Returns list of certificate types available for purchase with pricing and details
+      description: Возвращает список типов сертификатов, доступных для покупки, с ценами и деталями
       operationId: CertificatesController_getCertificateProducts
       parameters: []
       responses:
         '200':
-          description: Certificate products
+          description: Продукты сертификатов
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CertificateProductsResponseDto'
-      summary: Get available certificate products for purchase
+      summary: Получить доступные продукты сертификатов
       tags:
         - Certificates
   /certificates/purchase:
     post:
-      description: Client purchases a certificate and receives payment instructions
+      description: Клиент покупает сертификат и получает инструкции по оплате
       operationId: CertificatesController_purchaseCertificate
       parameters: []
       requestBody:
@@ -2394,23 +2647,24 @@ paths:
               $ref: '#/components/schemas/PurchaseCertificateDto'
       responses:
         '201':
-          description: Certificate created, payment initiated
+          description: Сертификат создан, оплата инициирована
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PurchaseCertificateResponseDto'
         '400':
-          description: Invalid request
+          description: Неверный запрос
         '403':
-          description: Only clients can purchase
+          description: Только клиенты могут покупать
       security:
+        - clientAuth: []
         - bearer: []
-      summary: Purchase a certificate
+      summary: Купить сертификат
       tags:
         - Certificates
   /certificates/activate:
     post:
-      description: Activate certificate and convert to benefit (SeasonTicket or Cashback)
+      description: Активировать сертификат и конвертировать в выгоду (Абонемент или Кэшбэк)
       operationId: CertificatesController_activateCertificate
       parameters: []
       requestBody:
@@ -2421,45 +2675,49 @@ paths:
               $ref: '#/components/schemas/ActivateCertificateRequestDto'
       responses:
         '200':
-          description: Certificate activated
+          description: Сертификат активирован
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CertificateActivationResponseDto'
         '404':
-          description: Certificate not found
+          description: Сертификат не найден
         '409':
-          description: Certificate already activated or expired
+          description: Сертификат уже активирован или истек
         '410':
-          description: Certificate expired
+          description: Сертификат истек
       security:
+        - clientAuth: []
         - bearer: []
-      summary: Activate a certificate by code
+      summary: Активировать сертификат по коду
       tags:
         - Certificates
   /certificates/purchased:
     get:
-      description: Get list of certificates purchased by current user
+      description: Получить список сертификатов, купленных текущим пользователем
       operationId: CertificatesController_findPurchased
       parameters:
         - name: cursor
           required: false
           in: query
-          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          description: Курсор для пагинации. Передайте значение из поля "next" предыдущего ответа.
           schema:
+            example: cm4a2b3c4d5e6f7g8h9i0j
             type: string
         - name: limit
           required: false
           in: query
+          description: Количество элементов на странице
           schema:
             minimum: 1
             maximum: 200
             default: 20
+            example: 20
             type: number
         - name: status
           required: false
           in: query
-          description: Filter by status
+          description: Фильтр по статусу
           schema:
             enum:
               - PENDING_ACTIVATION
@@ -2468,50 +2726,53 @@ paths:
             type: string
       responses:
         '200':
-          description: Purchased certificates
+          description: Купленные сертификаты
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ListCertificatesResponseDto'
       security:
         - bearer: []
-      summary: List purchased certificates
+      summary: Список купленных сертификатов
       tags:
         - Certificates
   /certificates/activated:
     get:
-      description: Get list of certificates activated by current user
+      description: Получить список сертификатов, активированных текущим пользователем
       operationId: CertificatesController_findActivated
       parameters:
         - name: cursor
           required: false
           in: query
-          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          description: Курсор для пагинации. Передайте значение из поля "next" предыдущего ответа.
           schema:
+            example: cm4a2b3c4d5e6f7g8h9i0j
             type: string
         - name: limit
           required: false
           in: query
+          description: Количество элементов на странице
           schema:
             minimum: 1
             maximum: 200
             default: 20
+            example: 20
             type: number
       responses:
         '200':
-          description: Activated certificates
+          description: Активированные сертификаты
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ListCertificatesResponseDto'
       security:
         - bearer: []
-      summary: List activated certificates
+      summary: Список активированных сертификатов
       tags:
         - Certificates
   /certificates/by-code/{code}:
     get:
-      description: Check if certificate is valid and can be activated
+      description: Проверить, валиден ли сертификат и можно ли его активировать
       operationId: CertificatesController_checkByCode
       parameters:
         - name: code
@@ -2521,21 +2782,21 @@ paths:
             type: string
       responses:
         '200':
-          description: Certificate details
+          description: Детали сертификата
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CheckCertificateResponseDto'
         '404':
-          description: Certificate not found
+          description: Сертификат не найден
       security:
         - bearer: []
-      summary: Check certificate by code
+      summary: Проверить сертификат по коду
       tags:
         - Certificates
   /certificates/{id}:
     get:
-      description: Get certificate details (owner or admin only)
+      description: Получить детали сертификата (только владелец или админ)
       operationId: CertificatesController_findById
       parameters:
         - name: id
@@ -2545,137 +2806,20 @@ paths:
             type: string
       responses:
         '200':
-          description: Certificate details
+          description: Детали сертификата
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CertificateDto'
         '403':
-          description: Access denied
+          description: Доступ запрещен
         '404':
-          description: Certificate not found
+          description: Сертификат не найден
       security:
         - bearer: []
-      summary: Get certificate by ID
+      summary: Получить сертификат по ID
       tags:
         - Certificates
-  /users/{id}/cashback:
-    get:
-      operationId: UserCashbackController_getCashback
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CashbackWalletDto'
-      security:
-        - bearer: []
-      summary: Баланс кэшбэка пользователя (self или ADMIN)
-      tags:
-        - Users
-        - Cashback
-  /users/{id}/cashback/operations:
-    get:
-      operationId: UserCashbackController_findUserOperations
-      parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: string
-        - name: cursor
-          required: false
-          in: query
-          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
-          schema:
-            type: string
-        - name: limit
-          required: false
-          in: query
-          schema:
-            minimum: 1
-            maximum: 200
-            default: 20
-            type: number
-      responses:
-        '200':
-          description: Operations history
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedResponseDto'
-      security:
-        - bearer: []
-      summary: User's cashback operations history
-      tags:
-        - Users
-        - Cashback
-  /cashback/rules:
-    get:
-      operationId: CashbackController_getRules
-      parameters: []
-      responses:
-        '200':
-          description: Cashback rules
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CashbackRulesDto'
-      summary: Get cashback rules (read-only)
-      tags:
-        - Cashback
-  /cashback/settings:
-    get:
-      operationId: CashbackController_getSettings
-      parameters: []
-      responses:
-        '200':
-          description: List of cashback settings
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CashbackSettingsDto'
-      security:
-        - bearer: []
-      summary: Get all cashback settings (ADMIN only)
-      tags:
-        - Cashback
-  /cashback/settings/{product}:
-    put:
-      operationId: CashbackController_updateSettings
-      parameters:
-        - name: product
-          required: true
-          in: path
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateCashbackSettingsDto'
-      responses:
-        '200':
-          description: Updated cashback settings
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CashbackSettingsDto'
-      security:
-        - bearer: []
-      summary: Update cashback settings for a product (ADMIN only)
-      tags:
-        - Cashback
   /season-ticket-plans:
     post:
       operationId: SeasonTicketPlansController_createPlan
@@ -2688,14 +2832,15 @@ paths:
               $ref: '#/components/schemas/CreateSeasonTicketPlanDto'
       responses:
         '201':
-          description: Plan created
+          description: План создан
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SeasonTicketPlanDto'
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Create season ticket plan (admin)
+      summary: Создать план абонемента (ADMIN)
       tags:
         - Season Tickets
     get:
@@ -2736,12 +2881,12 @@ paths:
             type: number
       responses:
         '200':
-          description: Plans list
+          description: Список планов
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedResponseDto'
-      summary: List season ticket plans
+      summary: Список планов абонементов
       tags:
         - Season Tickets
   /season-ticket-plans/{id}:
@@ -2755,14 +2900,14 @@ paths:
             type: string
       responses:
         '200':
-          description: Plan details
+          description: Детали плана
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SeasonTicketPlanDto'
         '404':
-          description: Plan not found
-      summary: Get season ticket plan details
+          description: План не найден
+      summary: Детали плана абонемента
       tags:
         - Season Tickets
     patch:
@@ -2781,14 +2926,15 @@ paths:
               $ref: '#/components/schemas/UpdateSeasonTicketPlanDto'
       responses:
         '200':
-          description: Plan updated
+          description: План обновлён
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SeasonTicketPlanDto'
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Update season ticket plan
+      summary: Обновить план абонемента
       tags:
         - Season Tickets
     delete:
@@ -2801,10 +2947,11 @@ paths:
             type: string
       responses:
         '204':
-          description: Deleted or deactivated
+          description: Удалён или деактивирован
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Delete (or deactivate) plan
+      summary: Удалить (или деактивировать) план
       tags:
         - Season Tickets
   /season-ticket-plans/{id}/purchase:
@@ -2823,30 +2970,36 @@ paths:
             type: string
         - name: Idempotency-Key
           in: header
-          description: Unique idempotency key for the request
+          description: Уникальный ключ идемпотентности запроса
           required: true
           schema:
             type: string
             minLength: 8
             maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseSeasonTicketDto'
       responses:
         '201':
-          description: Payment for season ticket purchase created
+          description: Платёж для покупки абонемента создан
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaymentDto'
         '401':
-          description: Unauthorized
+          description: Не авторизован
         '403':
-          description: Forbidden
+          description: Доступ запрещен
         '404':
-          description: Plan not found
+          description: План не найден
         '409':
-          description: Conflict
+          description: Конфликт
       security:
         - bearer: []
-      summary: Purchase season ticket (clientId taken from token)
+      summary: Купить абонемент (clientId из токена)
       tags:
         - Season Tickets
   /season-ticket-plans/{id}/applicable-events:
@@ -2861,23 +3014,26 @@ paths:
         - name: cursor
           required: false
           in: query
-          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          description: Курсор для пагинации. Передайте значение из поля "next" предыдущего ответа.
           schema:
+            example: cm4a2b3c4d5e6f7g8h9i0j
             type: string
         - name: limit
           required: false
           in: query
+          description: Количество элементов на странице
           schema:
             minimum: 1
             maximum: 200
             default: 20
+            example: 20
             type: number
       responses:
         '200':
-          description: List of applicable events
+          description: Список применимых событий
         '404':
-          description: Plan not found
-      summary: Get events applicable to this season ticket plan
+          description: План не найден
+      summary: События, применимые к этому плану абонемента
       tags:
         - Season Tickets
   /season-tickets:
@@ -2943,14 +3099,14 @@ paths:
             type: number
       responses:
         '200':
-          description: Season tickets list
+          description: Список абонементов
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedResponseDto'
       security:
         - bearer: []
-      summary: List season tickets (self or ADMIN)
+      summary: Список абонементов (свои или ADMIN)
       tags:
         - Season Tickets
   /season-tickets/{id}:
@@ -2964,14 +3120,14 @@ paths:
             type: string
       responses:
         '200':
-          description: Season ticket
+          description: Абонемент
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SeasonTicketDto'
       security:
         - bearer: []
-      summary: Get season ticket by id
+      summary: Получить абонемент по ID
       tags:
         - Season Tickets
   /season-tickets/{id}/cancel:
@@ -2985,14 +3141,14 @@ paths:
             type: string
       responses:
         '200':
-          description: Cancelled
+          description: Отменён
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SeasonTicketDto'
       security:
         - bearer: []
-      summary: Cancel season ticket (proportional refund policy)
+      summary: Отменить абонемент (пропорциональный возврат)
       tags:
         - Season Tickets
   /clients/{id}/season-tickets:
@@ -3007,27 +3163,30 @@ paths:
         - name: cursor
           required: false
           in: query
-          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          description: Курсор для пагинации. Передайте значение из поля "next" предыдущего ответа.
           schema:
+            example: cm4a2b3c4d5e6f7g8h9i0j
             type: string
         - name: limit
           required: false
           in: query
+          description: Количество элементов на странице
           schema:
             minimum: 1
             maximum: 200
             default: 20
+            example: 20
             type: number
       responses:
         '200':
-          description: Client's season tickets
+          description: Абонементы клиента
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedResponseDto'
       security:
         - bearer: []
-      summary: Client's season tickets
+      summary: Абонементы клиента
       tags:
         - Clients
         - Season Tickets
@@ -3047,7 +3206,7 @@ paths:
             type: string
         - name: Idempotency-Key
           in: header
-          description: Idempotency key for safely retrying POST requests
+          description: Ключ идемпотентности для безопасного повтора POST запросов
           required: true
           schema:
             type: string
@@ -3061,16 +3220,16 @@ paths:
               $ref: '#/components/schemas/JoinWaitlistDto'
       responses:
         '201':
-          description: Added to waitlist
+          description: Добавлен в лист ожидания
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/WaitlistEntryDto'
         '409':
-          description: Session not full or not waitlist-eligible
+          description: Сессия не заполнена или недоступна для листа ожидания
       security:
         - bearer: []
-      summary: Join waitlist for a full session (idempotent)
+      summary: Встать в лист ожидания на заполненную сессию
       tags:
         - Waitlist
     delete:
@@ -3083,10 +3242,10 @@ paths:
             type: string
       responses:
         '204':
-          description: Removed or not present
+          description: Удален или отсутствовал
       security:
         - bearer: []
-      summary: Leave waitlist (idempotent)
+      summary: Покинуть лист ожидания
       tags:
         - Waitlist
     get:
@@ -3100,27 +3259,31 @@ paths:
         - name: cursor
           required: false
           in: query
-          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          description: Курсор для пагинации. Передайте значение из поля "next" предыдущего ответа.
           schema:
+            example: cm4a2b3c4d5e6f7g8h9i0j
             type: string
         - name: limit
           required: false
           in: query
+          description: Количество элементов на странице
           schema:
             minimum: 1
             maximum: 200
             default: 20
+            example: 20
             type: number
       responses:
         '200':
-          description: Entries
+          description: Записи
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedResponseDto'
       security:
+        - adminAuth: []
         - bearer: []
-      summary: List waitlist entries (admin)
+      summary: Список записей листа ожидания
       tags:
         - Waitlist
   /sessions/{id}/subscriptions:
@@ -3136,27 +3299,31 @@ paths:
         - name: cursor
           required: false
           in: query
-          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          description: Курсор для пагинации. Передайте значение из поля "next" предыдущего ответа.
           schema:
+            example: cm4a2b3c4d5e6f7g8h9i0j
             type: string
         - name: limit
           required: false
           in: query
+          description: Количество элементов на странице
           schema:
             minimum: 1
             maximum: 200
             default: 20
+            example: 20
             type: number
       responses:
         '200':
-          description: Entries
+          description: Записи
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedResponseDto'
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Alias of /sessions/{id}/waitlist (admin)
+      summary: Алиас /sessions/{id}/waitlist
       tags:
         - Waitlist
   /users/{id}/waitlist:
@@ -3171,23 +3338,26 @@ paths:
         - name: cursor
           required: false
           in: query
-          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          description: Курсор для пагинации. Передайте значение из поля "next" предыдущего ответа.
           schema:
+            example: cm4a2b3c4d5e6f7g8h9i0j
             type: string
         - name: limit
           required: false
           in: query
+          description: Количество элементов на странице
           schema:
             minimum: 1
             maximum: 200
             default: 20
+            example: 20
             type: number
       responses:
         '200':
-          description: Sessions where user is on waitlist
+          description: Сессии, где пользователь в листе ожидания
       security:
         - bearer: []
-      summary: User's waitlisted sessions
+      summary: Сессии пользователя в листе ожидания
       tags:
         - Waitlist
         - Users
@@ -3198,16 +3368,19 @@ paths:
         - name: cursor
           required: false
           in: query
-          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          description: Курсор для пагинации. Передайте значение из поля "next" предыдущего ответа.
           schema:
+            example: cm4a2b3c4d5e6f7g8h9i0j
             type: string
         - name: limit
           required: false
           in: query
+          description: Количество элементов на странице
           schema:
             minimum: 1
             maximum: 200
             default: 20
+            example: 20
             type: number
         - name: status
           required: false
@@ -3334,14 +3507,15 @@ paths:
             type: string
       responses:
         '200':
-          description: List of all payments
+          description: Список всех платежей
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedResponseDto'
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Get all payments (admin)
+      summary: Получить все платежи
       tags:
         - Admin
   /admin/audit-logs:
@@ -3351,16 +3525,19 @@ paths:
         - name: cursor
           required: false
           in: query
-          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          description: Курсор для пагинации. Передайте значение из поля "next" предыдущего ответа.
           schema:
+            example: cm4a2b3c4d5e6f7g8h9i0j
             type: string
         - name: limit
           required: false
           in: query
+          description: Количество элементов на странице
           schema:
             minimum: 1
             maximum: 200
             default: 20
+            example: 20
             type: number
         - name: filter.action
           required: false
@@ -3394,7 +3571,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Audit records
+          description: Записи аудита
           content:
             application/json:
               schema:
@@ -3408,8 +3585,9 @@ paths:
                     type: string
                     nullable: true
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Audit log (admin)
+      summary: Журнал аудита
       tags:
         - Admin
   /admin/upload:
@@ -3426,12 +3604,12 @@ paths:
                 file:
                   type: string
                   format: binary
-                  description: File to upload (images, etc.)
+                  description: Файл для загрузки (изображения и др.)
               required:
                 - file
       responses:
         '201':
-          description: File uploaded successfully
+          description: Файл успешно загружен
           content:
             application/json:
               schema:
@@ -3439,13 +3617,14 @@ paths:
                 properties:
                   url:
                     type: string
-                    description: Public URL to access the file
+                    description: Публичный URL для доступа к файлу
                   objectName:
                     type: string
-                    description: Object name in MinIO
+                    description: Имя объекта в MinIO
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Upload file to MinIO (admin)
+      summary: Загрузить файл в MinIO
       tags:
         - Admin
   /admin/jobs/run/booking-expiry:
@@ -3454,7 +3633,7 @@ paths:
       parameters: []
       responses:
         '200':
-          description: Booking expiry job completed
+          description: Задача истечения бронирований завершена
           content:
             application/json:
               schema:
@@ -3463,8 +3642,9 @@ paths:
                   expired:
                     type: number
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Manually run booking expiry job (admin only)
+      summary: Запустить задачу истечения бронирований вручную
       tags:
         - Jobs
   /admin/jobs/run/season-ticket-expiry:
@@ -3473,7 +3653,7 @@ paths:
       parameters: []
       responses:
         '200':
-          description: Season ticket expiry job completed
+          description: Задача истечения абонементов завершена
           content:
             application/json:
               schema:
@@ -3482,8 +3662,9 @@ paths:
                   expired:
                     type: number
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Manually run season ticket expiry job (admin only)
+      summary: Запустить задачу истечения абонементов вручную
       tags:
         - Jobs
   /images:
@@ -3502,18 +3683,18 @@ paths:
                   items:
                     type: string
                     format: binary
-                  description: Image files (max 10 files, 10MB each)
+                  description: Файлы изображений (макс. 10 файлов, 10МБ каждый)
                 tags:
                   type: array
                   items:
                     type: string
-                  description: Tags for categorization
+                  description: Теги для категоризации
                   nullable: true
               required:
                 - files
       responses:
         '201':
-          description: Images uploaded successfully
+          description: Изображения успешно загружены
           content:
             application/json:
               schema:
@@ -3521,8 +3702,9 @@ paths:
                 items:
                   $ref: '#/components/schemas/ImageDto'
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Upload images (admin)
+      summary: Загрузить изображения
       tags:
         - Images
     get:
@@ -3531,16 +3713,19 @@ paths:
         - name: cursor
           required: false
           in: query
-          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          description: Курсор для пагинации. Передайте значение из поля "next" предыдущего ответа.
           schema:
+            example: cm4a2b3c4d5e6f7g8h9i0j
             type: string
         - name: limit
           required: false
           in: query
+          description: Количество элементов на странице
           schema:
             minimum: 1
             maximum: 200
             default: 20
+            example: 20
             type: number
         - name: q
           required: false
@@ -3612,12 +3797,12 @@ paths:
             type: string
       responses:
         '200':
-          description: List of images
+          description: Список изображений
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedResponseDto'
-      summary: List images with filtering
+      summary: Список изображений с фильтрацией
       tags:
         - Images
   /images/batch:
@@ -3636,18 +3821,18 @@ paths:
                   items:
                     type: string
                     format: binary
-                  description: Image files (max 10 files, 10MB each)
+                  description: Файлы изображений (макс. 10 файлов, 10МБ каждый)
                 tags:
                   type: array
                   items:
                     type: string
-                  description: Tags for categorization
+                  description: Теги для категоризации
                   nullable: true
               required:
                 - files
       responses:
         '201':
-          description: Images uploaded successfully
+          description: Изображения успешно загружены
           content:
             application/json:
               schema:
@@ -3655,8 +3840,9 @@ paths:
                 items:
                   $ref: '#/components/schemas/ImageDto'
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Batch upload images (admin, alias to POST /images)
+      summary: Пакетная загрузка изображений (алиас POST /images)
       tags:
         - Images
   /images/{id}:
@@ -3670,12 +3856,12 @@ paths:
             type: string
       responses:
         '200':
-          description: Image
+          description: Изображение
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ImageDto'
-      summary: Get image by ID
+      summary: Получить изображение по ID
       tags:
         - Images
     patch:
@@ -3694,18 +3880,19 @@ paths:
               $ref: '#/components/schemas/ImageUpdateDto'
       responses:
         '200':
-          description: Image updated
+          description: Изображение обновлено
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ImageDto'
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Update image metadata (admin)
+      summary: Обновить метаданные изображения
       tags:
         - Images
     delete:
-      description: Deletes image from MinIO and database
+      description: Удаляет изображение из MinIO и базы данных
       operationId: ImagesController_delete
       parameters:
         - name: id
@@ -3715,15 +3902,16 @@ paths:
             type: string
       responses:
         '204':
-          description: Image successfully deleted
+          description: Изображение успешно удалено
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Delete image (admin)
+      summary: Удалить изображение
       tags:
         - Images
   /images/batch/delete:
     delete:
-      description: Deletes multiple images from MinIO and database
+      description: Удаляет несколько изображений из MinIO и базы данных
       operationId: ImagesController_batchDelete
       parameters: []
       requestBody:
@@ -3734,10 +3922,11 @@ paths:
               $ref: '#/components/schemas/BatchDeleteDto'
       responses:
         '204':
-          description: Images successfully deleted
+          description: Изображения успешно удалены
       security:
+        - adminAuth: []
         - bearer: []
-      summary: Batch delete images (admin)
+      summary: Пакетное удаление изображений
       tags:
         - Images
   /static/images/{objectName}:
@@ -3747,12 +3936,12 @@ paths:
         - name: objectName
           required: true
           in: path
-          description: MinIO object name
+          description: Имя объекта в MinIO
           schema:
             type: string
       responses:
         '200':
-          description: Image file
+          description: Файл изображения
           content:
             image/jpeg:
               schema:
@@ -3771,27 +3960,40 @@ paths:
                 type: string
                 format: binary
         '404':
-          description: Image not found
-      summary: Serve image file
+          description: Изображение не найдено
+      summary: Отдать файл изображения
       tags:
         - Static
 info:
   title: Surf Booking Telegram Web App API
-  description: |-
-    API для сервиса бронирования и оплаты тренировок по (серфинг, скейтсерфинг, вейксерфинг)
-    и многодневных туров. Включает подарочные сертификаты, абонементы, лист ожидания,
-    кэшбэк-кошелёк и админ-аудит. Эта версия (v0.3.2) включает правки из аудита:
-      - унификация названий (tickets), статусов (CANCELLED)
-      - консистентная пагинация {items,next}
-      - идемпотентность через заголовок Idempotency-Key
-      - безопасные PATCH DTO, запрет userId в покупках за другого
-      - платежи/рефанды без дублирования валюты, oneOf для метода оплаты
-      - корректные схемы сертификатов (денежный vs passes)
-      - стандартизированные фильтры времени (startsAfter/endsBefore)
+  description: |
+    API для сервиса бронирования и оплаты тренировок по сёрфингу, скейтсёрфингу и вейксёрфингу.
 
-          - добавлены эндпоинты: POST /events/{id}/sessions (bulk create, ADMIN), PATCH /sessions/{id} (ADMIN), DELETE /sessions/{id} (CANCELLED, ADMIN)
-      - добавлены эндпоинты для выполнения административных задач (job endpoints)
-  version: v0.3.2
+    ## Аутентификация
+
+    API поддерживает две схемы аутентификации:
+
+    ### Для клиентов (Telegram)
+    - Используется `POST /auth/client/telegram` с initData из Telegram Web App
+    - Возвращает JWT токены для авторизации запросов
+    - Защищённые эндпоинты помечены `clientAuth`
+
+    ### Для администраторов
+    - Используется `POST /auth/admin/login` с email/password
+    - Возвращает JWT токены для авторизации запросов
+    - Защищённые эндпоинты помечены `adminAuth`
+
+    ## Пагинация
+
+    API использует cursor-based пагинацию:
+    - `cursor` - курсор для получения следующей страницы
+    - `limit` - количество элементов на странице (по умолчанию 20, максимум 200)
+    - Ответ содержит `next` - курсор для следующей страницы (null если это последняя)
+
+    ## Идемпотентность
+
+    Эндпоинты создания ресурсов требуют заголовок `Idempotency-Key` для безопасного повтора запросов.
+  version: v0.4.0
   contact: {}
 tags: []
 servers:
@@ -3803,13 +4005,26 @@ components:
       scheme: bearer
       bearerFormat: JWT
       type: http
+      description: JWT токен авторизации
+    adminAuth:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+      description: Требуется роль ADMIN. Используйте POST /auth/admin/login для получения токена.
+    clientAuth:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+      description: Требуется роль CLIENT. Используйте POST /auth/client/telegram для получения токена.
   schemas:
     TelegramLoginDto:
       type: object
       properties:
         initData:
           type: string
-          description: Telegram Web App initData
+          description: Данные инициализации Telegram Web App
+          example: >-
+            query_id=AAHdF6IQAAAAAN0XohDhrOrc&user=%7B%22id%22%3A1234567890%2C%22first_name%22%3A%22John%22%7D&auth_date=1234567890&hash=abc123...
       required:
         - initData
     ClientDto:
@@ -3880,10 +4095,16 @@ components:
       properties:
         accessToken:
           type: string
+          description: JWT токен доступа
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         refreshToken:
           type: string
+          description: Токен обновления
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         client:
-          $ref: '#/components/schemas/ClientDto'
+          description: Данные клиента
+          allOf:
+            - $ref: '#/components/schemas/ClientDto'
       required:
         - accessToken
         - refreshToken
@@ -3964,10 +4185,16 @@ components:
       properties:
         accessToken:
           type: string
+          description: JWT токен доступа
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         refreshToken:
           type: string
+          description: Токен обновления
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         admin:
-          $ref: '#/components/schemas/AdminDto'
+          description: Данные администратора
+          allOf:
+            - $ref: '#/components/schemas/AdminDto'
       required:
         - accessToken
         - refreshToken
@@ -3977,6 +4204,8 @@ components:
       properties:
         refreshToken:
           type: string
+          description: Токен обновления
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
       required:
         - refreshToken
     RefreshTokenResponseDto:
@@ -3984,8 +4213,12 @@ components:
       properties:
         accessToken:
           type: string
+          description: Новый JWT токен доступа
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         refreshToken:
           type: string
+          description: Новый токен обновления
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
       required:
         - accessToken
         - refreshToken
@@ -3997,24 +4230,82 @@ components:
           enum:
             - CLIENT
             - ADMIN
+          description: Тип пользователя
+          example: CLIENT
         client:
-          $ref: '#/components/schemas/ClientDto'
+          description: Данные клиента (присутствует если type=CLIENT)
+          allOf:
+            - $ref: '#/components/schemas/ClientDto'
         admin:
-          $ref: '#/components/schemas/AdminDto'
+          description: Данные администратора (присутствует если type=ADMIN)
+          allOf:
+            - $ref: '#/components/schemas/AdminDto'
       required:
         - type
     PaginatedResponseDto:
       type: object
       properties:
         items:
+          description: Массив элементов текущей страницы
           type: array
           items:
             type: string
         next:
           type: string
           nullable: true
+          description: Курсор для получения следующей страницы. null если это последняя страница.
+          example: cm4a2b3c4d5e6f7g8h9i0j
       required:
         - items
+    PriceDto:
+      type: object
+      properties:
+        currency:
+          type: string
+          description: ISO-4217 currency code
+          example: KZT
+        amountMinor:
+          type: number
+          description: Amount in minor units (tiyn/cents)
+          example: 129900
+      required:
+        - currency
+        - amountMinor
+    CashbackHistoryItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+            - EARN
+            - REDEEM
+            - ADJUST
+        amount:
+          $ref: '#/components/schemas/PriceDto'
+        createdAt:
+          type: string
+          format: date-time
+        note:
+          type: object
+          nullable: true
+      required:
+        - id
+        - type
+        - amount
+        - createdAt
+    CashbackWalletDto:
+      type: object
+      properties:
+        balance:
+          $ref: '#/components/schemas/PriceDto'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/CashbackHistoryItemDto'
+      required:
+        - balance
     CompleteProfileDto:
       type: object
       properties:
@@ -4049,6 +4340,88 @@ components:
         - personalDataConsent
         - privacyPolicyConsent
         - safetyRulesConsent
+    CashbackEarnRateDto:
+      type: object
+      properties:
+        product:
+          type: string
+          enum:
+            - single
+            - certificate
+            - seasonTicket
+        rate:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Earn rate (0.05 = 5%)
+      required:
+        - product
+        - rate
+    CashbackRulesDto:
+      type: object
+      properties:
+        earnRates:
+          type: array
+          items:
+            $ref: '#/components/schemas/CashbackEarnRateDto'
+        maxRedeemRate:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Maximum portion of payment that can be covered by cashback
+      required:
+        - earnRates
+        - maxRedeemRate
+    CashbackSettingsDto:
+      type: object
+      properties:
+        id:
+          type: string
+        product:
+          type: string
+          enum:
+            - single
+            - certificate
+            - seasonTicket
+        rate:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Cashback rate (0.05 = 5%)
+        maxRedeemRate:
+          type: object
+          nullable: true
+          minimum: 0
+          maximum: 1
+          description: Maximum redeem rate (only for one product)
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - product
+        - rate
+        - createdAt
+        - updatedAt
+    UpdateCashbackSettingsDto:
+      type: object
+      properties:
+        rate:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Cashback rate (0.05 = 5%)
+        maxRedeemRate:
+          type: object
+          nullable: true
+          minimum: 0
+          maximum: 1
+          description: Maximum redeem rate (only for single product)
+      required:
+        - rate
     CreateAdminDto:
       type: object
       properties:
@@ -4112,20 +4485,6 @@ components:
       required:
         - heading
         - body
-    PriceDto:
-      type: object
-      properties:
-        currency:
-          type: string
-          description: ISO-4217 currency code
-          example: KZT
-        amountMinor:
-          type: number
-          description: Amount in minor units (tiyn/cents)
-          example: 129900
-      required:
-        - currency
-        - amountMinor
     TicketPriceDto:
       type: object
       properties:
@@ -4193,6 +4552,10 @@ components:
           type: array
           items:
             type: string
+        allowDeferredPayment:
+          type: boolean
+          description: Allow deferred (offline/cash) payment for this event
+          default: false
       required:
         - id
         - title
@@ -4418,6 +4781,10 @@ components:
           type: object
           nullable: true
           description: ID администратора, создавшего бронирование
+        isPaid:
+          type: boolean
+          description: Статус оплаты. False для отложенных платежей, ожидающих подтверждения.
+          default: true
       required:
         - id
         - sessionId
@@ -4425,6 +4792,7 @@ components:
         - status
         - totalPrice
         - createdAt
+        - isPaid
     PaymentInfoDto:
       type: object
       properties:
@@ -4494,6 +4862,10 @@ components:
           type: object
           nullable: true
           description: ID администратора, создавшего бронирование
+        isPaid:
+          type: boolean
+          description: Статус оплаты. False для отложенных платежей, ожидающих подтверждения.
+          default: true
         client:
           description: Информация о пользователе (доступно при запросе с правами ADMIN)
           allOf:
@@ -4514,6 +4886,20 @@ components:
         - status
         - totalPrice
         - createdAt
+        - isPaid
+    CreateBookingPaymentDto:
+      type: object
+      properties:
+        paymentMethods:
+          oneOf:
+            - type: array
+              items:
+                $ref: '#/components/schemas/PaymentMethodRequestDto'
+            - $ref: '#/components/schemas/PaymentMethodRequestDto'
+            - $ref: '#/components/schemas/CompositePaymentMethodRequestDto'
+          description: Payment methods - accepts array (new format), single method, or composite object (backward compatibility)
+      required:
+        - paymentMethods
     CreateBookingPaymentResponseDto:
       type: object
       properties:
@@ -4713,6 +5099,8 @@ components:
           type: string
         first_name:
           type: string
+        last_name:
+          type: string
         username:
           type: string
       required:
@@ -4824,8 +5212,12 @@ components:
             - $ref: '#/components/schemas/PriceDto'
         paymentMethods:
           oneOf:
+            - type: array
+              items:
+                $ref: '#/components/schemas/PaymentMethodRequestDto'
             - $ref: '#/components/schemas/PaymentMethodRequestDto'
             - $ref: '#/components/schemas/CompositePaymentMethodRequestDto'
+          description: Payment methods - accepts array (new format), single method, or composite object (backward compatibility)
       required:
         - type
         - paymentMethods
@@ -4971,123 +5363,6 @@ components:
         - data
         - status
         - canActivate
-    CashbackHistoryItemDto:
-      type: object
-      properties:
-        id:
-          type: string
-        type:
-          type: string
-          enum:
-            - EARN
-            - REDEEM
-            - ADJUST
-        amount:
-          $ref: '#/components/schemas/PriceDto'
-        createdAt:
-          type: string
-          format: date-time
-        note:
-          type: object
-          nullable: true
-      required:
-        - id
-        - type
-        - amount
-        - createdAt
-    CashbackWalletDto:
-      type: object
-      properties:
-        balance:
-          $ref: '#/components/schemas/PriceDto'
-        history:
-          type: array
-          items:
-            $ref: '#/components/schemas/CashbackHistoryItemDto'
-      required:
-        - balance
-    CashbackEarnRateDto:
-      type: object
-      properties:
-        product:
-          type: string
-          enum:
-            - single
-            - certificate
-            - seasonTicket
-        rate:
-          type: number
-          minimum: 0
-          maximum: 1
-          description: Earn rate (0.05 = 5%)
-      required:
-        - product
-        - rate
-    CashbackRulesDto:
-      type: object
-      properties:
-        earnRates:
-          type: array
-          items:
-            $ref: '#/components/schemas/CashbackEarnRateDto'
-        maxRedeemRate:
-          type: number
-          minimum: 0
-          maximum: 1
-          description: Maximum portion of payment that can be covered by cashback
-      required:
-        - earnRates
-        - maxRedeemRate
-    CashbackSettingsDto:
-      type: object
-      properties:
-        id:
-          type: string
-        product:
-          type: string
-          enum:
-            - single
-            - certificate
-            - seasonTicket
-        rate:
-          type: number
-          minimum: 0
-          maximum: 1
-          description: Cashback rate (0.05 = 5%)
-        maxRedeemRate:
-          type: object
-          nullable: true
-          minimum: 0
-          maximum: 1
-          description: Maximum redeem rate (only for one product)
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-      required:
-        - id
-        - product
-        - rate
-        - createdAt
-        - updatedAt
-    UpdateCashbackSettingsDto:
-      type: object
-      properties:
-        rate:
-          type: number
-          minimum: 0
-          maximum: 1
-          description: Cashback rate (0.05 = 5%)
-        maxRedeemRate:
-          type: object
-          nullable: true
-          minimum: 0
-          maximum: 1
-          description: Maximum redeem rate (only for single product)
-      required:
-        - rate
     EventFilterLabelsDto:
       type: object
       properties:
@@ -5253,6 +5528,19 @@ components:
           description: Flexible event matching filters (optional)
           allOf:
             - $ref: '#/components/schemas/EventFilterDto'
+    PurchaseSeasonTicketDto:
+      type: object
+      properties:
+        paymentMethods:
+          oneOf:
+            - type: array
+              items:
+                $ref: '#/components/schemas/PaymentMethodRequestDto'
+            - $ref: '#/components/schemas/PaymentMethodRequestDto'
+            - $ref: '#/components/schemas/CompositePaymentMethodRequestDto'
+          description: Payment methods - accepts array (new format), single method, or composite object (backward compatibility)
+      required:
+        - paymentMethods
     SeasonTicketDto:
       type: object
       properties:

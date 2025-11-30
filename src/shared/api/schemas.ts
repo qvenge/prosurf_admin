@@ -48,6 +48,20 @@ export const UserUpdateDtoSchema = z.object({
   email: z.string().optional(),
 });
 
+// Client schema - matches server ClientDto (Telegram users)
+// Note: Defined early because it's used in BookingExtendedSchema
+export const ClientSchema = z.object({
+  telegramId: z.string(),
+  telegramChatId: z.string().nullable().optional(),
+  username: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
+  firstName: z.string().nullable().optional(),
+  lastName: z.string().nullable().optional(),
+  photoUrl: z.string().nullable().optional(),
+  dateOfBirth: z.string().datetime().nullable().optional(),
+  createdAt: z.string().datetime(),
+});
+
 // Guest contact schema
 export const GuestContactSchema = z.object({
   phone: z.string().regex(/^\+?[0-9]{7,15}$/),
@@ -228,6 +242,7 @@ export const BookingSchema = z.object({
   notes: z.string().nullable().optional(),
   createdAt: z.string().datetime(),
   createdByAdminId: z.string().nullable().optional(),
+  isPaid: z.boolean().default(true),
 });
 
 export const BookRequestSchema = z.object({
@@ -235,7 +250,7 @@ export const BookRequestSchema = z.object({
 });
 
 export const BookingExtendedSchema = BookingSchema.extend({
-  client: UserSchema.optional(),
+  client: ClientSchema.optional(),
   guestContact: GuestContactSchema.nullable().optional(),
   session: z.lazy(() => SessionSchema).optional(),
   paymentInfo: z.union([
@@ -334,6 +349,28 @@ export const PaymentRequestSchema = z
   .array(PaymentMethodRequestSchema)
   .min(1)
   .max(10);
+
+// Composite payment method for backward compatibility
+export const CompositePaymentMethodRequestSchema = z.object({
+  methods: z.array(PaymentMethodRequestSchema),
+});
+
+// DTO schemas for payment requests
+export const CreateBookingPaymentDtoSchema = z.object({
+  paymentMethods: z.union([
+    z.array(PaymentMethodRequestSchema),
+    PaymentMethodRequestSchema,
+    CompositePaymentMethodRequestSchema,
+  ]),
+});
+
+export const PurchaseSeasonTicketDtoSchema = z.object({
+  paymentMethods: z.union([
+    z.array(PaymentMethodRequestSchema),
+    PaymentMethodRequestSchema,
+    CompositePaymentMethodRequestSchema,
+  ]),
+});
 
 // Refund schemas
 export const RefundRequestSchema = z.object({
@@ -453,6 +490,7 @@ export const SeasonTicketSchema = z.object({
   status: SeasonTicketStatusSchema,
   remainingPasses: z.number().int().min(0),
   validUntil: z.string().datetime(),
+  paymentId: z.string().nullable().optional(),
 });
 
 // Cashback schemas
@@ -507,23 +545,87 @@ export const TelegramLoginDtoSchema = z.object({
   initData: z.string(),
 });
 
-export const LoginDtoSchema = z.object({
-  login: z.string(),
+// Admin login DTO - uses email field (not login)
+export const AdminLoginDtoSchema = z.object({
+  email: z.string().email(),
   password: z.string().min(6),
 });
 
-export const RegisterDtoSchema = z.object({
+// Legacy alias for backward compatibility
+export const LoginDtoSchema = AdminLoginDtoSchema;
+
+// Admin schema - matches server AdminDto
+export const AdminSchema = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  firstName: z.string().nullable().optional(),
+  lastName: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
+  department: z.string().nullable().optional(),
+  permissions: z.array(z.string()).default([]),
+  notes: z.string().nullable().optional(),
+  createdAt: z.string().datetime(),
+});
+
+// Client update DTO
+export const ClientUpdateDtoSchema = z.object({
+  phone: z.string().regex(/^\+?[0-9]{7,15}$/).nullable().optional(),
+  firstName: z.string().max(128).nullable().optional(),
+  lastName: z.string().max(128).nullable().optional(),
+  dateOfBirth: z.string().datetime().nullable().optional(),
+});
+
+// Admin create DTO
+export const AdminCreateDtoSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  firstName: z.string().max(128).nullable().optional(),
+  lastName: z.string().max(128).nullable().optional(),
+  phone: z.string().regex(/^\+?[0-9]{7,15}$/).nullable().optional(),
+  department: z.string().max(128).nullable().optional(),
+  permissions: z.array(z.string()).optional(),
+  notes: z.string().max(1000).nullable().optional(),
+});
+
+// Admin update DTO (for updating other admins)
+export const AdminUpdateDtoSchema = z.object({
   email: z.string().email().optional(),
-  username: z.string().regex(/^[a-zA-Z0-9_-]{3,32}$/).optional(),
-  password: z.string().min(6),
-  firstName: z.string().max(128).optional(),
-  lastName: z.string().max(128).optional(),
-  phone: z.string().regex(/^\+?[0-9]{7,15}$/).optional(),
-  role: RoleSchema.optional(),
-}).refine(data => data.email || data.username, {
-  message: "Either email or username must be provided",
+  firstName: z.string().max(128).nullable().optional(),
+  lastName: z.string().max(128).nullable().optional(),
+  phone: z.string().regex(/^\+?[0-9]{7,15}$/).nullable().optional(),
+  department: z.string().max(128).nullable().optional(),
+  permissions: z.array(z.string()).optional(),
+  notes: z.string().max(1000).nullable().optional(),
 });
 
+// Admin self-update DTO (for /admins/me)
+export const AdminSelfUpdateDtoSchema = z.object({
+  firstName: z.string().max(128).nullable().optional(),
+  lastName: z.string().max(128).nullable().optional(),
+  phone: z.string().regex(/^\+?[0-9]{7,15}$/).nullable().optional(),
+});
+
+// Change password DTO
+export const ChangePasswordDtoSchema = z.object({
+  oldPassword: z.string().min(6),
+  newPassword: z.string().min(6),
+});
+
+// Admin auth response - server returns { admin: AdminDto } not { user: UserDto }
+export const AdminAuthResponseSchema = z.object({
+  accessToken: z.string(),
+  refreshToken: z.string(),
+  admin: AdminSchema,
+});
+
+// Client auth response - for Telegram login
+export const ClientAuthResponseSchema = z.object({
+  accessToken: z.string(),
+  refreshToken: z.string(),
+  client: ClientSchema,
+});
+
+// Generic auth response for backward compatibility
 export const AuthResponseSchema = z.object({
   accessToken: z.string(),
   refreshToken: z.string(),
@@ -684,6 +786,20 @@ export const AuditLogFiltersSchema = z.object({
 export const SeasonTicketPlanFiltersSchema = z.object({
   eventIds: z.array(z.string()).optional(),
   sessionId: z.string().optional(),
+  cursor: CursorParamSchema,
+  limit: LimitParamSchema,
+});
+
+// Client filters schema
+export const ClientFiltersSchema = z.object({
+  q: z.string().optional(), // Search query
+  cursor: CursorParamSchema,
+  limit: LimitParamSchema,
+});
+
+// Admin filters schema
+export const AdminFiltersSchema = z.object({
+  q: z.string().optional(), // Search query
   cursor: CursorParamSchema,
   limit: LimitParamSchema,
 });

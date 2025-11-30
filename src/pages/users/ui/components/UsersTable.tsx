@@ -11,25 +11,25 @@ import clsx from 'clsx';
 import { ArrowDownBold, ArrowUpBold, PencilSimpleBold } from '@/shared/ds/icons';
 import { Icon, IconButton } from '@/shared/ui';
 import { capitalize } from '@/shared/lib/string';
-import { useUsersInfinite, type User, type SeasonTicket } from '@/shared/api';
+import { useClientsInfinite, type Client, type SeasonTicket } from '@/shared/api';
 import { formatDate, formatTime } from '@/shared/lib/format-utils';
 import styles from './UsersTable.module.scss';
 
 type PlanRowData = {
-  id: User['id'];
-  telegramId: User['telegramId'];
+  id: string; // telegramId is the id for clients
+  telegramId: Client['telegramId'];
   name: string;
   seasonTickets: SeasonTicket[];
   createdDate: string;
   createdTime: string;
-  phone?: string;
+  phone?: string | null;
   email?: string;
-  dateOfBirth?: string;
-  photoUrl?: string;
+  dateOfBirth?: string | null;
+  photoUrl?: string | null;
 };
 
 export interface SessionsTableProps extends React.HTMLAttributes<HTMLDivElement> {
-  handleEdit?: (user: User) => void;
+  handleEdit?: (client: Client) => void;
 }
 
 const columnHelper = createColumnHelper<PlanRowData>();
@@ -37,7 +37,7 @@ const columnHelper = createColumnHelper<PlanRowData>();
 export function UsersTable({ className, handleEdit }: SessionsTableProps) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const bodyContainerRef = useRef<HTMLDivElement>(null);
-  const [allItems, setAllItems] = useState<User[]>([]);
+  const [allItems, setAllItems] = useState<Client[]>([]);
 
   const {
     data: rawData,
@@ -46,21 +46,19 @@ export function UsersTable({ className, handleEdit }: SessionsTableProps) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage
-  } = useUsersInfinite({
+  } = useClientsInfinite({
     limit: 100
   });
 
-  const normalizeFn = (item: User) => {
-
+  const normalizeFn = (item: Client): PlanRowData => {
     return {
-      id: item.id,
+      id: item.telegramId,
       telegramId: item.telegramId,
-      name: [item.lastName, item.firstName].filter(Boolean).join(' '),
-      dateOfBirth: '03.02.1990', // item.dateOfBirth,
-      photoUrl: '/photo.jpeg',
+      name: [item.lastName, item.firstName].filter(Boolean).join(' ') || item.username || 'Без имени',
+      dateOfBirth: item.dateOfBirth ? formatDate(item.dateOfBirth) : undefined,
+      photoUrl: item.photoUrl,
       seasonTickets: [],
-      phone: '+ 7 999 962-70-70',
-      email: 'lazarevsergei030290@gmail.com',
+      phone: item.phone,
       createdDate: formatDate(item.createdAt),
       createdTime: formatTime(item.createdAt)
     };
@@ -69,7 +67,7 @@ export function UsersTable({ className, handleEdit }: SessionsTableProps) {
   const data = useMemo(() => {
     if (!rawData?.pages) return [];
 
-    const _rawData = rawData.pages.flatMap(page => page.items);
+    const _rawData = rawData.pages.flatMap((page: { items: Client[] }) => page.items);
     setAllItems(_rawData);
 
     return _rawData.map(normalizeFn);
@@ -82,10 +80,16 @@ export function UsersTable({ className, handleEdit }: SessionsTableProps) {
         header: 'Личные данные',
         cell: info => (
           <div className={styles.personalInfoContainer}>
-            <img src={info.row.original.photoUrl} alt="User Avatar" className={styles.avatar} />
+            {info.row.original.photoUrl ? (
+              <img src={info.row.original.photoUrl} alt="User Avatar" className={styles.avatar} />
+            ) : (
+              <div className={styles.avatarPlaceholder} />
+            )}
             <div className={styles.personalInfo}>
               <div className={styles.name}>{info.row.original.name}</div>
-              <div className={styles.dateOfBirth}>{info.row.original.dateOfBirth}</div>
+              {info.row.original.dateOfBirth && (
+                <div className={styles.dateOfBirth}>{info.row.original.dateOfBirth}</div>
+              )}
             </div>
           </div>
         ),
@@ -95,8 +99,7 @@ export function UsersTable({ className, handleEdit }: SessionsTableProps) {
         header: 'Абонемент',
         cell: () => (
           <div className={styles.seasonTicket}>
-            <div className={styles.seasonTicketSeats}>10 из 20 занятий</div>
-            <div className={styles.seasonTicketExpiration}>До 11 ноября 2024</div>
+            <div className={styles.seasonTicketSeats}>—</div>
           </div>
         ),
       }),
@@ -105,13 +108,14 @@ export function UsersTable({ className, handleEdit }: SessionsTableProps) {
         header: 'Контакты',
         cell: (info) => (
           <div className={styles.contacts}>
-            <div className={styles.contactsPhone}>{info.row.original.phone}</div>
-            <div className={styles.contactsEmail}>{info.row.original.email}</div>
+            {info.row.original.phone && (
+              <div className={styles.contactsPhone}>{info.row.original.phone}</div>
+            )}
           </div>
         ),
       }),
-      columnHelper.accessor('id', {
-        header: 'ID',
+      columnHelper.accessor('telegramId', {
+        header: 'Telegram ID',
         cell: info => info.getValue(),
       }),
       columnHelper.display({
@@ -133,10 +137,10 @@ export function UsersTable({ className, handleEdit }: SessionsTableProps) {
             type="secondary"
             size="s"
             onClick={() => {
-              const user = allItems.find(user => user.id === info.row.original.id);
+              const client = allItems.find(c => c.telegramId === info.row.original.telegramId);
 
-              if (user && handleEdit) {
-                handleEdit(user);
+              if (client && handleEdit) {
+                handleEdit(client);
               }
             }}
           />
@@ -180,11 +184,11 @@ export function UsersTable({ className, handleEdit }: SessionsTableProps) {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (trainingLoading) {
-    return <div className={styles.loading}>Loading training data...</div>;
+    return <div className={styles.loading}>Загрузка...</div>;
   }
 
   if (trainingError) {
-    return <div className={styles.error}>Error loading training data</div>;
+    return <div className={styles.error}>Ошибка загрузки данных</div>;
   }
 
   return (
@@ -238,14 +242,14 @@ export function UsersTable({ className, handleEdit }: SessionsTableProps) {
         {/* Loading state for pagination */}
         {isFetchingNextPage && (
           <div className={styles.paginationLoading}>
-            Loading more trainings...
+            Загрузка...
           </div>
         )}
 
         {/* End of list indicator */}
         {!hasNextPage && data.length > 0 && (
           <div className={styles.endOfList}>
-            No more trainings to load
+            Все клиенты загружены
           </div>
         )}
       </div>

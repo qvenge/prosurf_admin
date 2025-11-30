@@ -1,12 +1,13 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { seasonTicketsClient } from '../clients/season-tickets';
-import type { 
-  SeasonTicketPlan, 
+import type {
+  SeasonTicketPlan,
   SeasonTicketPlanUpdateDto,
   SeasonTicketPlanCreateDto,
-  PaymentMethodRequest,
+  PurchaseSeasonTicketDto,
   SeasonTicketPlanFilters,
   SeasonTicketFilters,
+  SeasonTicket,
   PaginatedResponse,
   IdempotencyKey,
 } from '../types';
@@ -95,17 +96,17 @@ export const useSeasonTicketPlanApplicableEvents = (
 
 export const usePurchaseSeasonTicket = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ 
-      planId, 
-      paymentMethod, 
-      idempotencyKey 
-    }: { 
-      planId: string; 
-      paymentMethod: PaymentMethodRequest;
+    mutationFn: ({
+      planId,
+      data,
+      idempotencyKey
+    }: {
+      planId: string;
+      data: PurchaseSeasonTicketDto;
       idempotencyKey: IdempotencyKey;
-    }) => seasonTicketsClient.purchaseSeasonTicket(planId, paymentMethod, idempotencyKey),
+    }) => seasonTicketsClient.purchaseSeasonTicket(planId, data, idempotencyKey),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: seasonTicketsKeys.tickets() });
     },
@@ -130,19 +131,19 @@ export const useSeasonTicketsInfinite = (filters?: Omit<SeasonTicketFilters, 'cu
   });
 };
 
-export const useCurrentUserSeasonTickets = () => {
-  const queryClient = useQueryClient();
-  const getCurrentUserId = (): string | null => {
-    const authData = queryClient.getQueryData(['auth', 'user', 'profile']) as { id?: string } | undefined;
-    return authData?.id || null;
-  };
-
-  const userId = getCurrentUserId();
+// Hook for filtering season tickets by clientId (uses GET /season-tickets with filter)
+export const useSeasonTicketsByClient = (clientId: string | null) => {
   return useQuery({
-    queryKey: seasonTicketsKeys.ticketsList({ userId: userId! }),
-    queryFn: () => seasonTicketsClient.getSeasonTickets({ userId: userId! }),
-    enabled: Boolean(userId),
+    queryKey: seasonTicketsKeys.ticketsList({ clientId: clientId! }),
+    queryFn: () => seasonTicketsClient.getSeasonTickets({ clientId: clientId! }),
+    enabled: Boolean(clientId),
     staleTime: 5 * 60 * 1000,
     select: (data) => data.items, // Extract items array from PaginatedResponse
   });
 };
+
+// Legacy alias for backward compatibility
+/**
+ * @deprecated Use useSeasonTicketsByClient instead
+ */
+export const useCurrentUserSeasonTickets = () => useSeasonTicketsByClient(null);

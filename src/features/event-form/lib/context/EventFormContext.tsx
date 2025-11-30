@@ -106,7 +106,7 @@ export function EventFormProvider({
     }
   }, [initializeFormData, setFormData]);
 
-  const handleInputChangeWithClearError = (field: keyof FormData, value: string) => {
+  const handleInputChangeWithClearError = (field: keyof FormData, value: string | File[]) => {
     handleInputChange(field, value);
     clearError(field);
   };

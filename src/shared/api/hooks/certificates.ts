@@ -37,18 +37,18 @@ export const useCreateCertificate = () => {
   });
 };
 
-export const useCurrentUserCertificates = () => {
-  const queryClient = useQueryClient();
-  const getCurrentUserId = (): string | null => {
-    const authData = queryClient.getQueryData(['auth', 'user', 'profile']) as { id?: string } | undefined;
-    return authData?.id || null;
-  };
-
-  const userId = getCurrentUserId();
+// Hook for client's certificates (for admin to view client's certificates)
+export const useClientCertificates = (clientId: string | null) => {
   return useQuery({
-    queryKey: certificatesKeys.list({ userId: userId! }),
-    queryFn: () => certificatesClient.getCertificates({ userId: userId! }),
-    enabled: Boolean(userId),
+    queryKey: certificatesKeys.list({ clientId: clientId! }),
+    queryFn: () => certificatesClient.getCertificates({ clientId: clientId! }),
+    enabled: Boolean(clientId),
     staleTime: 5 * 60 * 1000,
   });
 };
+
+// Legacy alias for backward compatibility
+/**
+ * @deprecated Use useClientCertificates instead
+ */
+export const useCurrentUserCertificates = () => useClientCertificates(null);

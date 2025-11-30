@@ -22,9 +22,12 @@ export function SessionDetails({ sessionId }: SessionDetailsProps) {
   });
   const [isAddBookingOpen, setIsAddBookingOpen] = useState(false);
 
-  const getUserName = (booking: BookingExtended) => {
-    if (booking.user?.firstName || booking.user?.lastName) {
-      return `${booking.user.firstName || ''} ${booking.user.lastName || ''}`.trim();
+  const getClientName = (booking: BookingExtended) => {
+    if (booking.client?.firstName || booking.client?.lastName) {
+      return `${booking.client.firstName || ''} ${booking.client.lastName || ''}`.trim();
+    }
+    if (booking.client?.username) {
+      return `@${booking.client.username}`;
     }
     if (booking.guestContact?.firstName || booking.guestContact?.lastName) {
       return `${booking.guestContact.firstName || ''} ${booking.guestContact.lastName || ''}`.trim();
@@ -107,10 +110,10 @@ export function SessionDetails({ sessionId }: SessionDetailsProps) {
           {bookingsData?.items.length && bookingsData.items.map((booking) => (
             <div key={booking.id} className={styles.booking}>
               <div className={styles.bookingUserAvatarWrapper}>
-                {booking.user?.photoUrl ? (
+                {booking.client?.photoUrl ? (
                   <img
                     className={styles.bookingUserAvatar}
-                    src={booking.user.photoUrl}
+                    src={booking.client.photoUrl}
                     alt="Avatar"
                   />
                 ) : (
@@ -118,7 +121,7 @@ export function SessionDetails({ sessionId }: SessionDetailsProps) {
                 )}
               </div>
               <div className={styles.bookingInfo}>
-                <div className={styles.bookingUserName}>{getUserName(booking)}</div>
+                <div className={styles.bookingUserName}>{getClientName(booking)}</div>
                 <div className={styles.bookingPaymentMethod}>{getPaymentMethodText(booking)}</div>
               </div>
               <Icon className={styles.bookingCancelBtn} src={TrashRegular} width={20} height={20} />

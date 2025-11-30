@@ -17,7 +17,7 @@ export * from './auth';
 
 // API Clients
 export { authClient } from './clients/auth';
-export { usersClient } from './clients/users';
+export { clientsClient } from './clients/clients';
 export { eventsClient } from './clients/events';
 export { sessionsClient } from './clients/sessions';
 export { bookingsClient } from './clients/bookings';
@@ -32,8 +32,8 @@ export { webhooksClient } from './clients/webhooks';
 // Hooks - Auth
 export * from './hooks/auth';
 
-// Hooks - Users
-export * from './hooks/users';
+// Hooks - Clients (Telegram users)
+export * from './hooks/clients';
 
 // Hooks - Events
 export * from './hooks/events';
@@ -67,7 +67,7 @@ export { ApiProvider } from './providers/ApiProvider';
 
 // Query key factories (for advanced usage)
 export { authKeys } from './auth';
-export { usersKeys } from './hooks/users';
+export { clientsKeys } from './hooks/clients';
 export { eventsKeys } from './hooks/events';
 export { sessionsKeys } from './hooks/sessions';
 export { bookingsKeys } from './hooks/bookings';
@@ -80,7 +80,10 @@ export { adminKeys } from './hooks/admin';
 
 // Common utilities and helpers
 export {
-  // Role helpers
+  // Permission helpers
+  hasPermission,
+  requirePermission,
+  // Legacy role helpers for backward compatibility
   hasRole,
   isAdmin,
   isUser,

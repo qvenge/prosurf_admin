@@ -1,23 +1,28 @@
 import { createContext, useContext } from 'react';
 import { apiClient, tokenStorage, STORAGE_KEYS } from './config';
-import { RefreshRequestSchema, RefreshResponseSchema, UserSchema } from './schemas';
+import { RefreshRequestSchema, RefreshResponseSchema, AdminSchema } from './schemas';
 import { validateResponse } from './config';
-import type { AuthState, AuthResponse, RefreshRequest, RefreshResponse, User } from './types';
+import type { AuthState, AdminAuthResponse, AdminLoginDto, RefreshRequest, RefreshResponse, Admin } from './types';
 
-// Authentication context
+// Re-export STORAGE_KEYS for use in other modules
+export { STORAGE_KEYS };
+
+// Authentication context - uses Admin instead of User for admin panel
 export const AuthContext = createContext<AuthState & {
+  login: (request: AdminLoginDto) => Promise<AdminAuthResponse>;
   logout: () => Promise<void>;
   refreshTokens: () => Promise<void>;
-  updateUser: (user: User) => void;
+  updateAdmin: (admin: Admin) => void;
 }>({
-  user: null,
+  admin: null,
   accessToken: null,
   refreshToken: null,
   isAuthenticated: false,
   isLoading: true,
+  login: async () => { throw new Error('AuthContext not initialized'); },
   logout: async () => { throw new Error('AuthContext not initialized'); },
   refreshTokens: async () => { throw new Error('AuthContext not initialized'); },
-  updateUser: () => { throw new Error('AuthContext not initialized'); },
+  updateAdmin: () => { throw new Error('AuthContext not initialized'); },
 });
 
 // Auth API functions
@@ -27,7 +32,7 @@ export const authApi = {
    */
   async refresh(request: RefreshRequest): Promise<RefreshResponse> {
     const validatedRequest = RefreshRequestSchema.parse(request);
-    
+
     const response = await apiClient.post('/auth/refresh', validatedRequest);
     return validateResponse(response.data, RefreshResponseSchema);
   },
@@ -46,14 +51,14 @@ export const authUtils = {
    * Token storage utilities
    */
   tokenStorage,
-  
+
   /**
    * Initialize auth state from localStorage
    */
   initializeAuth(): AuthState {
     if (typeof window === 'undefined') {
       return {
-        user: null,
+        admin: null,
         accessToken: null,
         refreshToken: null,
         isAuthenticated: false,
@@ -63,23 +68,23 @@ export const authUtils = {
 
     const accessToken = tokenStorage.getAccessToken();
     const refreshToken = tokenStorage.getRefreshToken();
-    const userString = localStorage.getItem(STORAGE_KEYS.USER);
-    
-    let user: User | null = null;
-    if (userString) {
+    const adminString = localStorage.getItem(STORAGE_KEYS.USER); // Keep same key for migration
+
+    let admin: Admin | null = null;
+    if (adminString) {
       try {
-        const parsedUser = JSON.parse(userString);
-        user = UserSchema.parse(parsedUser);
+        const parsedAdmin = JSON.parse(adminString);
+        admin = AdminSchema.parse(parsedAdmin);
       } catch (error) {
-        console.error('Invalid user data in localStorage:', error);
+        console.error('Invalid admin data in localStorage:', error);
         localStorage.removeItem(STORAGE_KEYS.USER);
       }
     }
 
-    const isAuthenticated = Boolean(accessToken && refreshToken && user);
+    const isAuthenticated = Boolean(accessToken && refreshToken && admin);
 
     return {
-      user,
+      admin,
       accessToken,
       refreshToken,
       isAuthenticated,
@@ -90,10 +95,10 @@ export const authUtils = {
   /**
    * Save auth data to localStorage
    */
-  saveAuthData(authResponse: AuthResponse): void {
+  saveAuthData(authResponse: AdminAuthResponse): void {
     tokenStorage.setAccessToken(authResponse.accessToken);
     tokenStorage.setRefreshToken(authResponse.refreshToken);
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(authResponse.user));
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(authResponse.admin));
   },
 
   /**
@@ -120,15 +125,14 @@ export const authUtils = {
   },
 
   /**
-   * Get user from token payload (for development/debugging)
-   * In production, always fetch user data from the server
+   * Get admin from token payload (for development/debugging)
+   * In production, always fetch admin data from the server
    */
-  getUserFromToken(token: string): Partial<User> | null {
+  getAdminFromToken(token: string): Partial<Admin> | null {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       return {
         id: payload.sub,
-        role: payload.role,
       };
     } catch (error) {
       console.error('Error parsing token payload:', error);
@@ -149,8 +153,10 @@ export const useAuth = () => {
 // Auth query keys for React Query
 export const authKeys = {
   all: ['auth'] as const,
+  admin: () => [...authKeys.all, 'admin'] as const,
+  profile: () => [...authKeys.admin(), 'profile'] as const,
+  // Legacy keys for backward compatibility
   user: () => [...authKeys.all, 'user'] as const,
-  profile: () => [...authKeys.user(), 'profile'] as const,
 } as const;
 
 // Logout helper that can be used anywhere
@@ -161,41 +167,53 @@ export const performLogout = async (): Promise<void> => {
     console.error('Logout request failed:', error);
     // Continue with local cleanup even if server request fails
   }
-  
+
   authUtils.clearAuthData();
-  
+
   // Redirect to login or home page
   if (typeof window !== 'undefined') {
     window.location.href = '/';
   }
 };
 
-// Helper to check if user has specific role
-export const hasRole = (user: User | null, role: User['role']): boolean => {
-  return user?.role === role;
-};
-
-export const isAdmin = (user: User | null): boolean => {
-  return hasRole(user, 'ADMIN');
-};
-
-export const isUser = (user: User | null): boolean => {
-  return hasRole(user, 'USER');
+// Helper to check if admin has specific permission
+export const hasPermission = (admin: Admin | null, permission: string): boolean => {
+  return admin?.permissions?.includes(permission) ?? false;
 };
 
 // Helper to require authentication for components
-export const requireAuth = (user: User | null): User => {
-  if (!user) {
+export const requireAuth = (admin: Admin | null): Admin => {
+  if (!admin) {
     throw new Error('Authentication required');
   }
-  return user;
+  return admin;
 };
 
-// Helper to require admin role
-export const requireAdmin = (user: User | null): User => {
-  const authenticatedUser = requireAuth(user);
-  if (!isAdmin(authenticatedUser)) {
-    throw new Error('Admin role required');
+// Helper to require specific permission
+export const requirePermission = (admin: Admin | null, permission: string): Admin => {
+  const authenticatedAdmin = requireAuth(admin);
+  if (!hasPermission(authenticatedAdmin, permission)) {
+    throw new Error(`Permission '${permission}' required`);
   }
-  return authenticatedUser;
+  return authenticatedAdmin;
+};
+
+// Legacy helpers for backward compatibility
+export const hasRole = (admin: Admin | null, _role: string): boolean => {
+  // In the new system, admins don't have roles, they have permissions
+  // Return true for any authenticated admin
+  return admin !== null;
+};
+
+export const isAdmin = (admin: Admin | null): boolean => {
+  return admin !== null;
+};
+
+export const isUser = (_admin: Admin | null): boolean => {
+  // Admin panel users are always admins, not regular users
+  return false;
+};
+
+export const requireAdmin = (admin: Admin | null): Admin => {
+  return requireAuth(admin);
 };

@@ -4,8 +4,7 @@ import { bookingsKeys } from './bookings';
 
 import type {
   Payment,
-  PaymentMethodRequest,
-  CompositePaymentMethodRequest,
+  CreateBookingPaymentDto,
   RefundRequest,
   IdempotencyKey
 } from '../types';
@@ -25,21 +24,21 @@ export const paymentsKeys = {
 // Create payment mutation
 export const useCreatePayment = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ 
-      bookingId, 
-      data, 
-      idempotencyKey 
-    }: { 
-      bookingId: string; 
-      data: PaymentMethodRequest | CompositePaymentMethodRequest;
+    mutationFn: ({
+      bookingId,
+      data,
+      idempotencyKey
+    }: {
+      bookingId: string;
+      data: CreateBookingPaymentDto;
       idempotencyKey: IdempotencyKey;
     }) => paymentsClient.createPayment(bookingId, data, idempotencyKey),
     onSuccess: (newPayment, variables) => {
       // Add payment to cache
       queryClient.setQueryData(paymentsKeys.detail(newPayment.id), newPayment);
-      
+
       // Invalidate booking to reflect payment status
       queryClient.invalidateQueries({ queryKey: bookingsKeys.detail(variables.bookingId) });
     },

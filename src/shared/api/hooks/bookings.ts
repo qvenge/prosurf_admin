@@ -7,7 +7,8 @@ import type {
   BookRequest,
   BookingFilters,
   PaginatedResponse,
-  IdempotencyKey
+  IdempotencyKey,
+  CreateBookingPaymentDto
 } from '../types';
 
 // Query key factory for bookings
@@ -144,33 +145,24 @@ export const useConfirmBooking = () => {
   });
 };
 
-// Hook for current user's bookings
-export const useCurrentUserBookings = () => {
-  const queryClient = useQueryClient();
-  
-  const getCurrentUserId = (): string | null => {
-    const authData = queryClient.getQueryData(['auth', 'user', 'profile']) as { id?: string } | undefined;
-    return authData?.id || null;
-  };
-
-  const userId = getCurrentUserId();
-  
+// Hook for client's bookings (for admin to view client's bookings)
+export const useClientBookings = (clientId: string | null) => {
   return useQuery({
-    queryKey: bookingsKeys.list({ userId: userId! }),
-    queryFn: () => bookingsClient.getBookings({ userId: userId! }),
-    enabled: Boolean(userId),
+    queryKey: bookingsKeys.list({ clientId: clientId! }),
+    queryFn: () => bookingsClient.getBookings({ clientId: clientId! }),
+    enabled: Boolean(clientId),
     staleTime: 1 * 60 * 1000,
   });
 };
 
-// Hook for current user's active bookings (HOLD or CONFIRMED)
-export const useActiveBookings = () => {
-  const { data, ...rest } = useCurrentUserBookings();
-  
+// Hook for client's active bookings (HOLD or CONFIRMED)
+export const useActiveClientBookings = (clientId: string | null) => {
+  const { data, ...rest } = useClientBookings(clientId);
+
   return {
     data: data ? {
       ...data,
-      items: data.items.filter(booking => 
+      items: data.items.filter(booking =>
         booking.status === 'HOLD' || booking.status === 'CONFIRMED'
       ),
     } : undefined,
@@ -178,10 +170,10 @@ export const useActiveBookings = () => {
   };
 };
 
-// Hook for expired bookings
-export const useExpiredBookings = () => {
-  const { data, ...rest } = useCurrentUserBookings();
-  
+// Hook for client's expired bookings
+export const useExpiredClientBookings = (clientId: string | null) => {
+  const { data, ...rest } = useClientBookings(clientId);
+
   return {
     data: data ? {
       ...data,
@@ -191,10 +183,10 @@ export const useExpiredBookings = () => {
   };
 };
 
-// Hook for cancelled bookings
-export const useCancelledBookings = () => {
-  const { data, ...rest } = useCurrentUserBookings();
-  
+// Hook for client's cancelled bookings
+export const useCancelledClientBookings = (clientId: string | null) => {
+  const { data, ...rest } = useClientBookings(clientId);
+
   return {
     data: data ? {
       ...data,
@@ -202,4 +194,55 @@ export const useCancelledBookings = () => {
     } : undefined,
     ...rest,
   };
+};
+
+// Legacy aliases for backward compatibility
+/**
+ * @deprecated Use useClientBookings instead
+ */
+export const useCurrentUserBookings = () => useClientBookings(null);
+
+/**
+ * @deprecated Use useActiveClientBookings instead
+ */
+export const useActiveBookings = () => useActiveClientBookings(null);
+
+/**
+ * @deprecated Use useExpiredClientBookings instead
+ */
+export const useExpiredBookings = () => useExpiredClientBookings(null);
+
+/**
+ * @deprecated Use useCancelledClientBookings instead
+ */
+export const useCancelledBookings = () => useCancelledClientBookings(null);
+
+/**
+ * Create payment for booking mutation
+ * POST /bookings/{id}/payment
+ */
+export const useCreateBookingPayment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      bookingId,
+      data,
+      idempotencyKey
+    }: {
+      bookingId: string;
+      data: CreateBookingPaymentDto;
+      idempotencyKey: IdempotencyKey;
+    }) => bookingsClient.createPayment(bookingId, data, idempotencyKey),
+    onSuccess: (_payment, variables) => {
+      // Invalidate the booking to reflect payment status
+      queryClient.invalidateQueries({ queryKey: bookingsKeys.detail(variables.bookingId) });
+
+      // Invalidate bookings lists
+      queryClient.invalidateQueries({ queryKey: bookingsKeys.lists() });
+    },
+    onError: (error) => {
+      console.error('Failed to create payment for booking:', error);
+    },
+  });
 };

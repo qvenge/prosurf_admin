@@ -19,7 +19,7 @@ export function LoginPage() {
 
     try {
       await login({
-        login: email,
+        email: email,
         password: password
       });
 

@@ -5,7 +5,9 @@ import {
   BookingCreateDtoSchema,
   BookingUpdateDtoSchema,
   PaginatedResponseSchema,
-  BookingFiltersSchema
+  BookingFiltersSchema,
+  CreateBookingPaymentDtoSchema,
+  PaymentSchema
 } from '../schemas';
 import type {
   Booking,
@@ -15,7 +17,9 @@ import type {
   BookingWithHoldTTL,
   PaginatedResponse,
   BookingFilters,
-  IdempotencyKey
+  IdempotencyKey,
+  CreateBookingPaymentDto,
+  Payment
 } from '../types';
 
 /**
@@ -173,5 +177,51 @@ export const bookingsClient = {
     );
 
     return validateResponse(response.data, BookingExtendedSchema);
+  },
+
+  /**
+   * Create payment for booking
+   * POST /bookings/{id}/payment
+   *
+   * Initiates payment for a booking that is in HOLD status.
+   * Supports multiple payment methods including card, certificate, season ticket pass, and cashback.
+   *
+   * @param bookingId - The ID of the booking to pay for
+   * @param data - Payment methods to use
+   * @param idempotencyKey - Unique key for request idempotency (8-128 chars)
+   * @returns Promise resolving to payment information with next action
+   *
+   * @example
+   * ```ts
+   * // Pay with card
+   * const payment = await bookingsClient.createPayment(
+   *   'booking-123',
+   *   { paymentMethods: [{ method: 'card', provider: 'yookassa' }] },
+   *   'payment-idempotency-key'
+   * );
+   *
+   * // Pay with certificate
+   * const certPayment = await bookingsClient.createPayment(
+   *   'booking-123',
+   *   { paymentMethods: [{ method: 'certificate', certificateId: 'cert-456' }] },
+   *   'cert-payment-key'
+   * );
+   * ```
+   */
+  async createPayment(
+    bookingId: string,
+    data: CreateBookingPaymentDto,
+    idempotencyKey: IdempotencyKey
+  ): Promise<Payment> {
+    const validatedData = CreateBookingPaymentDtoSchema.parse(data);
+
+    const config = withIdempotency({}, idempotencyKey);
+    const response = await apiClient.post(
+      `/bookings/${encodeURIComponent(bookingId)}/payment`,
+      validatedData,
+      config
+    );
+
+    return validateResponse(response.data, PaymentSchema);
   },
 };

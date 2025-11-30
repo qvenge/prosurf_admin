@@ -1,9 +1,11 @@
 import { apiClient, validateResponse } from '../config';
-import { 
-  CashbackRulesSchema
+import {
+  CashbackRulesSchema,
+  CashbackWalletSchema
 } from '../schemas';
-import type { 
-  CashbackRules
+import type {
+  CashbackRules,
+  CashbackWallet
 } from '../types';
 
 /**
@@ -19,5 +21,14 @@ export const cashbackClient = {
     return validateResponse(response.data, CashbackRulesSchema);
   },
 
-  // Note: User cashback wallet is accessed through usersClient.getUserCashback()
+  /**
+   * Get current client's cashback wallet
+   * GET /clients/me/cashback
+   */
+  async getMyClientCashback(): Promise<CashbackWallet> {
+    const response = await apiClient.get('/clients/me/cashback');
+    return validateResponse(response.data, CashbackWalletSchema);
+  },
+
+  // Note: User cashback wallet is also accessed through usersClient.getUserCashback()
 };

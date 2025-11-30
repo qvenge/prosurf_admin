@@ -1,27 +1,27 @@
 import { Header } from '@/shared/ui';
 import { UsersTable } from './components/UsersTable';
 import styles from './UsersPage.module.scss';
-import type { User } from '@/shared/api';
+import type { Client } from '@/shared/api';
 import { SideModal } from '@/shared/ui';
 import { useState } from 'react';
 
 export function UsersPage() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [userData, setUserData] = useState<User | undefined>(undefined);
+  const [clientData, setClientData] = useState<Client | undefined>(undefined);
 
-  const handleOpen = (user: User) => {
-    setUserData(user);
+  const handleOpen = (client: Client) => {
+    setClientData(client);
     setIsModalOpen(true);
   };
 
   const handleClose = () => {
     setIsModalOpen(false);
-    setUserData(undefined);
+    setClientData(undefined);
   };
 
   return (
     <>
-      <Header title={'Абонементы'}>
+      <Header title={'Клиенты'}>
       </Header>
       <div className={styles.page}>
         <UsersTable
@@ -29,10 +29,16 @@ export function UsersPage() {
           handleEdit={handleOpen}
         />
       </div>
-      {isModalOpen && userData && (
+      {isModalOpen && clientData && (
         <SideModal onClose={handleClose}>
-          {/* TODO: Add user details component */}
-          <div>User: {userData.email}</div>
+          {/* TODO: Add client details component */}
+          <div>
+            <div>Telegram ID: {clientData.telegramId}</div>
+            {clientData.username && <div>Username: @{clientData.username}</div>}
+            {clientData.firstName && <div>Имя: {clientData.firstName}</div>}
+            {clientData.lastName && <div>Фамилия: {clientData.lastName}</div>}
+            {clientData.phone && <div>Телефон: {clientData.phone}</div>}
+          </div>
         </SideModal>
       )}
     </>

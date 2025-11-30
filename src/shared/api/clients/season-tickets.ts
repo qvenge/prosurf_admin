@@ -5,7 +5,7 @@ import {
   SeasonTicketPlanUpdateDtoSchema,
   SeasonTicketSchema,
   PaymentSchema,
-  PaymentMethodRequestSchema,
+  PurchaseSeasonTicketDtoSchema,
   PaginatedResponseSchema,
   SeasonTicketPlanFiltersSchema,
   SeasonTicketFiltersSchema,
@@ -17,7 +17,7 @@ import type {
   SeasonTicketPlanUpdateDto,
   SeasonTicket,
   Payment,
-  PaymentMethodRequest,
+  PurchaseSeasonTicketDto,
   PaginatedResponse,
   SeasonTicketPlanFilters,
   SeasonTicketFilters,
@@ -104,18 +104,32 @@ export const seasonTicketsClient = {
   /**
    * Purchase season ticket (userId from token)
    * POST /season-ticket-plans/{id}/purchase
+   *
+   * @param planId - The ID of the season ticket plan to purchase
+   * @param data - Payment methods wrapped in paymentMethods field
+   * @param idempotencyKey - Unique key for request idempotency (8-128 chars)
+   * @returns Promise resolving to payment with status and next action
+   *
+   * @example
+   * ```ts
+   * const payment = await seasonTicketsClient.purchaseSeasonTicket(
+   *   'plan-123',
+   *   { paymentMethods: [{ method: 'card', provider: 'yookassa' }] },
+   *   'purchase-idempotency-key'
+   * );
+   * ```
    */
   async purchaseSeasonTicket(
-    planId: string, 
-    paymentMethod: PaymentMethodRequest, 
+    planId: string,
+    data: PurchaseSeasonTicketDto,
     idempotencyKey: IdempotencyKey
   ): Promise<Payment> {
-    const validatedPaymentMethod = PaymentMethodRequestSchema.parse(paymentMethod);
-    
+    const validatedData = PurchaseSeasonTicketDtoSchema.parse(data);
+
     const config = withIdempotency({}, idempotencyKey);
     const response = await apiClient.post(
-      `/season-ticket-plans/${encodeURIComponent(planId)}/purchase`, 
-      validatedPaymentMethod,
+      `/season-ticket-plans/${encodeURIComponent(planId)}/purchase`,
+      validatedData,
       config
     );
     return validateResponse(response.data, PaymentSchema);

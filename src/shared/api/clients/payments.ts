@@ -1,13 +1,13 @@
 import { apiClient, validateResponse, withIdempotency } from '../config';
-import { 
-  PaymentSchema, 
-  PaymentRequestSchema,
+import {
+  PaymentSchema,
+  CreateBookingPaymentDtoSchema,
   RefundSchema,
   RefundRequestSchema
 } from '../schemas';
-import type { 
-  Payment, 
-  PaymentRequest,
+import type {
+  Payment,
+  CreateBookingPaymentDto,
   Refund,
   RefundRequest,
   IdempotencyKey
@@ -21,30 +21,31 @@ import type {
  */
 export const paymentsClient = {
   /**
-   * Create payment for booking (single or composite payment method)
+   * Create payment for booking
    * POST /bookings/{id}/payment
-   * 
+   *
    * Creates or continues a payment for the specified booking (booking must be in HOLD state).
-   * 
+   * The paymentMethods field accepts an array of payment methods, a single method, or a composite object.
+   *
    * @param bookingId - The ID of the booking to pay for
-   * @param data - Payment method (single or composite with multiple methods)
+   * @param data - Payment methods wrapped in paymentMethods field
    * @param idempotencyKey - Unique key for request idempotency (8-128 chars)
    * @returns Promise resolving to payment with status and next action
-   * 
+   *
    * @example
    * ```ts
-   * // Single payment method
+   * // Single payment method (array format)
    * const payment = await paymentsClient.createPayment(
    *   'booking-123',
-   *   { method: 'card', provider: 'telegram' },
+   *   { paymentMethods: [{ method: 'card', provider: 'telegram' }] },
    *   'idempotency-key-123'
    * );
-   * 
-   * // Composite payment
+   *
+   * // Multiple payment methods
    * const compositePayment = await paymentsClient.createPayment(
    *   'booking-123',
    *   {
-   *     methods: [
+   *     paymentMethods: [
    *       { method: 'certificate', certificateId: 'cert-123' },
    *       { method: 'cashback', amount: { currency: 'KZT', amountMinor: 1500 } },
    *       { method: 'card', provider: 'telegram' }
@@ -55,15 +56,15 @@ export const paymentsClient = {
    * ```
    */
   async createPayment(
-    bookingId: string, 
-    data: PaymentRequest, 
+    bookingId: string,
+    data: CreateBookingPaymentDto,
     idempotencyKey: IdempotencyKey
   ): Promise<Payment> {
-    const validatedData = PaymentRequestSchema.parse(data);
-    
+    const validatedData = CreateBookingPaymentDtoSchema.parse(data);
+
     const config = withIdempotency({}, idempotencyKey);
     const response = await apiClient.post(
-      `/bookings/${encodeURIComponent(bookingId)}/payment`, 
+      `/bookings/${encodeURIComponent(bookingId)}/payment`,
       validatedData,
       config
     );

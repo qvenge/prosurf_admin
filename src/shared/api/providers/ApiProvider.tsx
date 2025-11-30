@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 // import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { type PropsWithChildren, useState, useEffect } from 'react';
-import { authUtils, AuthContext } from '../auth';
+import { authUtils, AuthContext, STORAGE_KEYS } from '../auth';
 import { logError, getErrorInfo, isValidationResponseError } from '../error-handler';
-import type { AuthState, User, LoginRequest, LoginResponse } from '../types';
+import type { AuthState, Admin, AdminLoginDto, AdminAuthResponse } from '../types';
 import { authClient } from '../clients/auth';
 import { performLogout } from '../auth';
 
@@ -65,17 +65,17 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
           isLoading: false,
         });
 
-        // If we have tokens but no user, try to refresh
-        if (initialAuth.accessToken && initialAuth.refreshToken && !initialAuth.user) {
+        // If we have tokens but no admin, try to refresh
+        if (initialAuth.accessToken && initialAuth.refreshToken && !initialAuth.admin) {
           try {
             const refreshResponse = await authClient.refresh({ refreshToken: initialAuth.refreshToken });
-            // RefreshResponse doesn't include user, so we need to set tokens separately
+            // RefreshResponse doesn't include admin, so we need to set tokens separately
             authUtils.tokenStorage.setAccessToken(refreshResponse.accessToken);
             authUtils.tokenStorage.setRefreshToken(refreshResponse.refreshToken);
-            
-            // TODO: Get user profile after refresh if needed
+
+            // TODO: Get admin profile after refresh if needed
             setAuthState({
-              user: null, // We don't have user from refresh
+              admin: null, // We don't have admin from refresh
               accessToken: refreshResponse.accessToken,
               refreshToken: refreshResponse.refreshToken,
               isAuthenticated: true,
@@ -85,7 +85,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
             console.error('Failed to refresh token on init:', error);
             authUtils.clearAuthData();
             setAuthState({
-              user: null,
+              admin: null,
               accessToken: null,
               refreshToken: null,
               isAuthenticated: false,
@@ -105,25 +105,25 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     initAuth();
   }, []);
 
-  const login = async (request: LoginRequest): Promise<LoginResponse> => {
-    const response = await authClient.login(request);
+  const login = async (request: AdminLoginDto): Promise<AdminAuthResponse> => {
+    const response = await authClient.loginWithCredentials(request);
     authUtils.saveAuthData(response);
-    
+
     setAuthState({
-      user: response.user,
+      admin: response.admin,
       accessToken: response.accessToken,
       refreshToken: response.refreshToken,
       isAuthenticated: true,
       isLoading: false,
     });
-    
+
     return response;
   };
 
   const logout = async (): Promise<void> => {
     await performLogout();
     setAuthState({
-      user: null,
+      admin: null,
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
@@ -137,8 +137,10 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     }
 
     const response = await authClient.refresh({ refreshToken: authState.refreshToken });
-    authUtils.saveAuthData({ ...response, user: authState.user! });
-    
+    if (authState.admin) {
+      authUtils.saveAuthData({ ...response, admin: authState.admin });
+    }
+
     setAuthState(prev => ({
       ...prev,
       accessToken: response.accessToken,
@@ -146,12 +148,12 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     }));
   };
 
-  const updateUser = (user: User): void => {
+  const updateAdmin = (admin: Admin): void => {
     setAuthState(prev => ({
       ...prev,
-      user,
+      admin,
     }));
-    localStorage.setItem('surf_user', JSON.stringify(user));
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(admin));
   };
 
   const contextValue = {
@@ -159,7 +161,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     login,
     logout,
     refreshTokens,
-    updateUser,
+    updateAdmin,
   };
 
   return (
@@ -180,8 +182,8 @@ export const ApiProvider = ({ children }: PropsWithChildren) => {
         {/* Only show devtools in development */}
         {/* TODO: Install @tanstack/react-query-devtools for development
         {import.meta.env.MODE === 'development' && (
-          <ReactQueryDevtools 
-            initialIsOpen={false} 
+          <ReactQueryDevtools
+            initialIsOpen={false}
             buttonPosition="bottom-left"
           />
         )} */}
@@ -189,4 +191,3 @@ export const ApiProvider = ({ children }: PropsWithChildren) => {
     </QueryClientProvider>
   );
 };
-

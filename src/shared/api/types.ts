@@ -65,6 +65,13 @@ export type PaymentMethodRequest = z.infer<typeof schemas.PaymentMethodRequestSc
 // Simplified: PaymentRequest is always an array of payment methods
 export type PaymentRequest = z.infer<typeof schemas.PaymentRequestSchema>;
 
+// Composite payment method for backward compatibility
+export type CompositePaymentMethodRequest = z.infer<typeof schemas.CompositePaymentMethodRequestSchema>;
+
+// DTO types for payment requests
+export type CreateBookingPaymentDto = z.infer<typeof schemas.CreateBookingPaymentDtoSchema>;
+export type PurchaseSeasonTicketDto = z.infer<typeof schemas.PurchaseSeasonTicketDtoSchema>;
+
 // Refund types
 export type RefundRequest = z.infer<typeof schemas.RefundRequestSchema>;
 export type Refund = z.infer<typeof schemas.RefundSchema>;
@@ -102,8 +109,25 @@ export type JobExecutionResult = z.infer<typeof schemas.JobExecutionResultSchema
 
 // Auth types
 export type TelegramLoginDto = z.infer<typeof schemas.TelegramLoginDtoSchema>;
-export type LoginDto = z.infer<typeof schemas.LoginDtoSchema>;
-export type RegisterDto = z.infer<typeof schemas.RegisterDtoSchema>;
+export type AdminLoginDto = z.infer<typeof schemas.AdminLoginDtoSchema>;
+export type LoginDto = z.infer<typeof schemas.LoginDtoSchema>; // Alias for AdminLoginDto
+
+// Admin types
+export type Admin = z.infer<typeof schemas.AdminSchema>;
+export type AdminCreateDto = z.infer<typeof schemas.AdminCreateDtoSchema>;
+export type AdminUpdateDto = z.infer<typeof schemas.AdminUpdateDtoSchema>;
+export type AdminSelfUpdateDto = z.infer<typeof schemas.AdminSelfUpdateDtoSchema>;
+export type ChangePasswordDto = z.infer<typeof schemas.ChangePasswordDtoSchema>;
+export type AdminFilters = z.infer<typeof schemas.AdminFiltersSchema>;
+
+// Client types (Telegram users)
+export type Client = z.infer<typeof schemas.ClientSchema>;
+export type ClientUpdateDto = z.infer<typeof schemas.ClientUpdateDtoSchema>;
+export type ClientFilters = z.infer<typeof schemas.ClientFiltersSchema>;
+
+// Auth response types
+export type AdminAuthResponse = z.infer<typeof schemas.AdminAuthResponseSchema>;
+export type ClientAuthResponse = z.infer<typeof schemas.ClientAuthResponseSchema>;
 export type AuthResponse = z.infer<typeof schemas.AuthResponseSchema>;
 
 // Legacy types for backward compatibility
@@ -157,8 +181,17 @@ export interface ApiErrorResponse {
   statusText: string;
 }
 
-// Authentication context types
+// Authentication context types - Admin panel uses Admin, not User
 export interface AuthState {
+  admin: Admin | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+}
+
+// Legacy alias for backward compatibility during migration
+export interface LegacyAuthState {
   user: User | null;
   accessToken: string | null;
   refreshToken: string | null;
