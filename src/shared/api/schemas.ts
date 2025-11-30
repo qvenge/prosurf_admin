@@ -109,6 +109,7 @@ export const EventCreateDtoSchema = z.object({
   tickets: z.array(EventTicketCreateSchema),
   labels: z.array(z.string()).optional(),
   attributes: z.record(z.string(), AttributeValueSchema).optional(),
+  images: z.array(z.instanceof(File)).optional(),
 });
 
 export const EventUpdateDtoSchema = z.object({
@@ -119,6 +120,7 @@ export const EventUpdateDtoSchema = z.object({
   tickets: z.array(EventTicketCreateSchema).optional(),
   labels: z.array(z.string()).optional(),
   attributes: z.record(z.string(), AttributeValueSchema).optional(),
+  images: z.array(z.instanceof(File)).optional(),
 });
 
 // Session schemas
@@ -215,7 +217,7 @@ export const BookingStatusSchema = z.enum(['HOLD', 'CONFIRMED', 'CANCELLED', 'EX
 export const BookingSchema = z.object({
   id: z.string(),
   sessionId: z.string(),
-  userId: z.string().nullable(),
+  clientId: z.string().nullable(),
   quantity: z.number().int().min(1),
   status: BookingStatusSchema,
   hold: z.object({
@@ -225,7 +227,7 @@ export const BookingSchema = z.object({
   guestContact: GuestContactSchema.nullable().optional(),
   notes: z.string().nullable().optional(),
   createdAt: z.string().datetime(),
-  createdBy: z.string().nullable().optional(),
+  createdByAdminId: z.string().nullable().optional(),
 });
 
 export const BookRequestSchema = z.object({
@@ -233,7 +235,7 @@ export const BookRequestSchema = z.object({
 });
 
 export const BookingExtendedSchema = BookingSchema.extend({
-  user: UserSchema.optional(),
+  client: UserSchema.optional(),
   guestContact: GuestContactSchema.nullable().optional(),
   session: z.lazy(() => SessionSchema).optional(),
   paymentInfo: z.union([
@@ -249,7 +251,7 @@ export const BookingExtendedSchema = BookingSchema.extend({
 
 export const BookingCreateDtoSchema = z.object({
   quantity: z.number().int().min(1),
-  userId: z.string().nullable().optional(),
+  clientId: z.string().nullable().optional(),
   guestContact: GuestContactSchema.nullable().optional(),
   status: z.enum(['HOLD', 'CONFIRMED']).default('HOLD').optional(),
   ticketId: z.string().nullable().optional(),
@@ -327,14 +329,11 @@ export const PaymentMethodRequestSchema = z.discriminatedUnion('method', [
   CashbackPaymentMethodSchema,
 ]);
 
-export const CompositePaymentMethodRequestSchema = z.object({
-  methods: z.array(PaymentMethodRequestSchema).min(1),
-});
-
-export const PaymentRequestSchema = z.union([
-  PaymentMethodRequestSchema,
-  CompositePaymentMethodRequestSchema,
-]);
+// Simplified: paymentMethods is always an array (single or multiple methods)
+export const PaymentRequestSchema = z
+  .array(PaymentMethodRequestSchema)
+  .min(1)
+  .max(10);
 
 // Refund schemas
 export const RefundRequestSchema = z.object({
@@ -450,7 +449,7 @@ export const SeasonTicketStatusSchema = z.enum(['ACTIVE', 'EXPIRED', 'CANCELLED'
 export const SeasonTicketSchema = z.object({
   id: z.string(),
   plan: SeasonTicketPlanSchema,
-  userId: z.string(),
+  clientId: z.string(),
   status: SeasonTicketStatusSchema,
   remainingPasses: z.number().int().min(0),
   validUntil: z.string().datetime(),
@@ -484,7 +483,7 @@ export const CashbackRulesSchema = z.object({
 export const WaitlistEntrySchema = z.object({
   id: z.string(),
   sessionId: z.string(),
-  userId: z.string(),
+  clientId: z.string(),
   createdAt: z.string().datetime(),
   position: z.number().int().min(1),
 });
@@ -639,7 +638,7 @@ export const SessionFiltersSchema = z.object({
 });
 
 export const BookingFiltersSchema = z.object({
-  userId: z.string().optional(),
+  clientId: z.string().optional(),
   sessionId: z.string().optional(),
   status: z.enum(['HOLD', 'CONFIRMED', 'CANCELLED', 'EXPIRED']).optional(),
   bookingType: z.enum(['registered', 'guest', 'all']).default('all').optional(),
@@ -657,13 +656,13 @@ export const UserFiltersSchema = z.object({
 });
 
 export const CertificateFiltersSchema = z.object({
-  userId: z.string().optional(),
+  clientId: z.string().optional(),
   cursor: CursorParamSchema,
   limit: LimitParamSchema,
 });
 
 export const SeasonTicketFiltersSchema = z.object({
-  userId: z.string().optional(),
+  clientId: z.string().optional(),
   sessionId: z.string().optional(),
   eventId: z.string().optional(),
   status: z.array(SeasonTicketStatusSchema).optional(),

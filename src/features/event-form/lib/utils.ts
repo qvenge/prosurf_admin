@@ -40,6 +40,7 @@ export function convertFormDataToEventCreateDto(formData: FormData, labels: stri
     ],
     labels: [...labels, formData.category].filter((label?: string): label is string => label != null && typeof label === 'string'),
     capacity: parseInt(formData.capacity),
+    images: formData.images.length > 0 ? formData.images : undefined,
   };
 }
 
@@ -183,7 +184,7 @@ export function convertEventDataToFormData(
       timeSlots: [{ id: 'time-1', startTime: '' }],
       duration: '1.5',
     }],
-    photos: [],
+    images: [],
     description: descriptionItem?.body || '',
     whatToBring: whatToBringItem?.body || '',
   };

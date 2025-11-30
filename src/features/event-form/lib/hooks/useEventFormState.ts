@@ -7,8 +7,22 @@ export function useEventFormState(initialData: FormData = defaultFormData, range
   const [formData, setFormData] = useState<FormData>(initialData);
   const [selectedSessionId, setSelectedSessionId] = useState<string>(initialData.sessions[0].id);
 
-  const handleInputChange = (field: keyof FormData, value: string) => {
+  const handleInputChange = (field: keyof FormData, value: string | File[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleImageAdd = (files: File[]) => {
+    setFormData(prev => ({
+      ...prev,
+      images: [...prev.images, ...files].slice(0, 10), // Max 10 images per OpenAPI spec
+    }));
+  };
+
+  const handleImageRemove = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
   };
 
   const handleSessionChange = (sessionId: string, field: keyof Omit<SessionForm, 'timeSlots'>, value: string | number) => {
@@ -106,6 +120,8 @@ export function useEventFormState(initialData: FormData = defaultFormData, range
     setSelectedSessionId,
     setFormData: setFormDataComplete,
     handleInputChange,
+    handleImageAdd,
+    handleImageRemove,
     handleSessionChange,
     handleTimeSlotChange,
     addTimeSlot,

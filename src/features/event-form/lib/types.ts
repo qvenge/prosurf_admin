@@ -24,7 +24,7 @@ export interface FormData {
   price: string;
   capacity: string;
   sessions: SessionForm[];
-  photos: File[];
+  images: File[];
   description: string;
   whatToBring: string;
   category?: string;

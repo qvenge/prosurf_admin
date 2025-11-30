@@ -15,11 +15,11 @@ export const defaultFormData: FormData = {
     }],
     duration: '1.5',
   }],
-  photos: [],
+  images: [],
   description: '',
   whatToBring: '',
 };
 
 export const defaultDuration = '1.5';
-export const maxPhotos = 10;
+export const maxImages = 10;
 export const maxDescriptionLength = 500;

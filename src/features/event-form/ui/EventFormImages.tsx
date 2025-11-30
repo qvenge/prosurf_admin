@@ -1,52 +1,65 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { UploadImageInput, Icon, ButtonContainer } from '@/shared/ui';
 import { CameraRegular, TrashRegular } from '@/shared/ds/icons';
+import { useEventFormContext } from '../lib/context';
+import { maxImages } from '../lib/constants';
 import styles from './EventForm.module.scss';
 
 export function EventFormImages() {
-  const [images, setImages] = useState<{ id: string; file: File; preview: string }[]>([]);
+  const { formData, handleImageAdd, handleImageRemove } = useEventFormContext();
+
+  // Create preview URLs for File objects
+  const imagePreviews = useMemo(() => {
+    return formData.images.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+  }, [formData.images]);
+
+  // Cleanup preview URLs when component unmounts
+  useMemo(() => {
+    return () => {
+      imagePreviews.forEach(({ preview }) => URL.revokeObjectURL(preview));
+    };
+  }, [imagePreviews]);
 
   const handleImageChange = (data: { file: File; preview: string }[] | { file: File; preview: string } | null) => {
     if (!data) return;
 
     const newImages = Array.isArray(data) ? data : [data];
-    const timestamp = Date.now();
+    const files = newImages.map((img) => img.file);
 
-    setImages((prev) => {
-      const remainingSlots = MAX_IMAGES - prev.length;
-      const imagesToAdd = newImages.slice(0, remainingSlots).map((img, index) => ({
-        id: `${timestamp}-${index}`,
-        file: img.file,
-        preview: img.preview,
-      }));
+    // Limit to max images (10 per OpenAPI spec)
+    const remainingSlots = maxImages - formData.images.length;
+    const filesToAdd = files.slice(0, remainingSlots);
 
-      return [...prev, ...imagesToAdd];
-    });
+    if (filesToAdd.length > 0) {
+      handleImageAdd(filesToAdd);
+    }
   };
 
-  const handleImageRemove = (imageId: string, e: React.MouseEvent) => {
+  const handleRemove = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    setImages((prev) => prev.filter((img) => img.id !== imageId));
+    handleImageRemove(index);
   };
 
-  const MAX_IMAGES = 6;
-  const canAddMore = images.length < MAX_IMAGES;
+  const canAddMore = formData.images.length < maxImages;
 
   return (
     <div className={styles.photosSection}>
-      <p className={styles.photoHint}>Добавьте до 6 фотографий</p>
+      <p className={styles.photoHint}>Добавьте до {maxImages} фотографий</p>
       <div className={styles.photoGrid}>
-        {images.map((image) => (
-          <div key={image.id} className={styles.photoUpload}>
+        {imagePreviews.map((image, index) => (
+          <div key={index} className={styles.photoUpload}>
             <div className={styles.imagePreview}>
               <img
                 src={image.preview}
-                alt="Event image"
+                alt={`Event image ${index + 1}`}
                 className={styles.imagePreviewImg}
               />
               <ButtonContainer
                 className={styles.imageRemove}
-                onClick={(e) => handleImageRemove(image.id, e)}
+                onClick={(e) => handleRemove(index, e)}
               >
                 <Icon src={TrashRegular} width={20} height={20} />
               </ButtonContainer>

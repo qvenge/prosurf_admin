@@ -6,9 +6,14 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   server: {
-    allowedHosts: [
-      'rarely-fervent-amphibian.cloudpub.ru'
-    ],
+    proxy: {
+      '/api': {
+        target: 'https://qvenge.tw1.ru',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        secure: true,
+      },
+    },
   },
   resolve: {
     alias: {

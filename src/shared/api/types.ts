@@ -62,7 +62,7 @@ export type CertificatePaymentMethod = z.infer<typeof schemas.CertificatePayment
 export type SeasonTicketPaymentMethod = z.infer<typeof schemas.SeasonTicketPaymentMethodSchema>;
 export type CashbackPaymentMethod = z.infer<typeof schemas.CashbackPaymentMethodSchema>;
 export type PaymentMethodRequest = z.infer<typeof schemas.PaymentMethodRequestSchema>;
-export type CompositePaymentMethodRequest = z.infer<typeof schemas.CompositePaymentMethodRequestSchema>;
+// Simplified: PaymentRequest is always an array of payment methods
 export type PaymentRequest = z.infer<typeof schemas.PaymentRequestSchema>;
 
 // Refund types

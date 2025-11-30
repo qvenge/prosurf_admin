@@ -1,0 +1,5386 @@
+openapi: 3.1.0
+paths:
+  /:
+    get:
+      operationId: AppController_getHello
+      parameters: []
+      responses:
+        '200':
+          description: Returns welcome message
+      summary: Root endpoint
+      tags:
+        - System
+  /health:
+    get:
+      operationId: AppController_getHealth
+      parameters: []
+      responses:
+        '200':
+          description: Service health status
+          content:
+            application/json:
+              schema:
+                example:
+                  status: ok
+                  timestamp: '2024-01-01T00:00:00.000Z'
+                  uptime: 123.456
+                  environment: production
+                  version: 0.0.1
+                  checks:
+                    database:
+                      status: healthy
+                      responseTime: 5ms
+                  responseTime: 10ms
+      summary: Health check endpoint
+      tags:
+        - System
+  /auth/client/telegram:
+    post:
+      operationId: AuthController_clientTelegramLogin
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelegramLoginDto'
+      responses:
+        '200':
+          description: Успешная аутентификация клиента через Telegram
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientAuthResponseDto'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      summary: Авторизация клиента через Telegram Web App
+      tags:
+        - Auth
+  /auth/admin/login:
+    post:
+      operationId: AuthController_adminLogin
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminLoginDto'
+      responses:
+        '200':
+          description: Успешная аутентификация администратора
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminAuthResponseDto'
+        '401':
+          description: Неверные учетные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      summary: Авторизация администратора через email и пароль
+      tags:
+        - Auth
+  /auth/refresh:
+    post:
+      operationId: AuthController_refreshToken
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenDto'
+      responses:
+        '200':
+          description: Новые токены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponseDto'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      summary: Обновление accessToken используя refreshToken (с ротацией)
+      tags:
+        - Auth
+  /auth/logout:
+    post:
+      operationId: AuthController_logout
+      parameters: []
+      responses:
+        '204':
+          description: Logged out
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - bearer: []
+      summary: Выход из системы (удаление refresh token)
+      tags:
+        - Auth
+  /auth/me:
+    get:
+      operationId: AuthController_getMe
+      parameters: []
+      responses:
+        '200':
+          description: Информация о пользователе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponseDto'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+      security:
+        - bearer: []
+      summary: Получить информацию о текущем пользователе
+      tags:
+        - Auth
+  /clients:
+    get:
+      operationId: ClientsController_findAll
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: Clients list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - bearer: []
+      summary: List all clients (ADMIN only)
+      tags:
+        - Clients
+  /clients/me:
+    get:
+      operationId: ClientsController_getMe
+      parameters: []
+      responses:
+        '200':
+          description: Client profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - only clients can access this endpoint
+      security:
+        - bearer: []
+      summary: Get current client profile
+      tags:
+        - Clients
+    patch:
+      operationId: ClientsController_updateMe
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  nullable: true
+                firstName:
+                  type: string
+                  nullable: true
+                lastName:
+                  type: string
+                  nullable: true
+                dateOfBirth:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  description: Date of birth in ISO 8601 format
+                photo:
+                  type: string
+                  format: binary
+                  nullable: true
+                  description: Profile photo (max 10MB)
+                deletePhoto:
+                  type: boolean
+                  nullable: true
+                  description: Set to true to delete existing photo. Ignored if photo file is uploaded.
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  nullable: true
+                firstName:
+                  type: string
+                  nullable: true
+                lastName:
+                  type: string
+                  nullable: true
+                dateOfBirth:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  description: Date of birth in ISO 8601 format
+                photo:
+                  type: string
+                  format: binary
+                  nullable: true
+                  description: Profile photo (max 10MB)
+                deletePhoto:
+                  type: boolean
+                  nullable: true
+                  description: Set to true to delete existing photo. Ignored if photo file is uploaded.
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDto'
+        '400':
+          description: Bad Request (e.g., file too large)
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - only clients can access this endpoint
+      security:
+        - bearer: []
+      summary: Update current client profile
+      tags:
+        - Clients
+  /clients/{id}:
+    get:
+      operationId: ClientsController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Client
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - bearer: []
+      summary: Get client by ID
+      tags:
+        - Clients
+    patch:
+      operationId: ClientsController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  nullable: true
+                firstName:
+                  type: string
+                  nullable: true
+                lastName:
+                  type: string
+                  nullable: true
+                dateOfBirth:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  description: Date of birth in ISO 8601 format
+                photo:
+                  type: string
+                  format: binary
+                  nullable: true
+                  description: Profile photo (max 10MB)
+                deletePhoto:
+                  type: boolean
+                  nullable: true
+                  description: Set to true to delete existing photo. Ignored if photo file is uploaded.
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                  nullable: true
+                firstName:
+                  type: string
+                  nullable: true
+                lastName:
+                  type: string
+                  nullable: true
+                dateOfBirth:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  description: Date of birth in ISO 8601 format
+                photo:
+                  type: string
+                  format: binary
+                  nullable: true
+                  description: Profile photo (max 10MB)
+                deletePhoto:
+                  type: boolean
+                  nullable: true
+                  description: Set to true to delete existing photo. Ignored if photo file is uploaded.
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDto'
+        '400':
+          description: Bad Request (e.g., file too large)
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - bearer: []
+      summary: Update client profile (ADMIN only)
+      tags:
+        - Clients
+  /clients/me/complete-profile:
+    post:
+      description: >-
+        Used to complete profile when user logs in for the first time. Requires full name, phone, and all required
+        consents to be provided.
+      operationId: ClientsController_completeProfile
+      parameters:
+        - name: user-agent
+          required: true
+          in: header
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteProfileDto'
+      responses:
+        '200':
+          description: Profile completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDto'
+        '400':
+          description: Bad Request - validation error or missing required consents
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - only clients can access this endpoint
+        '404':
+          description: Client not found
+      security:
+        - bearer: []
+      summary: Complete client profile on first login
+      tags:
+        - Clients
+  /admins:
+    get:
+      operationId: AdminsController_findAll
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: Admins list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - bearer: []
+      summary: List all admins (ADMIN only)
+      tags:
+        - Admins
+    post:
+      operationId: AdminsController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAdminDto'
+      responses:
+        '201':
+          description: Admin created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDto'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '409':
+          description: Admin with this email already exists
+      security:
+        - bearer: []
+      summary: Create a new admin (ADMIN only)
+      tags:
+        - Admins
+  /admins/me:
+    get:
+      operationId: AdminsController_getMe
+      parameters: []
+      responses:
+        '200':
+          description: Admin profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - bearer: []
+      summary: Get current admin profile
+      tags:
+        - Admins
+    patch:
+      operationId: AdminsController_updateMe
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUpdateDto'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDto'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - bearer: []
+      summary: Update current admin profile
+      tags:
+        - Admins
+  /admins/{id}:
+    get:
+      operationId: AdminsController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - bearer: []
+      summary: Get admin by ID
+      tags:
+        - Admins
+  /admins/me/password:
+    patch:
+      operationId: AdminsController_changePassword
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordDto'
+      responses:
+        '200':
+          description: Password changed successfully
+        '400':
+          description: Bad Request (e.g., incorrect current password)
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - bearer: []
+      summary: Change current admin password
+      tags:
+        - Admins
+  /events:
+    get:
+      operationId: EventsController_findAll
+      parameters:
+        - name: q
+          required: false
+          in: query
+          description: Search by title/description
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+        - name: startsAfter
+          required: false
+          in: query
+          description: Return entities starting AFTER this moment (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: endsBefore
+          required: false
+          in: query
+          description: Return entities starting BEFORE this moment (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: labels.any
+          required: false
+          in: query
+          description: Match ANY of the specified labels (OR)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: labels.all
+          required: false
+          in: query
+          description: Match ALL of the specified labels (AND)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: labels.none
+          required: false
+          in: query
+          description: Exclude events with any of these labels (NOT)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: attr.eq
+          required: false
+          in: query
+          description: Equality filter by attribute keys
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.in
+          required: false
+          in: query
+          description: In set filter by attribute keys
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.gte
+          required: false
+          in: query
+          description: Greater than or equal filter for numeric attributes
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.lte
+          required: false
+          in: query
+          description: Less than or equal filter for numeric attributes
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.bool
+          required: false
+          in: query
+          description: Boolean attribute filter
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.exists
+          required: false
+          in: query
+          description: Check attribute key existence
+          schema:
+            $ref: '#/components/schemas/Object'
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseDto'
+      summary: Catalog of events
+      tags:
+        - Events
+    post:
+      operationId: EventsController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      heading:
+                        type: string
+                      body:
+                        type: string
+                  nullable: true
+                location:
+                  type: string
+                  nullable: true
+                capacity:
+                  type: integer
+                  minimum: 0
+                  nullable: true
+                tickets:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      prepayment:
+                        type: object
+                        properties:
+                          price:
+                            type: object
+                            properties:
+                              currency:
+                                type: string
+                              amountMinor:
+                                type: integer
+                          description:
+                            type: string
+                            nullable: true
+                      full:
+                        type: object
+                        properties:
+                          price:
+                            type: object
+                            properties:
+                              currency:
+                                type: string
+                              amountMinor:
+                                type: integer
+                          description:
+                            type: string
+                            nullable: true
+                labels:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                attributes:
+                  type: object
+                  additionalProperties: true
+                  nullable: true
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Image files (max 10 files, 10MB each)
+                  nullable: true
+              required:
+                - title
+                - tickets
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      heading:
+                        type: string
+                      body:
+                        type: string
+                  nullable: true
+                location:
+                  type: string
+                  nullable: true
+                capacity:
+                  type: integer
+                  minimum: 0
+                  nullable: true
+                tickets:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      prepayment:
+                        type: object
+                        properties:
+                          price:
+                            type: object
+                            properties:
+                              currency:
+                                type: string
+                              amountMinor:
+                                type: integer
+                          description:
+                            type: string
+                            nullable: true
+                      full:
+                        type: object
+                        properties:
+                          price:
+                            type: object
+                            properties:
+                              currency:
+                                type: string
+                              amountMinor:
+                                type: integer
+                          description:
+                            type: string
+                            nullable: true
+                labels:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                attributes:
+                  type: object
+                  additionalProperties: true
+                  nullable: true
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Image files (max 10 files, 10MB each)
+                  nullable: true
+              required:
+                - title
+                - tickets
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDto'
+      security:
+        - bearer: []
+      summary: Create event (admin)
+      tags:
+        - Events
+  /events/{id}:
+    get:
+      operationId: EventsController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDto'
+      summary: Get event by id
+      tags:
+        - Events
+    patch:
+      operationId: EventsController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  nullable: true
+                description:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      heading:
+                        type: string
+                      body:
+                        type: string
+                  nullable: true
+                location:
+                  type: string
+                  nullable: true
+                capacity:
+                  type: integer
+                  minimum: 0
+                  nullable: true
+                tickets:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      prepayment:
+                        type: object
+                        properties:
+                          price:
+                            type: object
+                            properties:
+                              currency:
+                                type: string
+                              amountMinor:
+                                type: integer
+                          description:
+                            type: string
+                            nullable: true
+                      full:
+                        type: object
+                        properties:
+                          price:
+                            type: object
+                            properties:
+                              currency:
+                                type: string
+                              amountMinor:
+                                type: integer
+                          description:
+                            type: string
+                            nullable: true
+                  nullable: true
+                labels:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                attributes:
+                  type: object
+                  additionalProperties: true
+                  nullable: true
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: New image files to add (max 10 files, 10MB each)
+                  nullable: true
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  nullable: true
+                description:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      heading:
+                        type: string
+                      body:
+                        type: string
+                  nullable: true
+                location:
+                  type: string
+                  nullable: true
+                capacity:
+                  type: integer
+                  minimum: 0
+                  nullable: true
+                tickets:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      prepayment:
+                        type: object
+                        properties:
+                          price:
+                            type: object
+                            properties:
+                              currency:
+                                type: string
+                              amountMinor:
+                                type: integer
+                          description:
+                            type: string
+                            nullable: true
+                      full:
+                        type: object
+                        properties:
+                          price:
+                            type: object
+                            properties:
+                              currency:
+                                type: string
+                              amountMinor:
+                                type: integer
+                          description:
+                            type: string
+                            nullable: true
+                  nullable: true
+                labels:
+                  type: array
+                  items:
+                    type: string
+                  nullable: true
+                attributes:
+                  type: object
+                  additionalProperties: true
+                  nullable: true
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: New image files to add (max 10 files, 10MB each)
+                  nullable: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDto'
+      security:
+        - bearer: []
+      summary: Update event (ADMIN)
+      tags:
+        - Events
+    delete:
+      description: Deletes event. By default does not allow deleting event if it has sessions with active bookings.
+      operationId: EventsController_delete
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: force
+          required: true
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '204':
+          description: Event successfully deleted
+      security:
+        - bearer: []
+      summary: Delete event (ADMIN)
+      tags:
+        - Events
+  /events/{id}/sessions:
+    get:
+      operationId: EventsController_getEventSessions
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+        - name: startsAfter
+          required: false
+          in: query
+          description: Return entities starting AFTER this moment (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: endsBefore
+          required: false
+          in: query
+          description: Return entities starting BEFORE this moment (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: sortBy
+          required: false
+          in: query
+          description: Field to sort by
+          schema:
+            default: startsAt
+            enum:
+              - createdAt
+              - startsAt
+            type: string
+        - name: sortOrder
+          required: false
+          in: query
+          description: Sort order
+          schema:
+            default: asc
+            enum:
+              - asc
+              - desc
+            type: string
+        - name: minRemainingSeats
+          required: false
+          in: query
+          description: Minimum remaining seats
+          schema:
+            minimum: 0
+            type: number
+        - name: labels.any
+          required: false
+          in: query
+          description: Match ANY of the specified labels (OR)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: labels.all
+          required: false
+          in: query
+          description: Match ALL of the specified labels (AND)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: labels.none
+          required: false
+          in: query
+          description: Exclude sessions with any of these labels (NOT)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: attr.eq
+          required: false
+          in: query
+          description: Equality filter by attribute keys, e.g. attr.eq[city]=istanbul
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.in
+          required: false
+          in: query
+          description: In set filter by attribute keys, e.g. attr.in[level]=[beginner,intermediate]
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.gte
+          required: false
+          in: query
+          description: Greater than or equal filter for numeric attributes
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.lte
+          required: false
+          in: query
+          description: Less than or equal filter for numeric attributes
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.bool
+          required: false
+          in: query
+          description: Boolean attribute filter
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.exists
+          required: false
+          in: query
+          description: Check attribute key existence (true/false)
+          schema:
+            $ref: '#/components/schemas/Object'
+      responses:
+        '200':
+          description: Event sessions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseDto'
+      summary: Сессии события (возвращает eventId вместо полного события)
+      tags:
+        - Events
+    post:
+      operationId: EventsController_createEventSessions
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Event ID
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          description: Unique idempotency key for the request
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 128
+      responses:
+        '201':
+          description: Sessions created
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SessionCompact'
+      security:
+        - bearer: []
+      summary: Create sessions for event (ADMIN)
+      tags:
+        - Events
+  /sessions:
+    get:
+      operationId: SessionsController_findAll
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+        - name: startsAfter
+          required: false
+          in: query
+          description: Return entities starting AFTER this moment (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: endsBefore
+          required: false
+          in: query
+          description: Return entities starting BEFORE this moment (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: eventId
+          required: false
+          in: query
+          description: Filter by event ID
+          schema:
+            type: string
+        - name: sortBy
+          required: false
+          in: query
+          description: Field to sort by
+          schema:
+            enum:
+              - createdAt
+              - startsAt
+            type: string
+        - name: sortOrder
+          required: false
+          in: query
+          schema:
+            default: asc
+            enum:
+              - asc
+              - desc
+            type: string
+        - name: labels.any
+          required: false
+          in: query
+          description: Match ANY of the specified labels (OR)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: labels.all
+          required: false
+          in: query
+          description: Match ALL of the specified labels (AND)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: labels.none
+          required: false
+          in: query
+          description: Exclude sessions with any of these labels (NOT)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: attr.eq
+          required: false
+          in: query
+          description: Equality filter by attribute keys
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.in
+          required: false
+          in: query
+          description: In set filter by attribute keys
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.gte
+          required: false
+          in: query
+          description: Greater than or equal filter for numeric attributes
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.lte
+          required: false
+          in: query
+          description: Less than or equal filter for numeric attributes
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.bool
+          required: false
+          in: query
+          description: Boolean attribute filter
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.exists
+          required: false
+          in: query
+          description: Check attribute key existence
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: minRemainingSeats
+          required: false
+          in: query
+          description: Minimum remaining seats
+          schema:
+            minimum: 0
+            type: number
+        - name: onWaitlist
+          required: false
+          in: query
+          description: Filter sessions where the current user is on the waitlist (requires authentication)
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseDto'
+      summary: Search sessions
+      tags:
+        - Sessions
+    patch:
+      description: >-
+        Allows updating multiple sessions in one request. Each session in the array must contain ID and fields to
+        update.
+      operationId: SessionsController_bulkUpdate
+      parameters:
+        - name: idempotency-key
+          required: true
+          in: header
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          description: Unique idempotency key for the request
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        '200':
+          description: Sessions updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                  - updated
+                  - failed
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Session'
+                    description: Successfully updated sessions
+                  updated:
+                    type: integer
+                    description: Number of successfully updated sessions
+                  failed:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - error
+                      properties:
+                        id:
+                          type: string
+                          description: ID of session that failed to update
+                        error:
+                          type: string
+                          description: Error description
+                    description: List of sessions that failed to update
+      security:
+        - bearer: []
+      summary: Bulk update sessions (ADMIN)
+      tags:
+        - Sessions
+    delete:
+      description: >-
+        Allows deleting multiple sessions in one request. By default does not allow deleting sessions with active
+        bookings.
+      operationId: SessionsController_bulkDelete
+      parameters:
+        - name: idempotency-key
+          required: true
+          in: header
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          description: Unique idempotency key for the request
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionBulkDeleteDto'
+      responses:
+        '200':
+          description: Operation completed
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - deleted
+                  - failed
+                properties:
+                  deleted:
+                    type: array
+                    items:
+                      type: string
+                    description: IDs of successfully deleted sessions
+                  failed:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - error
+                      properties:
+                        id:
+                          type: string
+                          description: ID of session that failed to delete
+                        error:
+                          type: string
+                          description: Reason for failure
+                    description: List of sessions that failed to delete
+      security:
+        - bearer: []
+      summary: Bulk delete sessions (ADMIN)
+      tags:
+        - Sessions
+  /sessions/{id}:
+    get:
+      operationId: SessionsController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionDto'
+      summary: Get session
+      tags:
+        - Sessions
+    patch:
+      operationId: SessionsController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionUpdateDto'
+      responses:
+        '200':
+          description: Updated session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionDto'
+      security:
+        - bearer: []
+      summary: Update session
+      tags:
+        - Sessions
+    delete:
+      operationId: SessionsController_cancel
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Session cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionDto'
+      security:
+        - bearer: []
+      summary: Cancel session (set status to CANCELLED) (ADMIN)
+      tags:
+        - Sessions
+  /sessions/{id}/book:
+    post:
+      operationId: SessionsController_createBookingHold
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: idempotency-key
+          required: true
+          in: header
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          description: Idempotency key for safely retrying POST requests
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingDto'
+      responses:
+        '201':
+          description: Hold created
+          headers:
+            X-Hold-TTL:
+              description: Hold time-to-live in seconds
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+      security:
+        - bearer: []
+      summary: Create booking hold for a session
+      tags:
+        - Sessions
+  /bookings:
+    get:
+      operationId: BookingsController_findAll
+      parameters:
+        - name: clientId
+          required: false
+          in: query
+          description: Filter by client ID (ADMIN only)
+          schema:
+            type: string
+        - name: sessionId
+          required: false
+          in: query
+          description: Filter by session ID
+          schema:
+            type: string
+        - name: status
+          required: false
+          in: query
+          description: Filter by booking status (can specify multiple comma-separated)
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - HOLD
+                - CONFIRMED
+                - CANCELLED
+                - EXPIRED
+        - name: bookingType
+          required: false
+          in: query
+          description: Filter by booking type (ADMIN only)
+          schema:
+            default: all
+            enum:
+              - registered
+              - guest
+              - all
+            type: string
+        - name: includeUser
+          required: false
+          in: query
+          description: Include user information in response (ADMIN only)
+          schema:
+            default: false
+            type: boolean
+        - name: includeSession
+          required: false
+          in: query
+          description: Include session information in response
+          schema:
+            default: false
+            type: boolean
+        - name: includePaymentInfo
+          required: false
+          in: query
+          description: Include payment information in response (ADMIN only)
+          schema:
+            default: false
+            type: boolean
+        - name: includeGuestContact
+          required: false
+          in: query
+          description: Include guest contact details in response (ADMIN only)
+          schema:
+            default: false
+            type: boolean
+        - name: labels.any
+          required: false
+          in: query
+          description: Match ANY of the specified session labels (OR)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: labels.all
+          required: false
+          in: query
+          description: Match ALL of the specified session labels (AND)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: labels.none
+          required: false
+          in: query
+          description: Exclude bookings with sessions having any of these labels (NOT)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: attr.eq
+          required: false
+          in: query
+          description: Equality filter by session attribute keys
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.in
+          required: false
+          in: query
+          description: In set filter by session attribute keys
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.gte
+          required: false
+          in: query
+          description: Greater than or equal filter for numeric session attributes
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.lte
+          required: false
+          in: query
+          description: Less than or equal filter for numeric session attributes
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.bool
+          required: false
+          in: query
+          description: Boolean session attribute filter
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.exists
+          required: false
+          in: query
+          description: Check session attribute key existence
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Limit elements per page
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+        - name: createdAfter
+          required: false
+          in: query
+          description: Filter bookings created after this timestamp (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: createdBefore
+          required: false
+          in: query
+          description: Filter bookings created before this timestamp (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: startsAfter
+          required: false
+          in: query
+          description: Filter bookings where session starts after this timestamp (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: startsBefore
+          required: false
+          in: query
+          description: Filter bookings where session starts before this timestamp (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: endsAfter
+          required: false
+          in: query
+          description: Filter bookings where session ends after this timestamp (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: endsBefore
+          required: false
+          in: query
+          description: Filter bookings where session ends before this timestamp (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: minQuantity
+          required: false
+          in: query
+          description: Minimum number of seats in booking
+          schema:
+            type: number
+        - name: maxQuantity
+          required: false
+          in: query
+          description: Maximum number of seats in booking
+          schema:
+            type: number
+        - name: minPrice
+          required: false
+          in: query
+          description: Minimum total price in minor units (kopecks/cents)
+          schema:
+            type: number
+        - name: maxPrice
+          required: false
+          in: query
+          description: Maximum total price in minor units (kopecks/cents)
+          schema:
+            type: number
+        - name: eventId
+          required: false
+          in: query
+          description: Filter bookings by event ID
+          schema:
+            type: string
+        - name: seasonTicketId
+          required: false
+          in: query
+          description: Filter bookings paid with specific season ticket
+          schema:
+            type: string
+        - name: createdBy
+          required: false
+          in: query
+          description: Filter by admin who created the booking (ADMIN only)
+          schema:
+            type: string
+        - name: q
+          required: false
+          in: query
+          description: Search in guest contact info (phone, name, email) and user info
+          schema:
+            type: string
+        - name: sortBy
+          required: false
+          in: query
+          description: Field to sort by
+          schema:
+            default: createdAt
+            enum:
+              - createdAt
+              - totalPrice
+              - status
+              - startsAt
+            type: string
+        - name: sortOrder
+          required: false
+          in: query
+          description: Sort order
+          schema:
+            default: desc
+            enum:
+              - asc
+              - desc
+            type: string
+      responses:
+        '200':
+          description: Bookings list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Booking'
+                  next:
+                    type: string
+                    nullable: true
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+      security:
+        - bearer: []
+      summary: List bookings (self or ADMIN with extended filtering capabilities)
+      tags:
+        - Bookings
+  /bookings/{id}:
+    get:
+      operationId: BookingsController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: includeSession
+          required: false
+          in: query
+          description: Include session information in response
+          schema:
+            type: boolean
+        - name: includeUser
+          required: false
+          in: query
+          description: Include user information in response (ADMIN only)
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingExtendedDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+      security:
+        - bearer: []
+      summary: Get booking
+      tags:
+        - Bookings
+    patch:
+      operationId: BookingsController_updateBooking
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBookingDto'
+      responses:
+        '200':
+          description: Booking updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingExtendedDto'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '409':
+          description: Conflict
+      security:
+        - bearer: []
+      summary: Update booking (ADMIN only)
+      tags:
+        - Bookings
+  /bookings/{id}/payment:
+    post:
+      operationId: BookingsController_createBookingPayment
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: idempotency-key
+          required: true
+          in: header
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          description: Unique idempotency key for the request
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 128
+      responses:
+        '201':
+          description: Payment initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBookingPaymentResponseDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '409':
+          description: Conflict
+      security:
+        - bearer: []
+      summary: Create payment for booking
+      tags:
+        - Bookings
+  /bookings/{id}/cancel:
+    post:
+      operationId: BookingsController_cancelBooking
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Booking cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '409':
+          description: Conflict
+      security:
+        - bearer: []
+      summary: Cancel booking (self for HOLD/CONFIRMED within policy, or ADMIN)
+      tags:
+        - Bookings
+  /bookings/{id}/confirm:
+    post:
+      operationId: BookingsController_confirmBooking
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Booking confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '409':
+          description: Conflict
+      security:
+        - bearer: []
+      summary: Confirm booking (offline payment, ADMIN only)
+      tags:
+        - Bookings
+  /payments:
+    get:
+      operationId: PaymentsController_findAll
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+        - name: status
+          required: false
+          in: query
+          description: Filter by payment status (can specify multiple comma-separated)
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - PENDING
+                - SUCCEEDED
+                - FAILED
+                - CANCELLED
+        - name: category
+          required: false
+          in: query
+          description: Filter by payment category
+          schema:
+            enum:
+              - session
+              - seasonTicket
+              - certificate
+            type: string
+        - name: createdAfter
+          required: false
+          in: query
+          description: Return payments created AFTER this moment (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: createdBefore
+          required: false
+          in: query
+          description: Return payments created BEFORE this moment (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: labels.any
+          required: false
+          in: query
+          description: Match ANY of the specified labels (OR)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: labels.all
+          required: false
+          in: query
+          description: Match ALL of the specified labels (AND)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: labels.none
+          required: false
+          in: query
+          description: Exclude payments with any of these labels (NOT)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: attr.eq
+          required: false
+          in: query
+          description: Equality filter by attribute keys
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.in
+          required: false
+          in: query
+          description: In set filter by attribute keys
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.gte
+          required: false
+          in: query
+          description: Greater than or equal filter for numeric attributes
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.lte
+          required: false
+          in: query
+          description: Less than or equal filter for numeric attributes
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.bool
+          required: false
+          in: query
+          description: Boolean attribute filter
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.exists
+          required: false
+          in: query
+          description: Check attribute key existence
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: sortBy
+          required: false
+          in: query
+          description: Field to sort by
+          schema:
+            enum:
+              - createdAt
+              - price
+              - status
+            type: string
+        - name: sortOrder
+          required: false
+          in: query
+          description: Sort order
+          schema:
+            default: desc
+            enum:
+              - asc
+              - desc
+            type: string
+      responses:
+        '200':
+          description: List of user payments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseDto'
+      security:
+        - bearer: []
+      summary: Get current user payments
+      tags:
+        - Payments
+  /payments/{id}:
+    get:
+      operationId: PaymentsController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Payment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentDto'
+        '404':
+          description: Payment not found
+      security:
+        - bearer: []
+      summary: Get payment details
+      tags:
+        - Payments
+  /payments/{id}/refunds:
+    post:
+      operationId: PaymentsController_createRefund
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: idempotency-key
+          required: true
+          in: header
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          description: Unique idempotency key for the request
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 128
+      responses:
+        '201':
+          description: Refund created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefundDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Payment not found
+        '409':
+          description: Conflict
+      security:
+        - bearer: []
+      summary: Create refund
+      tags:
+        - Payments
+  /webhooks/payments/provider:
+    post:
+      operationId: PaymentWebhooksController_handleWebhook
+      parameters:
+        - name: x-signature
+          required: true
+          in: header
+          schema:
+            type: string
+        - name: X-Signature
+          in: header
+          description: Signature from provider
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK (idempotent processing; duplicates allowed)
+        '400':
+          description: Bad signature/payload
+      summary: Webhook from payment provider
+      tags:
+        - Webhooks
+  /webhooks/telegram/bot:
+    post:
+      description: >-
+        Receives Telegram Bot API updates (payments).
+
+
+        - On `pre_checkout_query`: verify booking hold & amount, then call Bot API `answerPreCheckoutQuery` within 10
+        seconds.
+
+
+        - On `successful_payment`: set Payment=SUCCEEDED and Booking=CONFIRMED.
+            
+      operationId: TelegramWebhookController_handleTelegramWebhook
+      parameters:
+        - name: x-telegram-bot-api-secret-token
+          required: true
+          in: header
+          schema:
+            type: string
+        - name: X-Telegram-Bot-Api-Secret-Token
+          in: header
+          description: Secret token set via setWebhook to verify Telegram as the sender.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelegramWebhookDto'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorDto'
+        '401':
+          description: Unauthorized (missing/invalid secret token)
+        '500':
+          description: Server error
+      summary: Telegram Bot webhook for payments
+      tags:
+        - Webhooks
+  /certificates/products:
+    get:
+      description: Returns list of certificate types available for purchase with pricing and details
+      operationId: CertificatesController_getCertificateProducts
+      parameters: []
+      responses:
+        '200':
+          description: Certificate products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateProductsResponseDto'
+      summary: Get available certificate products for purchase
+      tags:
+        - Certificates
+  /certificates/purchase:
+    post:
+      description: Client purchases a certificate and receives payment instructions
+      operationId: CertificatesController_purchaseCertificate
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseCertificateDto'
+      responses:
+        '201':
+          description: Certificate created, payment initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseCertificateResponseDto'
+        '400':
+          description: Invalid request
+        '403':
+          description: Only clients can purchase
+      security:
+        - bearer: []
+      summary: Purchase a certificate
+      tags:
+        - Certificates
+  /certificates/activate:
+    post:
+      description: Activate certificate and convert to benefit (SeasonTicket or Cashback)
+      operationId: CertificatesController_activateCertificate
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivateCertificateRequestDto'
+      responses:
+        '200':
+          description: Certificate activated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateActivationResponseDto'
+        '404':
+          description: Certificate not found
+        '409':
+          description: Certificate already activated or expired
+        '410':
+          description: Certificate expired
+      security:
+        - bearer: []
+      summary: Activate a certificate by code
+      tags:
+        - Certificates
+  /certificates/purchased:
+    get:
+      description: Get list of certificates purchased by current user
+      operationId: CertificatesController_findPurchased
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+        - name: status
+          required: false
+          in: query
+          description: Filter by status
+          schema:
+            enum:
+              - PENDING_ACTIVATION
+              - ACTIVATED
+              - EXPIRED
+            type: string
+      responses:
+        '200':
+          description: Purchased certificates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCertificatesResponseDto'
+      security:
+        - bearer: []
+      summary: List purchased certificates
+      tags:
+        - Certificates
+  /certificates/activated:
+    get:
+      description: Get list of certificates activated by current user
+      operationId: CertificatesController_findActivated
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: Activated certificates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCertificatesResponseDto'
+      security:
+        - bearer: []
+      summary: List activated certificates
+      tags:
+        - Certificates
+  /certificates/by-code/{code}:
+    get:
+      description: Check if certificate is valid and can be activated
+      operationId: CertificatesController_checkByCode
+      parameters:
+        - name: code
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Certificate details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckCertificateResponseDto'
+        '404':
+          description: Certificate not found
+      security:
+        - bearer: []
+      summary: Check certificate by code
+      tags:
+        - Certificates
+  /certificates/{id}:
+    get:
+      description: Get certificate details (owner or admin only)
+      operationId: CertificatesController_findById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Certificate details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateDto'
+        '403':
+          description: Access denied
+        '404':
+          description: Certificate not found
+      security:
+        - bearer: []
+      summary: Get certificate by ID
+      tags:
+        - Certificates
+  /users/{id}/cashback:
+    get:
+      operationId: UserCashbackController_getCashback
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashbackWalletDto'
+      security:
+        - bearer: []
+      summary: Баланс кэшбэка пользователя (self или ADMIN)
+      tags:
+        - Users
+        - Cashback
+  /users/{id}/cashback/operations:
+    get:
+      operationId: UserCashbackController_findUserOperations
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: Operations history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseDto'
+      security:
+        - bearer: []
+      summary: User's cashback operations history
+      tags:
+        - Users
+        - Cashback
+  /cashback/rules:
+    get:
+      operationId: CashbackController_getRules
+      parameters: []
+      responses:
+        '200':
+          description: Cashback rules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashbackRulesDto'
+      summary: Get cashback rules (read-only)
+      tags:
+        - Cashback
+  /cashback/settings:
+    get:
+      operationId: CashbackController_getSettings
+      parameters: []
+      responses:
+        '200':
+          description: List of cashback settings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CashbackSettingsDto'
+      security:
+        - bearer: []
+      summary: Get all cashback settings (ADMIN only)
+      tags:
+        - Cashback
+  /cashback/settings/{product}:
+    put:
+      operationId: CashbackController_updateSettings
+      parameters:
+        - name: product
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCashbackSettingsDto'
+      responses:
+        '200':
+          description: Updated cashback settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashbackSettingsDto'
+      security:
+        - bearer: []
+      summary: Update cashback settings for a product (ADMIN only)
+      tags:
+        - Cashback
+  /season-ticket-plans:
+    post:
+      operationId: SeasonTicketPlansController_createPlan
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSeasonTicketPlanDto'
+      responses:
+        '201':
+          description: Plan created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeasonTicketPlanDto'
+      security:
+        - bearer: []
+      summary: Create season ticket plan (admin)
+      tags:
+        - Season Tickets
+    get:
+      operationId: SeasonTicketPlansController_findAllPlans
+      parameters:
+        - name: eventIds
+          required: false
+          in: query
+          description: Filter plans applicable to ANY of these event IDs (OR)
+          schema:
+            example:
+              - event1
+              - event2
+            type: array
+            items:
+              type: string
+        - name: sessionId
+          required: false
+          in: query
+          description: Filter plans applicable to this session ID
+          schema:
+            example: session123
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Limit elements per page
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: Plans list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseDto'
+      summary: List season ticket plans
+      tags:
+        - Season Tickets
+  /season-ticket-plans/{id}:
+    get:
+      operationId: SeasonTicketPlansController_findPlanById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Plan details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeasonTicketPlanDto'
+        '404':
+          description: Plan not found
+      summary: Get season ticket plan details
+      tags:
+        - Season Tickets
+    patch:
+      operationId: SeasonTicketPlansController_updatePlan
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSeasonTicketPlanDto'
+      responses:
+        '200':
+          description: Plan updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeasonTicketPlanDto'
+      security:
+        - bearer: []
+      summary: Update season ticket plan
+      tags:
+        - Season Tickets
+    delete:
+      operationId: SeasonTicketPlansController_deletePlan
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted or deactivated
+      security:
+        - bearer: []
+      summary: Delete (or deactivate) plan
+      tags:
+        - Season Tickets
+  /season-ticket-plans/{id}/purchase:
+    post:
+      operationId: SeasonTicketPlansController_createPurchase
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: idempotency-key
+          required: true
+          in: header
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          description: Unique idempotency key for the request
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 128
+      responses:
+        '201':
+          description: Payment for season ticket purchase created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentDto'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Plan not found
+        '409':
+          description: Conflict
+      security:
+        - bearer: []
+      summary: Purchase season ticket (clientId taken from token)
+      tags:
+        - Season Tickets
+  /season-ticket-plans/{id}/applicable-events:
+    get:
+      operationId: SeasonTicketPlansController_getApplicableEvents
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: List of applicable events
+        '404':
+          description: Plan not found
+      summary: Get events applicable to this season ticket plan
+      tags:
+        - Season Tickets
+  /season-tickets:
+    get:
+      operationId: SeasonTicketsController_findAllTickets
+      parameters:
+        - name: sessionId
+          required: false
+          in: query
+          description: Filter tickets applicable to this session ID
+          schema:
+            example: session123
+            type: string
+        - name: eventId
+          required: false
+          in: query
+          description: Filter tickets applicable to this event ID
+          schema:
+            example: event123
+            type: string
+        - name: status
+          required: false
+          in: query
+          description: Filter by ticket status (can specify multiple)
+          schema:
+            example:
+              - ACTIVE
+            type: array
+            items:
+              type: string
+              enum:
+                - ACTIVE
+                - EXPIRED
+                - CANCELLED
+        - name: hasRemainingPasses
+          required: false
+          in: query
+          description: Filter tickets with remaining passes
+          schema:
+            example: true
+            type: boolean
+        - name: clientId
+          required: false
+          in: query
+          description: Filter by client ID (admin only)
+          schema:
+            example: client123
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Limit elements per page
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: Season tickets list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseDto'
+      security:
+        - bearer: []
+      summary: List season tickets (self or ADMIN)
+      tags:
+        - Season Tickets
+  /season-tickets/{id}:
+    get:
+      operationId: SeasonTicketsController_findById
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Season ticket
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeasonTicketDto'
+      security:
+        - bearer: []
+      summary: Get season ticket by id
+      tags:
+        - Season Tickets
+  /season-tickets/{id}/cancel:
+    post:
+      operationId: SeasonTicketsController_cancelSeasonTicket
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeasonTicketDto'
+      security:
+        - bearer: []
+      summary: Cancel season ticket (proportional refund policy)
+      tags:
+        - Season Tickets
+  /clients/{id}/season-tickets:
+    get:
+      operationId: ClientSeasonTicketsController_findClientTickets
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: Client's season tickets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseDto'
+      security:
+        - bearer: []
+      summary: Client's season tickets
+      tags:
+        - Clients
+        - Season Tickets
+  /sessions/{id}/waitlist:
+    post:
+      operationId: WaitlistController_joinWaitlist
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: idempotency-key
+          required: true
+          in: header
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          description: Idempotency key for safely retrying POST requests
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 128
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JoinWaitlistDto'
+      responses:
+        '201':
+          description: Added to waitlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WaitlistEntryDto'
+        '409':
+          description: Session not full or not waitlist-eligible
+      security:
+        - bearer: []
+      summary: Join waitlist for a full session (idempotent)
+      tags:
+        - Waitlist
+    delete:
+      operationId: WaitlistController_leaveWaitlist
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Removed or not present
+      security:
+        - bearer: []
+      summary: Leave waitlist (idempotent)
+      tags:
+        - Waitlist
+    get:
+      operationId: WaitlistController_getWaitlistEntries
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: Entries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseDto'
+      security:
+        - bearer: []
+      summary: List waitlist entries (admin)
+      tags:
+        - Waitlist
+  /sessions/{id}/subscriptions:
+    get:
+      deprecated: true
+      operationId: SubscriptionsController_getSubscriptions
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: Entries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseDto'
+      security:
+        - bearer: []
+      summary: Alias of /sessions/{id}/waitlist (admin)
+      tags:
+        - Waitlist
+  /users/{id}/waitlist:
+    get:
+      operationId: UserWaitlistController_getUserWaitlistedSessions
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+      responses:
+        '200':
+          description: Sessions where user is on waitlist
+      security:
+        - bearer: []
+      summary: User's waitlisted sessions
+      tags:
+        - Waitlist
+        - Users
+  /admin/payments:
+    get:
+      operationId: AdminController_getPayments
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+        - name: status
+          required: false
+          in: query
+          description: Filter by payment status (can specify multiple comma-separated)
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - PENDING
+                - SUCCEEDED
+                - FAILED
+                - CANCELLED
+        - name: category
+          required: false
+          in: query
+          description: Filter by payment category
+          schema:
+            enum:
+              - session
+              - seasonTicket
+              - certificate
+            type: string
+        - name: createdAfter
+          required: false
+          in: query
+          description: Return payments created AFTER this moment (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: createdBefore
+          required: false
+          in: query
+          description: Return payments created BEFORE this moment (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: labels.any
+          required: false
+          in: query
+          description: Match ANY of the specified labels (OR)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: labels.all
+          required: false
+          in: query
+          description: Match ALL of the specified labels (AND)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: labels.none
+          required: false
+          in: query
+          description: Exclude payments with any of these labels (NOT)
+          schema:
+            type: array
+            items:
+              type: string
+        - name: attr.eq
+          required: false
+          in: query
+          description: Equality filter by attribute keys
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.in
+          required: false
+          in: query
+          description: In set filter by attribute keys
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.gte
+          required: false
+          in: query
+          description: Greater than or equal filter for numeric attributes
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.lte
+          required: false
+          in: query
+          description: Less than or equal filter for numeric attributes
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.bool
+          required: false
+          in: query
+          description: Boolean attribute filter
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: attr.exists
+          required: false
+          in: query
+          description: Check attribute key existence
+          schema:
+            $ref: '#/components/schemas/Object'
+        - name: sortBy
+          required: false
+          in: query
+          description: Field to sort by
+          schema:
+            enum:
+              - createdAt
+              - price
+              - status
+            type: string
+        - name: sortOrder
+          required: false
+          in: query
+          description: Sort order
+          schema:
+            default: desc
+            enum:
+              - asc
+              - desc
+            type: string
+        - name: clientId
+          required: false
+          in: query
+          description: Filter by client ID (admin only)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of all payments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseDto'
+      security:
+        - bearer: []
+      summary: Get all payments (admin)
+      tags:
+        - Admin
+  /admin/audit-logs:
+    get:
+      operationId: AdminController_getAuditLogs
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+        - name: filter.action
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: filter.entityType
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: filter.entityId
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: filter.adminId
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: filter.dateFrom
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: filter.dateTo
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Audit records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AuditLog'
+                  next:
+                    type: string
+                    nullable: true
+      security:
+        - bearer: []
+      summary: Audit log (admin)
+      tags:
+        - Admin
+  /admin/upload:
+    post:
+      operationId: AdminController_uploadFile
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: File to upload (images, etc.)
+              required:
+                - file
+      responses:
+        '201':
+          description: File uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    description: Public URL to access the file
+                  objectName:
+                    type: string
+                    description: Object name in MinIO
+      security:
+        - bearer: []
+      summary: Upload file to MinIO (admin)
+      tags:
+        - Admin
+  /admin/jobs/run/booking-expiry:
+    post:
+      operationId: JobsController_runBookingExpiryJob
+      parameters: []
+      responses:
+        '200':
+          description: Booking expiry job completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  expired:
+                    type: number
+      security:
+        - bearer: []
+      summary: Manually run booking expiry job (admin only)
+      tags:
+        - Jobs
+  /admin/jobs/run/season-ticket-expiry:
+    post:
+      operationId: JobsController_runSeasonTicketExpiryJob
+      parameters: []
+      responses:
+        '200':
+          description: Season ticket expiry job completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  expired:
+                    type: number
+      security:
+        - bearer: []
+      summary: Manually run season ticket expiry job (admin only)
+      tags:
+        - Jobs
+  /images:
+    post:
+      operationId: ImagesController_uploadImages
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Image files (max 10 files, 10MB each)
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  description: Tags for categorization
+                  nullable: true
+              required:
+                - files
+      responses:
+        '201':
+          description: Images uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ImageDto'
+      security:
+        - bearer: []
+      summary: Upload images (admin)
+      tags:
+        - Images
+    get:
+      operationId: ImagesController_findAll
+      parameters:
+        - name: cursor
+          required: false
+          in: query
+          description: Cursor for pagination. Pass the value from the "next" field of the previous response.
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            minimum: 1
+            maximum: 200
+            default: 20
+            type: number
+        - name: q
+          required: false
+          in: query
+          description: Search by original name or object name
+          schema:
+            type: string
+        - name: mimetype
+          required: false
+          in: query
+          description: Filter by MIME type (e.g., image/jpeg)
+          schema:
+            type: string
+        - name: tags.any
+          required: false
+          in: query
+          description: Has any of these tags
+          schema:
+            type: array
+            items:
+              type: string
+        - name: tags.all
+          required: false
+          in: query
+          description: Has all of these tags
+          schema:
+            type: array
+            items:
+              type: string
+        - name: tags.none
+          required: false
+          in: query
+          description: Has none of these tags
+          schema:
+            type: array
+            items:
+              type: string
+        - name: minSize
+          required: false
+          in: query
+          description: Minimum file size in bytes
+          schema:
+            type: number
+        - name: maxSize
+          required: false
+          in: query
+          description: Maximum file size in bytes
+          schema:
+            type: number
+        - name: uploadedAfter
+          required: false
+          in: query
+          description: Return images uploaded AFTER this moment (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: uploadedBefore
+          required: false
+          in: query
+          description: Return images uploaded BEFORE this moment (RFC3339)
+          schema:
+            format: date-time
+            type: string
+        - name: uploadedByAdminId
+          required: false
+          in: query
+          description: Filter by uploader admin ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of images
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseDto'
+      summary: List images with filtering
+      tags:
+        - Images
+  /images/batch:
+    post:
+      operationId: ImagesController_batchUpload
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Image files (max 10 files, 10MB each)
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  description: Tags for categorization
+                  nullable: true
+              required:
+                - files
+      responses:
+        '201':
+          description: Images uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ImageDto'
+      security:
+        - bearer: []
+      summary: Batch upload images (admin, alias to POST /images)
+      tags:
+        - Images
+  /images/{id}:
+    get:
+      operationId: ImagesController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Image
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageDto'
+      summary: Get image by ID
+      tags:
+        - Images
+    patch:
+      operationId: ImagesController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImageUpdateDto'
+      responses:
+        '200':
+          description: Image updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageDto'
+      security:
+        - bearer: []
+      summary: Update image metadata (admin)
+      tags:
+        - Images
+    delete:
+      description: Deletes image from MinIO and database
+      operationId: ImagesController_delete
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Image successfully deleted
+      security:
+        - bearer: []
+      summary: Delete image (admin)
+      tags:
+        - Images
+  /images/batch/delete:
+    delete:
+      description: Deletes multiple images from MinIO and database
+      operationId: ImagesController_batchDelete
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchDeleteDto'
+      responses:
+        '204':
+          description: Images successfully deleted
+      security:
+        - bearer: []
+      summary: Batch delete images (admin)
+      tags:
+        - Images
+  /static/images/{objectName}:
+    get:
+      operationId: StaticController_serveImage
+      parameters:
+        - name: objectName
+          required: true
+          in: path
+          description: MinIO object name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Image file
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/gif:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Image not found
+      summary: Serve image file
+      tags:
+        - Static
+info:
+  title: Surf Booking Telegram Web App API
+  description: |-
+    API для сервиса бронирования и оплаты тренировок по (серфинг, скейтсерфинг, вейксерфинг)
+    и многодневных туров. Включает подарочные сертификаты, абонементы, лист ожидания,
+    кэшбэк-кошелёк и админ-аудит. Эта версия (v0.3.2) включает правки из аудита:
+      - унификация названий (tickets), статусов (CANCELLED)
+      - консистентная пагинация {items,next}
+      - идемпотентность через заголовок Idempotency-Key
+      - безопасные PATCH DTO, запрет userId в покупках за другого
+      - платежи/рефанды без дублирования валюты, oneOf для метода оплаты
+      - корректные схемы сертификатов (денежный vs passes)
+      - стандартизированные фильтры времени (startsAfter/endsBefore)
+
+          - добавлены эндпоинты: POST /events/{id}/sessions (bulk create, ADMIN), PATCH /sessions/{id} (ADMIN), DELETE /sessions/{id} (CANCELLED, ADMIN)
+      - добавлены эндпоинты для выполнения административных задач (job endpoints)
+  version: v0.3.2
+  contact: {}
+tags: []
+servers:
+  - url: https://urgently-intimate-tody.cloudpub.ru
+    description: Current Environment
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+  schemas:
+    TelegramLoginDto:
+      type: object
+      properties:
+        initData:
+          type: string
+          description: Telegram Web App initData
+      required:
+        - initData
+    ClientDto:
+      type: object
+      properties:
+        id:
+          type: string
+        telegramId:
+          type: string
+          description: Telegram user ID
+        telegramChatId:
+          type: object
+          nullable: true
+        username:
+          type: object
+          nullable: true
+        phone:
+          type: object
+          nullable: true
+        firstName:
+          type: object
+          nullable: true
+        lastName:
+          type: object
+          nullable: true
+        photoUrl:
+          type: object
+          nullable: true
+          description: URL of profile photo
+        dateOfBirth:
+          type: object
+          nullable: true
+          format: date-time
+          description: Date of birth
+        isActive:
+          type: boolean
+        personalDataConsent:
+          type: boolean
+          description: Consent for personal data processing
+        privacyPolicyConsent:
+          type: boolean
+          description: Consent for privacy policy
+        safetyRulesConsent:
+          type: boolean
+          description: Consent for safety rules
+        consentsAcceptedAt:
+          type: object
+          nullable: true
+          format: date-time
+          description: Timestamp when all required consents were accepted
+        isProfileComplete:
+          type: boolean
+          description: Indicates if the profile is complete (has phone, name, and all consents)
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - telegramId
+        - isActive
+        - personalDataConsent
+        - privacyPolicyConsent
+        - safetyRulesConsent
+        - isProfileComplete
+        - createdAt
+    ClientAuthResponseDto:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        client:
+          $ref: '#/components/schemas/ClientDto'
+      required:
+        - accessToken
+        - refreshToken
+        - client
+    ErrorDto:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - AMOUNT_MISMATCH
+            - DUPLICATE_PAYMENT
+            - HOLD_EXPIRED
+            - NO_SEATS
+            - PROVIDER_UNAVAILABLE
+            - INVALID_CREDENTIALS
+            - USER_EXISTS
+            - WEAK_PASSWORD
+            - INVALID_EMAIL
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          nullable: true
+          description: Доп. сведения об ошибке
+      required:
+        - code
+        - message
+    AdminLoginDto:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Email администратора
+          example: admin@example.com
+        password:
+          type: string
+          format: password
+          minLength: 6
+          description: Пароль администратора
+          example: AdminPassword123
+      required:
+        - email
+        - password
+    AdminDto:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: object
+          nullable: true
+        department:
+          type: object
+          nullable: true
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - email
+        - firstName
+        - lastName
+        - isActive
+        - createdAt
+    AdminAuthResponseDto:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        admin:
+          $ref: '#/components/schemas/AdminDto'
+      required:
+        - accessToken
+        - refreshToken
+        - admin
+    RefreshTokenDto:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+      required:
+        - refreshToken
+    RefreshTokenResponseDto:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+      required:
+        - accessToken
+        - refreshToken
+    MeResponseDto:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - CLIENT
+            - ADMIN
+        client:
+          $ref: '#/components/schemas/ClientDto'
+        admin:
+          $ref: '#/components/schemas/AdminDto'
+      required:
+        - type
+    PaginatedResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: string
+        next:
+          type: string
+          nullable: true
+      required:
+        - items
+    CompleteProfileDto:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: First name (required)
+          example: Иван
+        lastName:
+          type: string
+          description: Last name (required)
+          example: Иванов
+        phone:
+          type: string
+          description: Phone number (required)
+          example: '+79991234567'
+        personalDataConsent:
+          type: boolean
+          description: Consent for personal data processing (must be true)
+          example: true
+        privacyPolicyConsent:
+          type: boolean
+          description: Consent for privacy policy (must be true)
+          example: true
+        safetyRulesConsent:
+          type: boolean
+          description: Consent for safety rules (must be true)
+          example: true
+      required:
+        - firstName
+        - lastName
+        - phone
+        - personalDataConsent
+        - privacyPolicyConsent
+        - safetyRulesConsent
+    CreateAdminDto:
+      type: object
+      properties:
+        email:
+          type: string
+          example: admin@example.com
+        password:
+          type: string
+          minLength: 6
+          example: SecurePassword123
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        phone:
+          type: string
+        department:
+          type: string
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+    AdminUpdateDto:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: object
+          nullable: true
+        department:
+          type: object
+          nullable: true
+    ChangePasswordDto:
+      type: object
+      properties:
+        currentPassword:
+          type: string
+          minLength: 6
+        newPassword:
+          type: string
+          minLength: 6
+      required:
+        - currentPassword
+        - newPassword
+    Object:
+      type: object
+      properties: {}
+    EventDescriptionDto:
+      type: object
+      properties:
+        heading:
+          type: string
+        body:
+          type: string
+      required:
+        - heading
+        - body
+    PriceDto:
+      type: object
+      properties:
+        currency:
+          type: string
+          description: ISO-4217 currency code
+          example: KZT
+        amountMinor:
+          type: number
+          description: Amount in minor units (tiyn/cents)
+          example: 129900
+      required:
+        - currency
+        - amountMinor
+    TicketPriceDto:
+      type: object
+      properties:
+        price:
+          $ref: '#/components/schemas/PriceDto'
+        description:
+          type: object
+          nullable: true
+      required:
+        - price
+    EventTicketDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        prepayment:
+          $ref: '#/components/schemas/TicketPriceDto'
+        full:
+          $ref: '#/components/schemas/TicketPriceDto'
+      required:
+        - id
+        - name
+        - prepayment
+        - full
+    EventDto:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          nullable: true
+          type: array
+          items:
+            $ref: '#/components/schemas/EventDescriptionDto'
+        location:
+          type: object
+          nullable: true
+        capacity:
+          type: object
+          minimum: 0
+          nullable: true
+          description: Вместимость по умолчанию для сессий этого события. Может быть переопределена в конкретной сессии.
+        tickets:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventTicketDto'
+        createdAt:
+          type: string
+          format: date-time
+        labels:
+          description: Event labels
+          type: array
+          items:
+            type: string
+        attributes:
+          type: object
+          additionalProperties: true
+          description: Event attributes
+        images:
+          description: Array of image URLs
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - title
+        - tickets
+        - createdAt
+    SessionBulkDeleteDto:
+      type: object
+      properties:
+        ids:
+          minItems: 1
+          maxItems: 100
+          description: List of session IDs to delete
+          type: array
+          items:
+            type: string
+        force:
+          type: boolean
+          default: false
+          description: Force delete even when there are active bookings
+      required:
+        - ids
+    SessionDto:
+      type: object
+      properties:
+        id:
+          type: string
+        event:
+          $ref: '#/components/schemas/EventDto'
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: object
+          format: date-time
+          nullable: true
+        capacity:
+          type: object
+          minimum: 0
+          nullable: true
+          description: Вместимость сессии. Если не указана, используется capacity из события.
+        remainingSeats:
+          type: number
+          minimum: 0
+        hasBooking:
+          type: boolean
+          description: У текущего пользователя есть активная бронь
+        onWaitlist:
+          type: boolean
+          description: Текущий пользователь в листе ожидания
+        status:
+          type: string
+          enum:
+            - SCHEDULED
+            - CANCELLED
+        labels:
+          nullable: true
+          description: Session labels (override/extend event labels)
+          type: array
+          items:
+            type: string
+        attributes:
+          type: object
+          additionalProperties: true
+          description: Session attributes
+        effectiveLabels:
+          readOnly: true
+          description: Denormalized labels (Event ⊕ Session)
+          type: array
+          items:
+            type: string
+        effectiveAttributes:
+          type: object
+          readOnly: true
+          additionalProperties: true
+          description: Denormalized attributes (Event ⊕ Session)
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - event
+        - startsAt
+        - remainingSeats
+        - status
+        - createdAt
+    SessionUpdateDto:
+      type: object
+      properties:
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: object
+          format: date-time
+          nullable: true
+        capacity:
+          type: object
+          minimum: 0
+          nullable: true
+          description: Вместимость сессии. Если не указана, используется capacity из события.
+        labels:
+          description: Session labels
+          type: array
+          items:
+            type: string
+        attributes:
+          type: object
+          additionalProperties: true
+          description: Session attributes
+    GuestContactDto:
+      type: object
+      properties:
+        phone:
+          type: string
+          description: Guest phone number (required)
+          pattern: ^\+?[0-9]{7,15}$
+        firstName:
+          type: string
+          description: Guest first name
+          maxLength: 128
+        lastName:
+          type: string
+          description: Guest last name
+          maxLength: 128
+        email:
+          type: string
+          description: Guest email
+          format: email
+        note:
+          type: string
+          description: Additional notes about the guest
+          maxLength: 500
+      required:
+        - phone
+    CreateBookingDto:
+      type: object
+      properties:
+        quantity:
+          type: number
+          minimum: 1
+          description: Количество мест для бронирования
+        clientId:
+          type: object
+          nullable: true
+          description: >-
+            ID клиента для бронирования (только ADMIN). Если не указан и нет guestContact, бронирование создается как
+            гостевое.
+        guestContact:
+          nullable: true
+          description: >-
+            Контактные данные гостя без регистрации (только ADMIN). Используется для создания гостевых бронирований.
+            Нельзя использовать одновременно с clientId.
+          allOf:
+            - $ref: '#/components/schemas/GuestContactDto'
+        status:
+          type: string
+          enum:
+            - HOLD
+            - CONFIRMED
+          default: HOLD
+          description: >-
+            Начальный статус брони (только ADMIN). CONFIRMED используется для немедленного подтверждения при офлайн
+            оплате. Обычные пользователи всегда создают статус HOLD.
+        ticketId:
+          type: object
+          nullable: true
+          description: ID билета для расчета цены (только ADMIN)
+        notes:
+          type: object
+          nullable: true
+          maxLength: 1000
+          description: Внутренние заметки администратора (только ADMIN)
+      required:
+        - quantity
+    BookingHoldDto:
+      type: object
+      properties:
+        expiresAt:
+          type: string
+          format: date-time
+      required:
+        - expiresAt
+    BookingDto:
+      type: object
+      properties:
+        id:
+          type: string
+        sessionId:
+          type: string
+        clientId:
+          type: object
+          nullable: true
+          description: ID клиента. Может быть null для гостевых бронирований, созданных админом
+        quantity:
+          type: number
+          minimum: 1
+        status:
+          type: string
+          enum:
+            - HOLD
+            - CONFIRMED
+            - CANCELLED
+            - EXPIRED
+        hold:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BookingHoldDto'
+        totalPrice:
+          $ref: '#/components/schemas/PriceDto'
+        guestContact:
+          nullable: true
+          description: Контактные данные гостя для бронирований без регистрации (создается админом)
+          allOf:
+            - $ref: '#/components/schemas/GuestContactDto'
+        notes:
+          type: object
+          nullable: true
+          description: Заметки администратора о бронировании
+        createdAt:
+          type: string
+          format: date-time
+        createdByAdminId:
+          type: object
+          nullable: true
+          description: ID администратора, создавшего бронирование
+      required:
+        - id
+        - sessionId
+        - quantity
+        - status
+        - totalPrice
+        - createdAt
+    PaymentInfoDto:
+      type: object
+      properties:
+        method:
+          type: string
+          enum:
+            - card
+            - certificate
+            - pass
+            - cashback
+            - composite
+          description: Метод оплаты
+        paymentId:
+          type: object
+          nullable: true
+          description: ID платежа (если применимо)
+        certificateId:
+          type: object
+          nullable: true
+          description: ID использованного сертификата (если применимо)
+        seasonTicketId:
+          type: object
+          nullable: true
+          description: ID использованного абонемента (если применимо)
+      required:
+        - method
+    BookingExtendedDto:
+      type: object
+      properties:
+        id:
+          type: string
+        sessionId:
+          type: string
+        clientId:
+          type: object
+          nullable: true
+          description: ID клиента. Может быть null для гостевых бронирований, созданных админом
+        quantity:
+          type: number
+          minimum: 1
+        status:
+          type: string
+          enum:
+            - HOLD
+            - CONFIRMED
+            - CANCELLED
+            - EXPIRED
+        hold:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/BookingHoldDto'
+        totalPrice:
+          $ref: '#/components/schemas/PriceDto'
+        guestContact:
+          nullable: true
+          description: Контактные данные гостя для бронирований без регистрации (создается админом)
+          allOf:
+            - $ref: '#/components/schemas/GuestContactDto'
+        notes:
+          type: object
+          nullable: true
+          description: Заметки администратора о бронировании
+        createdAt:
+          type: string
+          format: date-time
+        createdByAdminId:
+          type: object
+          nullable: true
+          description: ID администратора, создавшего бронирование
+        client:
+          description: Информация о пользователе (доступно при запросе с правами ADMIN)
+          allOf:
+            - $ref: '#/components/schemas/ClientDto'
+        session:
+          description: Информация о сессии (включается при использовании параметра includeSession)
+          allOf:
+            - $ref: '#/components/schemas/SessionDto'
+        paymentInfo:
+          nullable: true
+          description: Информация об оплате (доступно при запросе с правами ADMIN)
+          allOf:
+            - $ref: '#/components/schemas/PaymentInfoDto'
+      required:
+        - id
+        - sessionId
+        - quantity
+        - status
+        - totalPrice
+        - createdAt
+    CreateBookingPaymentResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        bookingId:
+          type: string
+        amount:
+          $ref: '#/components/schemas/PriceDto'
+        status:
+          type: string
+          enum:
+            - PENDING
+            - SUCCEEDED
+            - FAILED
+            - CANCELLED
+        createdAt:
+          type: string
+          format: date-time
+        provider:
+          type: string
+          enum:
+            - telegram
+            - stripe
+            - yookassa
+            - cloudpayments
+            - other
+        providerPaymentId:
+          type: object
+          nullable: true
+        providerChargeId:
+          type: object
+          nullable: true
+        nextAction:
+          oneOf:
+            - $ref: '#/components/schemas/PaymentNextActionOpenInvoice'
+            - $ref: '#/components/schemas/PaymentNextActionRedirect'
+            - $ref: '#/components/schemas/PaymentNextActionNone'
+          discriminator:
+            propertyName: type
+            mapping:
+              openInvoice: '#/components/schemas/PaymentNextActionOpenInvoice'
+              redirect: '#/components/schemas/PaymentNextActionRedirect'
+              none: '#/components/schemas/PaymentNextActionNone'
+      required:
+        - id
+        - bookingId
+        - amount
+        - status
+        - createdAt
+        - provider
+        - nextAction
+    UpdateBookingDto:
+      type: object
+      properties:
+        quantity:
+          type: number
+          minimum: 1
+          description: Новое количество мест
+        guestContact:
+          description: Обновленные контактные данные гостя
+          allOf:
+            - $ref: '#/components/schemas/GuestContactDto'
+        notes:
+          type: string
+          maxLength: 1000
+          description: Обновленные заметки администратора
+    PaymentNextActionOpenInvoiceDto:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - openInvoice
+        slugOrUrl:
+          type: string
+      required:
+        - type
+        - slugOrUrl
+    PaymentNextActionRedirectDto:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - redirect
+        url:
+          type: string
+          format: uri
+      required:
+        - type
+        - url
+    PaymentNextActionNoneDto:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - none
+      required:
+        - type
+    PaymentDto:
+      type: object
+      properties:
+        id:
+          type: string
+        bookingId:
+          type: object
+          nullable: true
+          description: Null for standalone payments like season ticket purchases
+        amount:
+          $ref: '#/components/schemas/PriceDto'
+        status:
+          type: string
+          enum:
+            - PENDING
+            - SUCCEEDED
+            - FAILED
+            - CANCELLED
+        createdAt:
+          type: string
+          format: date-time
+        provider:
+          type: string
+          enum:
+            - telegram
+            - stripe
+            - yookassa
+            - cloudpayments
+            - other
+        providerPaymentId:
+          type: object
+          nullable: true
+        providerChargeId:
+          type: object
+          nullable: true
+        nextAction:
+          oneOf:
+            - $ref: '#/components/schemas/PaymentNextActionOpenInvoiceDto'
+            - $ref: '#/components/schemas/PaymentNextActionRedirectDto'
+            - $ref: '#/components/schemas/PaymentNextActionNoneDto'
+          discriminator:
+            propertyName: type
+            mapping:
+              openInvoice: '#/components/schemas/PaymentNextActionOpenInvoiceDto'
+              redirect: '#/components/schemas/PaymentNextActionRedirectDto'
+              none: '#/components/schemas/PaymentNextActionNoneDto'
+      required:
+        - id
+        - amount
+        - status
+        - createdAt
+        - provider
+        - nextAction
+    RefundDto:
+      type: object
+      properties:
+        id:
+          type: string
+        paymentId:
+          type: string
+        amount:
+          $ref: '#/components/schemas/PriceDto'
+        createdAt:
+          type: string
+      required:
+        - id
+        - paymentId
+        - amount
+        - createdAt
+    TelegramUserDto:
+      type: object
+      properties:
+        id:
+          type: number
+        is_bot:
+          type: boolean
+        first_name:
+          type: string
+        last_name:
+          type: string
+        username:
+          type: string
+        language_code:
+          type: string
+        is_premium:
+          type: boolean
+      required:
+        - id
+        - first_name
+    TelegramChatDto:
+      type: object
+      properties:
+        id:
+          type: number
+        type:
+          type: string
+        first_name:
+          type: string
+        username:
+          type: string
+      required:
+        - id
+    TelegramSuccessfulPaymentDto:
+      type: object
+      properties:
+        telegram_payment_charge_id:
+          type: string
+        provider_payment_charge_id:
+          type: string
+        invoice_payload:
+          type: string
+        shipping_option_id:
+          type: string
+        currency:
+          type: string
+        total_amount:
+          type: number
+      required:
+        - telegram_payment_charge_id
+        - provider_payment_charge_id
+        - invoice_payload
+        - currency
+        - total_amount
+    TelegramMessageDto:
+      type: object
+      properties:
+        message_id:
+          type: number
+        from:
+          $ref: '#/components/schemas/TelegramUserDto'
+        chat:
+          $ref: '#/components/schemas/TelegramChatDto'
+        date:
+          type: number
+        successful_payment:
+          $ref: '#/components/schemas/TelegramSuccessfulPaymentDto'
+      required:
+        - message_id
+        - from
+        - chat
+        - date
+    OrderInfoDto:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone_number:
+          type: string
+    TelegramPreCheckoutQueryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        from:
+          $ref: '#/components/schemas/TelegramUserDto'
+        currency:
+          type: string
+        total_amount:
+          type: number
+        invoice_payload:
+          type: string
+        shipping_option_id:
+          type: string
+        order_info:
+          $ref: '#/components/schemas/OrderInfoDto'
+      required:
+        - id
+        - from
+        - currency
+        - total_amount
+        - invoice_payload
+    TelegramWebhookDto:
+      type: object
+      properties:
+        update_id:
+          type: number
+        message:
+          $ref: '#/components/schemas/TelegramMessageDto'
+        pre_checkout_query:
+          $ref: '#/components/schemas/TelegramPreCheckoutQueryDto'
+      required:
+        - update_id
+    CertificateProductsResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/CertificateProductPassesDto'
+              - $ref: '#/components/schemas/CertificateProductDenominationDto'
+      required:
+        - items
+    PurchaseCertificateDto:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - passes
+            - denomination
+        amount:
+          description: Required for denomination type
+          allOf:
+            - $ref: '#/components/schemas/PriceDto'
+        paymentMethods:
+          oneOf:
+            - $ref: '#/components/schemas/PaymentMethodRequestDto'
+            - $ref: '#/components/schemas/CompositePaymentMethodRequestDto'
+      required:
+        - type
+        - paymentMethods
+    ClientBriefDto:
+      type: object
+      properties:
+        id:
+          type: string
+        firstName:
+          type: object
+        lastName:
+          type: object
+      required:
+        - id
+    CertificateDto:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+          description: Activation code - only visible to purchaser or admin
+        type:
+          type: string
+          enum:
+            - denomination
+            - passes
+        status:
+          type: string
+          enum:
+            - PENDING_ACTIVATION
+            - ACTIVATED
+            - EXPIRED
+        data:
+          oneOf:
+            - type: object
+              properties:
+                amount:
+                  $ref: '#/components/schemas/PriceDto'
+            - type: object
+              properties:
+                passes:
+                  type: integer
+        purchasedBy:
+          $ref: '#/components/schemas/ClientBriefDto'
+        activatedBy:
+          $ref: '#/components/schemas/ClientBriefDto'
+        activatedAt:
+          type: object
+          format: date-time
+        expiresAt:
+          type: object
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - status
+        - data
+        - createdAt
+    PurchaseCertificateResponseDto:
+      type: object
+      properties:
+        certificate:
+          $ref: '#/components/schemas/CertificateDto'
+        payment:
+          type: object
+      required:
+        - certificate
+        - payment
+    ActivateCertificateRequestDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Unique activation code
+      required:
+        - code
+    CertificateActivationResponseDto:
+      type: object
+      properties:
+        certificate:
+          $ref: '#/components/schemas/CertificateDto'
+        result:
+          oneOf:
+            - $ref: '#/components/schemas/CertificateActivationResultSeasonTicketDto'
+            - $ref: '#/components/schemas/CertificateActivationResultCashbackDto'
+      required:
+        - certificate
+        - result
+    ListCertificatesResponseDto:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CertificateDto'
+        next:
+          type: object
+          description: Cursor for pagination
+      required:
+        - items
+    CheckCertificateResponseDto:
+      type: object
+      properties:
+        code:
+          type: string
+        type:
+          type: string
+          enum:
+            - denomination
+            - passes
+        data:
+          oneOf:
+            - type: object
+              properties:
+                amount:
+                  $ref: '#/components/schemas/PriceDto'
+            - type: object
+              properties:
+                passes:
+                  type: integer
+        status:
+          type: string
+          enum:
+            - PENDING_ACTIVATION
+            - ACTIVATED
+            - EXPIRED
+        expiresAt:
+          type: object
+          format: date-time
+        canActivate:
+          type: boolean
+          description: Whether current user can activate this certificate
+        reason:
+          type: string
+          description: Reason why cannot activate (if canActivate is false)
+      required:
+        - code
+        - type
+        - data
+        - status
+        - canActivate
+    CashbackHistoryItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+            - EARN
+            - REDEEM
+            - ADJUST
+        amount:
+          $ref: '#/components/schemas/PriceDto'
+        createdAt:
+          type: string
+          format: date-time
+        note:
+          type: object
+          nullable: true
+      required:
+        - id
+        - type
+        - amount
+        - createdAt
+    CashbackWalletDto:
+      type: object
+      properties:
+        balance:
+          $ref: '#/components/schemas/PriceDto'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/CashbackHistoryItemDto'
+      required:
+        - balance
+    CashbackEarnRateDto:
+      type: object
+      properties:
+        product:
+          type: string
+          enum:
+            - single
+            - certificate
+            - seasonTicket
+        rate:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Earn rate (0.05 = 5%)
+      required:
+        - product
+        - rate
+    CashbackRulesDto:
+      type: object
+      properties:
+        earnRates:
+          type: array
+          items:
+            $ref: '#/components/schemas/CashbackEarnRateDto'
+        maxRedeemRate:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Maximum portion of payment that can be covered by cashback
+      required:
+        - earnRates
+        - maxRedeemRate
+    CashbackSettingsDto:
+      type: object
+      properties:
+        id:
+          type: string
+        product:
+          type: string
+          enum:
+            - single
+            - certificate
+            - seasonTicket
+        rate:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Cashback rate (0.05 = 5%)
+        maxRedeemRate:
+          type: object
+          nullable: true
+          minimum: 0
+          maximum: 1
+          description: Maximum redeem rate (only for one product)
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - product
+        - rate
+        - createdAt
+        - updatedAt
+    UpdateCashbackSettingsDto:
+      type: object
+      properties:
+        rate:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Cashback rate (0.05 = 5%)
+        maxRedeemRate:
+          type: object
+          nullable: true
+          minimum: 0
+          maximum: 1
+          description: Maximum redeem rate (only for single product)
+      required:
+        - rate
+    EventFilterLabelsDto:
+      type: object
+      properties:
+        any:
+          description: Match ANY of these labels (OR)
+          type: array
+          items:
+            type: string
+        all:
+          description: Match ALL of these labels (AND)
+          type: array
+          items:
+            type: string
+        none:
+          description: Exclude events with any of these labels (NOT)
+          type: array
+          items:
+            type: string
+    EventFilterAttributesDto:
+      type: object
+      properties:
+        eq:
+          type: object
+          description: Equality filters for attributes
+        in:
+          type: object
+          description: In-set filters for attributes
+        gte:
+          type: object
+          description: Greater-than-or-equal filters for numeric attributes
+        lte:
+          type: object
+          description: Less-than-or-equal filters for numeric attributes
+        bool:
+          type: object
+          description: Boolean filters for attributes
+        exists:
+          type: object
+          description: Check existence of attribute keys
+    EventFilterDto:
+      type: object
+      properties:
+        labels:
+          $ref: '#/components/schemas/EventFilterLabelsDto'
+        attributes:
+          $ref: '#/components/schemas/EventFilterAttributesDto'
+    CreateSeasonTicketPlanDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        passes:
+          type: number
+          minimum: 1
+        price:
+          $ref: '#/components/schemas/PriceDto'
+        expiresIn:
+          type: number
+          description: Days until expiration
+          minimum: 1
+        matchMode:
+          type: string
+          enum:
+            - IDS_ONLY
+            - FILTER_ONLY
+            - ANY
+            - ALL
+          default: ALL
+          description: Mode for matching events
+        eventIds:
+          nullable: true
+          description: Explicit list of event IDs (optional)
+          type: array
+          items:
+            type: string
+        eventFilter:
+          nullable: true
+          description: Flexible event matching filters (optional)
+          allOf:
+            - $ref: '#/components/schemas/EventFilterDto'
+      required:
+        - name
+        - passes
+        - price
+        - expiresIn
+    SeasonTicketPlanDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        passes:
+          type: number
+        price:
+          $ref: '#/components/schemas/PriceDto'
+        expiresIn:
+          type: number
+          description: Days until expiration
+        matchMode:
+          type: string
+          enum:
+            - IDS_ONLY
+            - FILTER_ONLY
+            - ANY
+            - ALL
+          default: ALL
+        eventIds:
+          nullable: true
+          type: array
+          items:
+            type: string
+        eventFilter:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/EventFilterDto'
+      required:
+        - id
+        - name
+        - passes
+        - price
+        - expiresIn
+        - matchMode
+    UpdateSeasonTicketPlanDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        passes:
+          type: number
+          minimum: 1
+        price:
+          $ref: '#/components/schemas/PriceDto'
+        expiresIn:
+          type: number
+          description: Days until expiration
+          minimum: 1
+        matchMode:
+          type: string
+          enum:
+            - IDS_ONLY
+            - FILTER_ONLY
+            - ANY
+            - ALL
+          description: Mode for matching events
+        eventIds:
+          nullable: true
+          description: Explicit list of event IDs (optional)
+          type: array
+          items:
+            type: string
+        eventFilter:
+          nullable: true
+          description: Flexible event matching filters (optional)
+          allOf:
+            - $ref: '#/components/schemas/EventFilterDto'
+    SeasonTicketDto:
+      type: object
+      properties:
+        id:
+          type: string
+        plan:
+          $ref: '#/components/schemas/SeasonTicketPlanDto'
+        clientId:
+          type: string
+        paymentId:
+          type: string
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - EXPIRED
+            - CANCELLED
+        remainingPasses:
+          type: number
+        validUntil:
+          type: string
+          format: date-time
+          description: Expiration date of the season ticket
+      required:
+        - id
+        - plan
+        - clientId
+        - status
+        - remainingPasses
+        - validUntil
+    JoinWaitlistDto:
+      type: object
+      properties:
+        idempotencyKey:
+          type: string
+    WaitlistEntryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        sessionId:
+          type: string
+        clientId:
+          type: string
+        position:
+          type: number
+          minimum: 1
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - sessionId
+        - clientId
+        - createdAt
+    ImageUploaderDto:
+      type: object
+      properties:
+        id:
+          type: string
+        firstName:
+          type: object
+          nullable: true
+        lastName:
+          type: object
+          nullable: true
+      required:
+        - id
+    ImageDto:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+          description: Public URL to access the image (computed from objectName, not stored in DB)
+        objectName:
+          type: string
+          description: MinIO object name (source of truth for URL generation)
+        originalName:
+          type: string
+          description: Original filename
+        mimetype:
+          type: string
+          description: MIME type (e.g., image/jpeg)
+        size:
+          type: number
+          description: File size in bytes
+        tags:
+          description: Tags for categorization
+          type: array
+          items:
+            type: string
+        uploader:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/ImageUploaderDto'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - url
+        - objectName
+        - originalName
+        - mimetype
+        - size
+        - tags
+        - createdAt
+        - updatedAt
+    ImageUpdateDto:
+      type: object
+      properties:
+        tags:
+          description: Tags for categorization
+          type: array
+          items:
+            type: string
+    BatchDeleteDto:
+      type: object
+      properties:
+        ids:
+          description: Array of image IDs to delete
+          type: array
+          items:
+            type: string
+      required:
+        - ids

@@ -14,7 +14,9 @@ interface EventFormContextValue {
   setFormData: (data: FormData) => void;
 
   // Form handlers
-  handleInputChange: (field: keyof FormData, value: string) => void;
+  handleInputChange: (field: keyof FormData, value: string | File[]) => void;
+  handleImageAdd: (files: File[]) => void;
+  handleImageRemove: (index: number) => void;
   handleSessionChange: (sessionId: string, field: keyof Omit<SessionForm, 'timeSlots'>, value: string | number) => void;
   handleTimeSlotChange: (sessionId: string, timeSlotId: string, field: keyof TimeSlot, value: string) => void;
   addTimeSlot: (sessionId: string) => void;
@@ -84,6 +86,8 @@ export function EventFormProvider({
     setSelectedSessionId,
     setFormData,
     handleInputChange,
+    handleImageAdd,
+    handleImageRemove,
     handleSessionChange,
     handleTimeSlotChange,
     addTimeSlot,
@@ -131,6 +135,8 @@ export function EventFormProvider({
 
     // Form handlers
     handleInputChange: handleInputChangeWithClearError,
+    handleImageAdd,
+    handleImageRemove,
     handleSessionChange,
     handleTimeSlotChange,
     addTimeSlot,

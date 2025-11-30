@@ -77,7 +77,7 @@ export class ValidationError extends Error {
 // Create axios instance
 const createApiClient = (): AxiosInstance => {
   const client = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+    baseURL: import.meta.env.MODE === 'development' ? '/api' : (import.meta.env.VITE_API_URL || 'http://localhost:3000'),
     timeout: 30000,
     headers: {
       'Content-Type': 'application/json',
@@ -267,7 +267,7 @@ export const validateResponse = <T>(
 
 // Environment configuration
 export const config = {
-  apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  apiUrl: import.meta.env.MODE === 'development' ? '/api' : (import.meta.env.VITE_API_URL || 'http://localhost:3000'),
   isDevelopment: import.meta.env.MODE === 'development',
   isProduction: import.meta.env.MODE === 'production',
 } as const;

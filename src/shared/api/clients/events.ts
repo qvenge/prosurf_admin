@@ -36,8 +36,41 @@ export const eventsClient = {
    */
   async createEvent(data: EventCreateDto): Promise<Event> {
     const validatedData = EventCreateDtoSchema.parse(data);
-    
-    const response = await apiClient.post('/events', validatedData);
+
+    // Construct FormData for multipart/form-data
+    const formData = new FormData();
+
+    // Add plain fields
+    formData.append('title', validatedData.title);
+    if (validatedData.location) formData.append('location', validatedData.location);
+    if (validatedData.capacity !== undefined && validatedData.capacity !== null) {
+      formData.append('capacity', validatedData.capacity.toString());
+    }
+
+    // Add complex fields as JSON strings
+    if (validatedData.description) {
+      formData.append('description', JSON.stringify(validatedData.description));
+    }
+    formData.append('tickets', JSON.stringify(validatedData.tickets));
+    if (validatedData.labels) {
+      formData.append('labels', JSON.stringify(validatedData.labels));
+    }
+    if (validatedData.attributes) {
+      formData.append('attributes', JSON.stringify(validatedData.attributes));
+    }
+
+    // Add image files
+    if (validatedData.images && validatedData.images.length > 0) {
+      validatedData.images.forEach((file) => {
+        formData.append('images', file);
+      });
+    }
+
+    const response = await apiClient.post('/events', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return validateResponse(response.data, EventSchema);
   },
 
@@ -57,9 +90,47 @@ export const eventsClient = {
   async updateEvent(id: string, data: EventUpdateDto): Promise<Event> {
     const validatedData = EventUpdateDtoSchema.parse(data);
 
+    // Construct FormData for multipart/form-data
+    const formData = new FormData();
+
+    // Add plain fields (only if provided)
+    if (validatedData.title) formData.append('title', validatedData.title);
+    if (validatedData.location !== undefined) {
+      formData.append('location', validatedData.location || '');
+    }
+    if (validatedData.capacity !== undefined && validatedData.capacity !== null) {
+      formData.append('capacity', validatedData.capacity.toString());
+    }
+
+    // Add complex fields as JSON strings (only if provided)
+    if (validatedData.description !== undefined) {
+      formData.append('description', JSON.stringify(validatedData.description));
+    }
+    if (validatedData.tickets) {
+      formData.append('tickets', JSON.stringify(validatedData.tickets));
+    }
+    if (validatedData.labels) {
+      formData.append('labels', JSON.stringify(validatedData.labels));
+    }
+    if (validatedData.attributes) {
+      formData.append('attributes', JSON.stringify(validatedData.attributes));
+    }
+
+    // Add image files
+    if (validatedData.images && validatedData.images.length > 0) {
+      validatedData.images.forEach((file) => {
+        formData.append('images', file);
+      });
+    }
+
     const response = await apiClient.patch(
       `/events/${encodeURIComponent(id)}`,
-      validatedData
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
     );
     return validateResponse(response.data, EventSchema);
   },

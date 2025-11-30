@@ -21,7 +21,7 @@ function EventFormContent() {
   }
 
   return (
-    <div className={styles.root}>
+    <form className={styles.root}>
       <div className={styles.info}>
         <EventFormMainInfo />
         <EventFormSessions />
@@ -29,7 +29,7 @@ function EventFormContent() {
         <EventFormDescription />
       </div>
       <EventFormActions />
-    </div>
+    </form>
   );
 }
 
