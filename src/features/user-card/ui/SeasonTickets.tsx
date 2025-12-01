@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import type { Client } from '@/shared/api';
-import { useClientSeasonTickets, useCancelSeasonTicket } from '@/shared/api';
-import { TextButton, Loader } from '@/shared/ui';
-import { GrantSeasonTicketModal } from './GrantSeasonTicketModal';
-import { SeasonTicketCard } from './SeasonTicketCard';
+import { useClientSeasonTickets, useCancelSeasonTicket, useSeasonTicketPlans, useGrantSeasonTicket } from '@/shared/api';
+import { Dropdown, Loader, Icon, IconButton } from '@/shared/ui';
+import { PlusBold, CaretDownBold, TrashRegular } from '@/shared/ds/icons';
 import styles from './SeasonTickets.module.scss';
 
 export interface SeasonTicketsProps {
@@ -11,14 +10,29 @@ export interface SeasonTicketsProps {
 }
 
 export function SeasonTickets({ client }: SeasonTicketsProps) {
-  const [isGrantModalOpen, setGrantModalOpen] = useState(false);
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownToggleRef = useRef<HTMLButtonElement>(null);
+
   const { data: ticketsData, isLoading, error } = useClientSeasonTickets(client.id);
+  const { data: plansData, isLoading: plansLoading } = useSeasonTicketPlans();
   const { mutate: cancelTicket, isPending: isCancelling } = useCancelSeasonTicket();
+  const { mutate: grantTicket, isPending: isGranting } = useGrantSeasonTicket();
 
   const handleCancel = (ticketId: string) => {
     if (confirm('Вы уверены, что хотите отменить этот абонемент?')) {
       cancelTicket(ticketId);
     }
+  };
+
+  const handleGrant = (planId: string) => {
+    grantTicket(
+      { clientId: client.id, data: { planId } },
+      {
+        onSuccess: () => {
+          setDropdownOpen(false);
+        },
+      }
+    );
   };
 
   if (isLoading) {
@@ -34,40 +48,101 @@ export function SeasonTickets({ client }: SeasonTicketsProps) {
   }
 
   const ticketsList = ticketsData?.items ?? [];
+  const activeTickets = ticketsList.filter((t) => t.status === 'ACTIVE');
+  const plans = plansData?.items ?? [];
+  const hasTickets = activeTickets.length > 0;
 
   return (
     <div className={styles.root}>
-      <div className={styles.header}>
-        <h3 className={styles.title}>Абонементы</h3>
-        <TextButton
-          type="primary"
-          size="s"
-          onClick={() => setGrantModalOpen(true)}
-        >
-          + Добавить
-        </TextButton>
-      </div>
+      {hasTickets ? (
+        <>
+          <div className={styles.ticketsList}>
+            {activeTickets.map((ticket) => (
+              <div key={ticket.id} className={styles.ticketRow}>
+                <div className={styles.ticketField}>
+                  <span className={styles.ticketName}>{ticket.plan.name}</span>
+                </div>
+                <IconButton
+                  type="secondary"
+                  size="l"
+                  src={TrashRegular}
+                  onClick={() => handleCancel(ticket.id)}
+                  disabled={isCancelling}
+                />
+              </div>
+            ))}
+          </div>
 
-      {ticketsList.length === 0 ? (
-        <div className={styles.empty}>Нет абонементов</div>
+          <div className={styles.addButtonWrapper}>
+            <button
+              ref={dropdownToggleRef}
+              type="button"
+              className={styles.addButton}
+              onClick={() => setDropdownOpen(!isDropdownOpen)}
+              disabled={plansLoading || isGranting}
+            >
+              <Icon src={PlusBold} width={20} height={20} />
+              <span>Добавить еще</span>
+              <Icon src={CaretDownBold} width={16} height={16} />
+            </button>
+
+            <Dropdown
+              className={styles.dropdown}
+              isOpen={isDropdownOpen}
+              onClose={() => setDropdownOpen(false)}
+              togglerRef={dropdownToggleRef}
+            >
+              {plans.map((plan) => (
+                <button
+                  key={plan.id}
+                  type="button"
+                  className={styles.dropdownItem}
+                  onClick={() => handleGrant(plan.id)}
+                  disabled={isGranting}
+                >
+                  {plan.name}
+                </button>
+              ))}
+            </Dropdown>
+          </div>
+        </>
       ) : (
-        <div className={styles.list}>
-          {ticketsList.map((ticket) => (
-            <SeasonTicketCard
-              key={ticket.id}
-              ticket={ticket}
-              onCancel={() => handleCancel(ticket.id)}
-              isCancelling={isCancelling}
-            />
-          ))}
-        </div>
-      )}
+        <>
+          <p className={styles.emptyTitle}>Нет абонемента</p>
 
-      {isGrantModalOpen && (
-        <GrantSeasonTicketModal
-          client={client}
-          onClose={() => setGrantModalOpen(false)}
-        />
+          <div className={styles.addButtonWrapper}>
+            <button
+              ref={dropdownToggleRef}
+              type="button"
+              className={styles.addButtonPressed}
+              onClick={() => setDropdownOpen(!isDropdownOpen)}
+              disabled={plansLoading || isGranting}
+            >
+              <Icon src={PlusBold} width={20} height={20} />
+              <span>Добавить</span>
+              <Icon src={CaretDownBold} width={16} height={16} />
+            </button>
+
+            <Dropdown
+              className={styles.dropdown}
+              isOpen={isDropdownOpen}
+              onClose={() => setDropdownOpen(false)}
+              togglerRef={dropdownToggleRef}
+            >
+              {plans.map((plan) => (
+                <button
+                  key={plan.id}
+                  type="button"
+                  className={styles.dropdownItem}
+                  onClick={() => handleGrant(plan.id)}
+                  disabled={isGranting}
+                >
+                  {plan.name}
+                </button>
+              ))}
+            </Dropdown>
+          </div>
+        </>
       )}
     </div>
   );

@@ -100,6 +100,9 @@ export type BonusTransactionType = z.infer<typeof schemas.BonusTransactionTypeSc
 export type BonusTransaction = z.infer<typeof schemas.BonusTransactionSchema>;
 export type BonusWallet = z.infer<typeof schemas.BonusWalletSchema>;
 export type BonusRules = z.infer<typeof schemas.BonusRulesSchema>;
+export type BonusOperationStatus = z.infer<typeof schemas.BonusOperationStatusSchema>;
+export type BonusOperationDto = z.infer<typeof schemas.BonusOperationDtoSchema>;
+export type AdminAdjustBonusDto = z.infer<typeof schemas.AdminAdjustBonusDtoSchema>;
 
 // Waitlist types
 export type WaitlistEntry = z.infer<typeof schemas.WaitlistEntrySchema>;

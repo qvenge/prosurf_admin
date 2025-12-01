@@ -41,7 +41,7 @@
   color: ds.color('text/primary');
 }
 
-.focus .inputWrapper {
+.root:not(.disabled):not(.readOnly):not(.error).focus .inputWrapper {
   border: 1px solid ds.color('border/accent');
 }
 
@@ -97,7 +97,6 @@
   }
 }
 
-.readOnly,
 .disabled {
   & .label {
     color: ds.color('text/secondary'); 

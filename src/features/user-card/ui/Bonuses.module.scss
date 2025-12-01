@@ -1,0 +1,18 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  height: 100%;
+  gap: 16px;
+}
+
+.heading {
+  @include ds.typo('body/b3/semibold');
+  color: ds.color('text/primary');
+  margin: 0;
+  padding: 0;
+}
+
+.content {
+  flex-grow: 1;
+}

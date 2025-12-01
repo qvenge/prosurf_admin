@@ -1,11 +1,14 @@
 import { apiClient, validateResponse } from '../config';
 import {
   BonusRulesSchema,
-  BonusWalletSchema
+  BonusWalletSchema,
+  BonusOperationDtoSchema,
 } from '../schemas';
 import type {
   BonusRules,
-  BonusWallet
+  BonusWallet,
+  AdminAdjustBonusDto,
+  BonusOperationDto,
 } from '../types';
 
 /**
@@ -28,6 +31,15 @@ export const bonusClient = {
   async getMyClientBonus(): Promise<BonusWallet> {
     const response = await apiClient.get('/clients/me/bonus');
     return validateResponse(response.data, BonusWalletSchema);
+  },
+
+  /**
+   * Adjust client's bonus (admin only) - can be positive or negative
+   * POST /bonus/adjust
+   */
+  async adjustBonus(dto: AdminAdjustBonusDto): Promise<BonusOperationDto> {
+    const response = await apiClient.post('/bonus/adjust', dto);
+    return validateResponse(response.data, BonusOperationDtoSchema);
   },
 
   // Note: User bonus wallet is also accessed through usersClient.getUserBonus()

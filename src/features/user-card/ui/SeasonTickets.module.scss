@@ -1,33 +1,138 @@
 .root {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 20px;
+  gap: ds.number('paddings & gaps/XL');
+  width: 100%;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.title {
-  @include ds.typo('body/b2/semibold');
+.emptyTitle {
+  @include ds.typo('body/b2/medium');
   color: ds.color('text/primary');
+  text-align: center;
   margin: 0;
 }
 
-.list {
+.ticketsList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: ds.number('paddings & gaps/XL');
 }
 
-.empty {
-  @include ds.typo('body/b4/medium');
-  color: ds.color('text/secondary');
-  text-align: center;
-  padding: 40px 20px;
+.ticketRow {
+  display: flex;
+  gap: ds.number('paddings & gaps/XXS');
+  align-items: center;
+}
+
+.ticketField {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 ds.number('paddings & gaps/S');
+  border: 1px solid ds.color('border/primary');
+  border-radius: ds.number('radius/M');
+}
+
+.ticketName {
+  @include ds.typo('body/b3/regular');
+  color: ds.color('text/primary');
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.addButtonWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.addButton {
+  @include utils.button-reset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: ds.number('paddings & gaps/XXS');
+  width: 100%;
+  padding: ds.number('paddings & gaps/XS') ds.number('paddings & gaps/M');
+  background: ds.color('background/button-tertiary/default');
+  border-radius: ds.number('radius/M');
+  @include ds.typo('body/b3/medium');
+  color: ds.color('text/primary');
+
+  &:hover {
+    background: ds.color('background/button-tertiary/hover');
+  }
+
+  &:active {
+    background: ds.color('background/button-tertiary/pressed');
+  }
+
+  &:disabled {
+    background: ds.color('background/button-tertiary/disabled');
+    color: ds.color('text/secondary');
+  }
+}
+
+.addButtonPressed {
+  @include utils.button-reset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: ds.number('paddings & gaps/XXS');
+  width: 100%;
+  padding: ds.number('paddings & gaps/XS') ds.number('paddings & gaps/M');
+  background: ds.color('background/button-tertiary/pressed');
+  border-radius: ds.number('radius/M');
+  @include ds.typo('body/b3/medium');
+  color: ds.color('text/primary');
+
+  &:hover {
+    background: ds.color('background/button-tertiary/hover');
+  }
+
+  &:active {
+    background: ds.color('background/button-tertiary/pressed');
+  }
+
+  &:disabled {
+    background: ds.color('background/button-tertiary/disabled');
+    color: ds.color('text/secondary');
+  }
+}
+
+.dropdown {
+  top: calc(100% + ds.number('paddings & gaps/XXS'));
+  left: 0;
+  right: 0;
+  background: ds.color('background/primary');
+  border-radius: ds.number('radius/M');
+  box-shadow: 0 0 20px 2px rgba(25, 31, 46, 0.2);
+  padding: ds.number('paddings & gaps/XXS');
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/3XS');
+  z-index: 10;
+}
+
+.dropdownItem {
+  @include utils.button-reset;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 ds.number('paddings & gaps/XXS');
+  border-radius: ds.number('radius/S');
+  @include ds.typo('body/b3/regular');
+  color: ds.color('text/primary');
+  text-align: left;
+
+  &:hover {
+    background: ds.color('background/secondary');
+  }
+
+  &:disabled {
+    color: ds.color('text/secondary');
+  }
 }
 
 .loading {

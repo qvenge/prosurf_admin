@@ -9,7 +9,7 @@ import {
   ListBulletsFill,
 
   UsersFill,
-  UserRegular,
+  UsersRegular,
 
   GearSixRegular,
   GearSixFill,
@@ -18,23 +18,16 @@ import {
 
 export const navItems = [
   {
-    id: 'calendar',
-    title: 'Календарь',
-    iconDefault: CalendarBlankRegular,
-    iconActive: CalendarBlankFill,
-    path: '/'
-  },
-  {
     id: 'sessions',
     title: 'Сеансы',
-    iconDefault: ListChecksRegular,
-    iconActive: ListChecksFill,
+    iconDefault: CalendarBlankRegular,
+    iconActive: CalendarBlankFill,
     path: '/sessions'
   },
   {
     id: 'users',
     title: 'Пользователи',
-    iconDefault: UserRegular,
+    iconDefault: UsersRegular,
     iconActive: UsersFill,
     path: '/users'
   },

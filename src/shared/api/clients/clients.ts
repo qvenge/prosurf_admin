@@ -80,13 +80,13 @@ export const clientsClient = {
 
   /**
    * Get client's bonus wallet (ADMIN only)
-   * GET /clients/{id}/bonus
+   * GET /users/{id}/bonus
    *
-   * @param id - Client's telegramId
+   * @param id - Client's UUID (not telegramId)
    */
   async getClientBonus(id: string): Promise<BonusWallet> {
     const response = await apiClient.get(
-      `/clients/${encodeURIComponent(id)}/bonus`
+      `/users/${encodeURIComponent(id)}/bonus`
     );
     return validateResponse(response.data, BonusWalletSchema);
   },

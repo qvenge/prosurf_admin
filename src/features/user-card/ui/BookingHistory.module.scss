@@ -1,0 +1,106 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/M');
+  width: 100%;
+}
+
+.card {
+  display: flex;
+  gap: ds.number('paddings & gaps/XS');
+  align-items: flex-start;
+  padding-bottom: ds.number('paddings & gaps/S');
+  border-bottom: 1px solid ds.color('border/primary');
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/XS');
+  min-width: 0;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: ds.number('paddings & gaps/XXS');
+  padding: ds.number('paddings & gaps/3XS') ds.number('paddings & gaps/XS') ds.number('paddings & gaps/3XS') ds.number('paddings & gaps/XXS');
+  background: ds.color('background/secondary');
+  border-radius: ds.number('radius/round');
+}
+
+.badgeLabel {
+  @include ds.typo('body/b4/semibold');
+  color: ds.color('text/primary');
+  white-space: nowrap;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/4XS');
+}
+
+.title {
+  @include ds.typo('body/b3/medium');
+  color: ds.color('text/primary');
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.location {
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/secondary');
+}
+
+.dateSection {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/4XS');
+  text-align: right;
+  flex-shrink: 0;
+  width: 128px;
+}
+
+.date {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/primary');
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.time {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/secondary');
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.paymentLabel {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/success');
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.error {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/error/primary');
+  text-align: center;
+  padding: 20px;
+}
+
+.empty {
+  @include ds.typo('body/b3/medium');
+  color: ds.color('text/secondary');
+  text-align: center;
+  padding: 20px;
+}

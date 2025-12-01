@@ -523,6 +523,24 @@ export const BonusRulesSchema = z.object({
   maxRedeemRate: z.number().min(0).max(1),
 });
 
+export const BonusOperationStatusSchema = z.enum(['PENDING', 'POSTED', 'CANCELLED']);
+
+export const BonusOperationDtoSchema = z.object({
+  id: z.string(),
+  clientId: z.string(),
+  type: BonusTransactionTypeSchema,
+  amount: z.number().int(),
+  status: BonusOperationStatusSchema,
+  createdAt: z.string().datetime(),
+  note: z.string().nullable().optional(),
+});
+
+export const AdminAdjustBonusDtoSchema = z.object({
+  clientId: z.string(),
+  amount: z.number(), // Positive to add, negative to subtract
+  note: z.string().optional(),
+});
+
 // Waitlist schemas
 export const WaitlistEntrySchema = z.object({
   id: z.string(),

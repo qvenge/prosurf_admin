@@ -1,0 +1,53 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  width: 100%;
+}
+
+.avatarSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: ds.number('paddings & gaps/M');
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatarPlaceholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: ds.color('background/secondary');
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ds.color('text/secondary');
+  @include ds.typo('body/b3/medium');
+}
+
+.deletePhotoButton {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/error/primary');
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+
+  &:hover {
+    color: ds.color('text/error/secondary');
+  }
+}
+
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/S');
+  width: 100%;
+}
