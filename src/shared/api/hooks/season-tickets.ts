@@ -147,3 +147,17 @@ export const useSeasonTicketsByClient = (clientId: string | null) => {
  * @deprecated Use useSeasonTicketsByClient instead
  */
 export const useCurrentUserSeasonTickets = () => useSeasonTicketsByClient(null);
+
+// Cancel season ticket
+export const useCancelSeasonTicket = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (ticketId: string) => seasonTicketsClient.cancelSeasonTicket(ticketId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: seasonTicketsKeys.tickets() });
+      // Also invalidate client-specific queries
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+    },
+  });
+};

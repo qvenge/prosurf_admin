@@ -4,6 +4,7 @@ import { Icon, SegmentedButtons } from '@/shared/ui';
 import { UserBold, TicketBold, WalletBold, GiftBold, ClockCounterClockwiseBold } from '@/shared/ds/icons';
 import styles from './UserCard.module.scss';
 import { Profile } from './Profile';
+import { SeasonTickets } from './SeasonTickets';
 
 export interface UserCardProps {
   client: Client;
@@ -29,6 +30,7 @@ export function UserCard({ client }: UserCardProps) {
         onChange={setSelectedTab}
       />
       {selectedTab === 'profile' && <Profile client={client} />}
+      {selectedTab === 'season-tickets' && <SeasonTickets client={client} />}
     </div>
   );
 }

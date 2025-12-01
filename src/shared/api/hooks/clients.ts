@@ -5,7 +5,9 @@ import type {
   ClientUpdateDto,
   ClientFilters,
   PaginatedResponse,
+  AdminGrantSeasonTicketDto,
 } from '../types';
+import { seasonTicketsKeys } from './season-tickets';
 
 // Query key factory for clients
 export const clientsKeys = {
@@ -15,7 +17,7 @@ export const clientsKeys = {
   details: () => [...clientsKeys.all, 'detail'] as const,
   detail: (id: string) => [...clientsKeys.details(), id] as const,
   seasonTickets: (id: string) => [...clientsKeys.detail(id), 'season-tickets'] as const,
-  cashback: (id: string) => [...clientsKeys.detail(id), 'cashback'] as const,
+  bonus: (id: string) => [...clientsKeys.detail(id), 'bonus'] as const,
 } as const;
 
 /**
@@ -80,11 +82,30 @@ export const useClientSeasonTickets = (clientId: string) => {
   });
 };
 
-// Get client's cashback wallet (ADMIN only)
-export const useClientCashback = (clientId: string) => {
+// Get client's bonus wallet (ADMIN only)
+export const useClientBonus = (clientId: string) => {
   return useQuery({
-    queryKey: clientsKeys.cashback(clientId),
-    queryFn: () => clientsClient.getClientCashback(clientId),
+    queryKey: clientsKeys.bonus(clientId),
+    queryFn: () => clientsClient.getClientBonus(clientId),
     staleTime: 1 * 60 * 1000, // 1 minute (financial data should be fresh)
+  });
+};
+
+// Grant season ticket to client (ADMIN only)
+export const useGrantSeasonTicket = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ clientId, data }: { clientId: string; data: AdminGrantSeasonTicketDto }) =>
+      clientsClient.grantSeasonTicket(clientId, data),
+    onSuccess: (_, variables) => {
+      // Invalidate client's season tickets
+      queryClient.invalidateQueries({ queryKey: clientsKeys.seasonTickets(variables.clientId) });
+      // Also invalidate the general season tickets list
+      queryClient.invalidateQueries({ queryKey: seasonTicketsKeys.tickets() });
+    },
+    onError: (error) => {
+      console.error('Failed to grant season ticket:', error);
+    },
   });
 };

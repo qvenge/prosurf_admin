@@ -5,7 +5,8 @@ import {
   ClientFiltersSchema,
   PaginatedResponseSchema,
   SeasonTicketSchema,
-  CashbackWalletSchema,
+  BonusWalletSchema,
+  AdminGrantSeasonTicketDtoSchema,
 } from '../schemas';
 import type {
   Client,
@@ -13,7 +14,8 @@ import type {
   ClientFilters,
   PaginatedResponse,
   SeasonTicket,
-  CashbackWallet,
+  BonusWallet,
+  AdminGrantSeasonTicketDto,
 } from '../types';
 
 /**
@@ -77,15 +79,32 @@ export const clientsClient = {
   },
 
   /**
-   * Get client's cashback wallet (ADMIN only)
-   * GET /clients/{id}/cashback
+   * Get client's bonus wallet (ADMIN only)
+   * GET /clients/{id}/bonus
    *
    * @param id - Client's telegramId
    */
-  async getClientCashback(id: string): Promise<CashbackWallet> {
+  async getClientBonus(id: string): Promise<BonusWallet> {
     const response = await apiClient.get(
-      `/clients/${encodeURIComponent(id)}/cashback`
+      `/clients/${encodeURIComponent(id)}/bonus`
     );
-    return validateResponse(response.data, CashbackWalletSchema);
+    return validateResponse(response.data, BonusWalletSchema);
+  },
+
+  /**
+   * Grant season ticket to client (ADMIN only)
+   * POST /clients/{id}/season-tickets
+   *
+   * @param id - Client's telegramId
+   * @param data - Grant data with planId and optional expiresIn
+   */
+  async grantSeasonTicket(id: string, data: AdminGrantSeasonTicketDto): Promise<SeasonTicket> {
+    const validatedData = AdminGrantSeasonTicketDtoSchema.parse(data);
+
+    const response = await apiClient.post(
+      `/clients/${encodeURIComponent(id)}/season-tickets`,
+      validatedData
+    );
+    return validateResponse(response.data, SeasonTicketSchema);
   },
 };

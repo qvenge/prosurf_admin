@@ -1,0 +1,68 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: ds.color('background/secondary');
+  border-radius: ds.number('radius/M');
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.planName {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/primary');
+}
+
+.status {
+  @include ds.typo('body/b5/regular');
+  padding: 4px 8px;
+  border-radius: ds.number('radius/S');
+}
+
+.statusACTIVE {
+  background: ds.color('background/success');
+  color: ds.color('text/success');
+}
+
+.statusEXPIRED {
+  background: ds.color('background/warning');
+  color: ds.color('text/warning');
+}
+
+.statusCANCELLED {
+  background: ds.color('background/error');
+  color: ds.color('text/error/primary');
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail {
+  display: flex;
+  justify-content: space-between;
+}
+
+.label {
+  @include ds.typo('body/b5/regular');
+  color: ds.color('text/secondary');
+}
+
+.value {
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/primary');
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
+  border-top: 1px solid ds.color('border/primary');
+}

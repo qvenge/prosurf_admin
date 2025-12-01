@@ -24,7 +24,7 @@ export { bookingsClient } from './clients/bookings';
 export { paymentsClient } from './clients/payments';
 export { certificatesClient } from './clients/certificates';
 export { seasonTicketsClient } from './clients/season-tickets';
-export { cashbackClient } from './clients/cashback';
+export { bonusClient } from './clients/bonus';
 export { waitlistClient } from './clients/waitlist';
 export { adminClient } from './clients/admin';
 export { webhooksClient } from './clients/webhooks';
@@ -53,8 +53,8 @@ export * from './hooks/certificates';
 // Hooks - Season Tickets
 export * from './hooks/season-tickets';
 
-// Hooks - Cashback
-export * from './hooks/cashback';
+// Hooks - Bonus
+export * from './hooks/bonus';
 
 // Hooks - Waitlist
 export * from './hooks/waitlist';
@@ -74,7 +74,7 @@ export { bookingsKeys } from './hooks/bookings';
 export { paymentsKeys } from './hooks/payments';
 export { certificatesKeys } from './hooks/certificates';
 export { seasonTicketsKeys } from './hooks/season-tickets';
-export { cashbackKeys } from './hooks/cashback';
+export { bonusKeys } from './hooks/bonus';
 export { waitlistKeys } from './hooks/waitlist';
 export { adminKeys } from './hooks/admin';
 

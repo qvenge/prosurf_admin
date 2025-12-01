@@ -51,8 +51,8 @@ export function SessionDetails({ sessionId }: SessionDetailsProps) {
           return 'Сертификат';
         case 'pass':
           return 'Абонемент';
-        case 'cashback':
-          return 'Кэшбэк';
+        case 'bonus':
+          return 'Бонусы';
         case 'composite':
           return 'Комбинированный';
         default:

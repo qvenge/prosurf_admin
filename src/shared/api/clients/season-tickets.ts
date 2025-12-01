@@ -142,8 +142,17 @@ export const seasonTicketsClient = {
   async getSeasonTickets(filters?: SeasonTicketFilters): Promise<PaginatedResponse<SeasonTicket>> {
     const validatedFilters = SeasonTicketFiltersSchema.parse(filters || {});
     const queryString = createQueryString(validatedFilters);
-    
+
     const response = await apiClient.get(`/season-tickets${queryString}`);
     return validateResponse(response.data, PaginatedResponseSchema(SeasonTicketSchema));
+  },
+
+  /**
+   * Cancel season ticket (proportional refund)
+   * POST /season-tickets/{id}/cancel
+   */
+  async cancelSeasonTicket(id: string): Promise<SeasonTicket> {
+    const response = await apiClient.post(`/season-tickets/${encodeURIComponent(id)}/cancel`);
+    return validateResponse(response.data, SeasonTicketSchema);
   },
 };

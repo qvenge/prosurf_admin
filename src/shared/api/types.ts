@@ -60,7 +60,7 @@ export type Payment = z.infer<typeof schemas.PaymentSchema>;
 export type CardPaymentMethod = z.infer<typeof schemas.CardPaymentMethodSchema>;
 export type CertificatePaymentMethod = z.infer<typeof schemas.CertificatePaymentMethodSchema>;
 export type SeasonTicketPaymentMethod = z.infer<typeof schemas.SeasonTicketPaymentMethodSchema>;
-export type CashbackPaymentMethod = z.infer<typeof schemas.CashbackPaymentMethodSchema>;
+export type BonusPaymentMethod = z.infer<typeof schemas.BonusPaymentMethodSchema>;
 export type PaymentMethodRequest = z.infer<typeof schemas.PaymentMethodRequestSchema>;
 // Simplified: PaymentRequest is always an array of payment methods
 export type PaymentRequest = z.infer<typeof schemas.PaymentRequestSchema>;
@@ -93,12 +93,13 @@ export type SeasonTicketPlanCreateDto = z.infer<typeof schemas.SeasonTicketPlanC
 export type SeasonTicketPlanUpdateDto = z.infer<typeof schemas.SeasonTicketPlanUpdateDtoSchema>;
 export type SeasonTicketStatus = z.infer<typeof schemas.SeasonTicketStatusSchema>;
 export type SeasonTicket = z.infer<typeof schemas.SeasonTicketSchema>;
+export type AdminGrantSeasonTicketDto = z.infer<typeof schemas.AdminGrantSeasonTicketDtoSchema>;
 
-// Cashback types
-export type CashbackTransactionType = z.infer<typeof schemas.CashbackTransactionTypeSchema>;
-export type CashbackTransaction = z.infer<typeof schemas.CashbackTransactionSchema>;
-export type CashbackWallet = z.infer<typeof schemas.CashbackWalletSchema>;
-export type CashbackRules = z.infer<typeof schemas.CashbackRulesSchema>;
+// Bonus types
+export type BonusTransactionType = z.infer<typeof schemas.BonusTransactionTypeSchema>;
+export type BonusTransaction = z.infer<typeof schemas.BonusTransactionSchema>;
+export type BonusWallet = z.infer<typeof schemas.BonusWalletSchema>;
+export type BonusRules = z.infer<typeof schemas.BonusRulesSchema>;
 
 // Waitlist types
 export type WaitlistEntry = z.infer<typeof schemas.WaitlistEntrySchema>;

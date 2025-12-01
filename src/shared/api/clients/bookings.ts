@@ -184,7 +184,7 @@ export const bookingsClient = {
    * POST /bookings/{id}/payment
    *
    * Initiates payment for a booking that is in HOLD status.
-   * Supports multiple payment methods including card, certificate, season ticket pass, and cashback.
+   * Supports multiple payment methods including card, certificate, season ticket pass, and bonus.
    *
    * @param bookingId - The ID of the booking to pay for
    * @param data - Payment methods to use

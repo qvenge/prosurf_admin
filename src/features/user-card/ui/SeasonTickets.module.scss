@@ -1,0 +1,44 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  @include ds.typo('body/b2/semibold');
+  color: ds.color('text/primary');
+  margin: 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/secondary');
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.error {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/error/primary');
+  text-align: center;
+  padding: 20px;
+}

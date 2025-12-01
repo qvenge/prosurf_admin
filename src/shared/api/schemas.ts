@@ -51,6 +51,7 @@ export const UserUpdateDtoSchema = z.object({
 // Client schema - matches server ClientDto (Telegram users)
 // Note: Defined early because it's used in BookingExtendedSchema
 export const ClientSchema = z.object({
+  id: z.string(),
   telegramId: z.string(),
   telegramChatId: z.string().nullable().optional(),
   username: z.string().nullable().optional(),
@@ -255,7 +256,7 @@ export const BookingExtendedSchema = BookingSchema.extend({
   session: z.lazy(() => SessionSchema).optional(),
   paymentInfo: z.union([
     z.object({
-      method: z.enum(['card', 'certificate', 'pass', 'cashback', 'composite']),
+      method: z.enum(['card', 'certificate', 'pass', 'bonus', 'composite']),
       paymentId: z.string().nullable().optional(),
       certificateId: z.string().nullable().optional(),
       seasonTicketId: z.string().nullable().optional(),
@@ -332,16 +333,16 @@ export const SeasonTicketPaymentMethodSchema = z.object({
   passesToSpend: z.number().int().min(1),
 });
 
-export const CashbackPaymentMethodSchema = z.object({
-  method: z.literal('cashback'),
-  amount: PriceSchema,
+export const BonusPaymentMethodSchema = z.object({
+  method: z.literal('bonus'),
+  amount: z.number().int(),
 });
 
 export const PaymentMethodRequestSchema = z.discriminatedUnion('method', [
   CardPaymentMethodSchema,
   CertificatePaymentMethodSchema,
   SeasonTicketPaymentMethodSchema,
-  CashbackPaymentMethodSchema,
+  BonusPaymentMethodSchema,
 ]);
 
 // Simplified: paymentMethods is always an array (single or multiple methods)
@@ -493,23 +494,28 @@ export const SeasonTicketSchema = z.object({
   paymentId: z.string().nullable().optional(),
 });
 
-// Cashback schemas
-export const CashbackTransactionTypeSchema = z.enum(['EARN', 'REDEEM', 'ADJUST']);
+export const AdminGrantSeasonTicketDtoSchema = z.object({
+  planId: z.string(),
+  expiresIn: z.number().int().min(1).optional(),
+});
 
-export const CashbackTransactionSchema = z.object({
+// Bonus schemas
+export const BonusTransactionTypeSchema = z.enum(['EARN', 'REDEEM', 'ADJUST']);
+
+export const BonusTransactionSchema = z.object({
   id: z.string(),
-  type: CashbackTransactionTypeSchema,
-  amount: PriceSchema,
+  type: BonusTransactionTypeSchema,
+  amount: z.number().int(),
   createdAt: z.string().datetime(),
   note: z.string().nullable().optional(),
 });
 
-export const CashbackWalletSchema = z.object({
-  balance: PriceSchema,
-  history: z.array(CashbackTransactionSchema).optional(),
+export const BonusWalletSchema = z.object({
+  balance: z.number().int(),
+  history: z.array(BonusTransactionSchema).optional(),
 });
 
-export const CashbackRulesSchema = z.object({
+export const BonusRulesSchema = z.object({
   earnRates: z.array(z.object({
     product: z.enum(['single', 'certificate', 'seasonTicket']),
     rate: z.number().min(0).max(1),

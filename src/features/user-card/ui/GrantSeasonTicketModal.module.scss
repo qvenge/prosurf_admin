@@ -1,0 +1,51 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+}
+
+.title {
+  @include ds.typo('body/b2/semibold');
+  color: ds.color('text/primary');
+  margin: 0;
+}
+
+.description {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/secondary');
+  margin: 0;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.planDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: ds.color('background/secondary');
+  border-radius: ds.number('radius/M');
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/secondary');
+}
+
+.error {
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/error/primary');
+  padding: 12px;
+  background: ds.color('background/error');
+  border-radius: ds.number('radius/S');
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 20px;
+  margin-top: auto;
+}
