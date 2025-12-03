@@ -21,3 +21,4 @@ export { SupportButton } from './support-button';
 export { SegmentedButtons, type SegmentedButtonsProps } from './segmented-buttons';
 export { AlternativeTabs, type AlternativeTabsProps } from './alternative-tabs';
 export * from './icon-button';
+export { ClientSearchInput, type ClientSearchInputProps } from './client-search-input';

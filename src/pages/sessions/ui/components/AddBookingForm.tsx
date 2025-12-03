@@ -1,7 +1,7 @@
-import { useActionState } from 'react';
-import { Button, TextButton, TextInput, Icon } from '@/shared/ui';
+import { useActionState, useState, useEffect } from 'react';
+import { Button, TextButton, TextInput, Icon, ClientSearchInput } from '@/shared/ui';
 import { CaretLeftBold } from '@/shared/ds/icons';
-import { useBookSession, type BookingCreateDto, type GuestContact, isApiError, getErrorMessage } from '@/shared/api';
+import { useBookSession, type BookingCreateDto, type GuestContact, type Client, isApiError, getErrorMessage } from '@/shared/api';
 import { generateIdempotencyKey, formatPhoneNumber } from '@/shared/lib/string';
 import styles from './SessionDetails.module.scss';
 
@@ -26,8 +26,44 @@ export interface AddBookingFormProps {
 export function AddBookingForm({ sessionId, onBack, onSuccess }: AddBookingFormProps) {
   const bookSession = useBookSession();
 
+  // State for client selection
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [phoneValue, setPhoneValue] = useState('');
+
+  // State for form fields (controlled when client is selected)
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+
+  // Update form fields when client is selected
+  useEffect(() => {
+    if (selectedClient) {
+      setFirstName(selectedClient.firstName || '');
+      setLastName(selectedClient.lastName || '');
+    }
+  }, [selectedClient]);
+
   const handleSubmit = async (_state: FormState, data: FormData) => {
     try {
+      // If a client is selected, use clientId
+      if (selectedClient) {
+        const bookingData: BookingCreateDto = {
+          quantity: 1,
+          clientId: selectedClient.id,
+          status: 'CONFIRMED', // Admin booking
+        };
+
+        await bookSession.mutateAsync({
+          sessionId,
+          data: bookingData,
+          idempotencyKey: generateIdempotencyKey()
+        });
+
+        onSuccess?.();
+        onBack();
+        return { message: 'Бронирование успешно создано' };
+      }
+
+      // Otherwise use guestContact (manual entry)
       const rawPhone = data.get('phone') as string;
       const formattedPhone = formatPhoneNumber(rawPhone);
 
@@ -91,6 +127,16 @@ export function AddBookingForm({ sessionId, onBack, onSuccess }: AddBookingFormP
 
   const [state, action, pending] = useActionState(handleSubmit, undefined);
 
+  // Handler for clearing client selection
+  const handleSelectClient = (client: Client | null) => {
+    setSelectedClient(client);
+    if (!client) {
+      // Clear form fields when client is deselected
+      setFirstName('');
+      setLastName('');
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -109,16 +155,19 @@ export function AddBookingForm({ sessionId, onBack, onSuccess }: AddBookingFormP
             {state.message}
           </div>
         )}
-        <TextInput
-          type="tel"
-          name="phone"
+
+        <ClientSearchInput
           label="Телефон"
           placeholder="+7 (900) 123-45-67"
+          phoneValue={phoneValue}
+          onPhoneChange={setPhoneValue}
+          selectedClient={selectedClient}
+          onSelectClient={handleSelectClient}
           error={Boolean(state?.errors?.phone)}
           hint={state?.errors?.phone?.[0]}
           disabled={pending}
-          required
         />
+
         <TextInput
           type="email"
           name="email"
@@ -127,27 +176,31 @@ export function AddBookingForm({ sessionId, onBack, onSuccess }: AddBookingFormP
           error={Boolean(state?.errors?.email)}
           hint={state?.errors?.email?.[0]}
           disabled={pending}
-          required
+          required={!selectedClient}
         />
         <TextInput
           type="text"
           name="firstName"
           label="Имя"
-          placeholder="Ввдите имя"
+          placeholder="Введите имя"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
           error={Boolean(state?.errors?.firstName)}
           hint={state?.errors?.firstName?.[0]}
-          disabled={pending}
-          required
+          disabled={pending || Boolean(selectedClient)}
+          required={!selectedClient}
         />
         <TextInput
           type="text"
           name="lastName"
           label="Фамилия"
           placeholder="Введите фамилию"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
           error={Boolean(state?.errors?.lastName)}
           hint={state?.errors?.lastName?.[0]}
-          disabled={pending}
-          required
+          disabled={pending || Boolean(selectedClient)}
+          required={!selectedClient}
         />
       </form>
       <Button type="primary" size='l' htmlType='submit' form="addBookingForm" disabled={pending || bookSession.isPending} loading={pending || bookSession.isPending}>

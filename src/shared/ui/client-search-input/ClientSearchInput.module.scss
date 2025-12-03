@@ -1,0 +1,92 @@
+.root {
+  position: relative;
+  width: 100%;
+}
+
+.clearButton {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: ds.color('background/secondary');
+  border-radius: 50%;
+  color: ds.color('text/secondary');
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: ds.color('background/tertiary');
+    color: ds.color('text/primary');
+  }
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  margin-top: ds.number('paddings & gaps/XXS');
+  padding: ds.number('paddings & gaps/3XS');
+  background: ds.color('background/primary');
+  border-radius: ds.number('radius/M');
+  box-shadow: ds.effect('Shadow/L');
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.loading {
+  padding: ds.number('paddings & gaps/M');
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty {
+  padding: ds.number('paddings & gaps/M');
+  text-align: center;
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/secondary');
+}
+
+.clientList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.clientItem {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: ds.number('paddings & gaps/4XS');
+  padding: ds.number('paddings & gaps/XS');
+  border: none;
+  background: transparent;
+  border-radius: ds.number('radius/S');
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    background: ds.color('background/secondary');
+  }
+}
+
+.clientName {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/primary');
+}
+
+.clientPhone {
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/secondary');
+}
+
+.clientEmail {
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/secondary');
+}

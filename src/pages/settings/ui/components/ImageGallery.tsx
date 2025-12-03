@@ -1,4 +1,4 @@
-import { Icon, Skeleton, SkeletonItem, UploadImageInput } from '@/shared/ui';
+import { Icon, Skeleton, UploadImageInput } from '@/shared/ui';
 import { CameraRegular, XBold } from '@/shared/ds/icons';
 import { useImages, useUploadImages, useDeleteImage } from '@/shared/api';
 import styles from './ImageGallery.module.scss';
@@ -41,10 +41,10 @@ export function ImageGallery({ title, tags }: ImageGalleryProps) {
       </p>
       <div className={styles.gallery}>
         {isLoading ? (
-          <Skeleton>
-            <SkeletonItem className={styles.skeletonImage} />
-            <SkeletonItem className={styles.skeletonImage} />
-          </Skeleton>
+          <>
+            <Skeleton className={styles.skeletonImage} />
+            <Skeleton className={styles.skeletonImage} />
+          </>
         ) : (
           <>
             {images.map((image) => (
