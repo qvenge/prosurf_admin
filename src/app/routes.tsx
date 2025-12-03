@@ -5,8 +5,6 @@ import { RootLayout } from '@/widgets/root-layout';
 import { CalendarPage } from '@/pages/calendar';
 import { LoginPage } from '@/pages/login';
 import { SessionsPage } from '@/pages/sessions';
-import { TrainingsPage } from '@/pages/trainings';
-import { ToursAndActivityPage } from '@/pages/tours-and-activity';
 import { UsersPage } from '@/pages/users';
 import { SettingsPage } from '@/pages/settings';
 import { TemplatesPage } from '@/pages/templates';
@@ -34,14 +32,6 @@ export const router = createBrowserRouter([
           {
             path: 'users',
             Component: UsersPage
-          },
-          {
-            path: 'trainings',
-            Component: TrainingsPage
-          },
-          {
-            path: 'events',
-            Component: ToursAndActivityPage
           },
           {
             path: 'templates',
