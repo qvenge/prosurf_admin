@@ -1,0 +1,143 @@
+.calendar {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/M');
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.monthTitle {
+  @include ds.typo('header/h4/bold');
+  color: ds.color('text/primary');
+  margin: 0;
+}
+
+.navigation {
+  display: flex;
+  gap: ds.number('paddings & gaps/XXS');
+}
+
+.grid {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid ds.color('border/primary');
+  border-radius: ds.number('radius/M');
+  overflow: hidden;
+}
+
+.weekdayRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.weekdayCell {
+  @include ds.typo('body/b4/semibold');
+  color: ds.color('text/secondary');
+  padding: ds.number('paddings & gaps/XS');
+  background: ds.color('background/primary');
+  border: 1px solid ds.color('border/primary');
+  border-top: none;
+
+  &:first-child {
+    border-left: none;
+  }
+
+  &:last-child {
+    border-right: none;
+  }
+}
+
+.weekdayCellWeekend {
+  color: ds.color('text/error/primary');
+}
+
+.weekRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.dayCell {
+  display: flex;
+  flex-direction: column;
+  min-height: 160px;
+  padding: ds.number('paddings & gaps/XS');
+  background: ds.color('background/primary');
+  border: 1px solid ds.color('border/primary');
+  border-top: none;
+  overflow: hidden;
+
+  &:first-child {
+    border-left: none;
+  }
+
+  &:last-child {
+    border-right: none;
+  }
+}
+
+.dayCellOutside {
+  background: ds.color('background/secondary');
+}
+
+.dayNumber {
+  @include ds.typo('body/b2/semibold');
+  color: ds.color('text/primary');
+}
+
+.dayNumberOutside {
+  color: ds.color('text/secondary');
+}
+
+.badges {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/3XS');
+  margin-top: ds.number('paddings & gaps/XS');
+  min-width: 0;
+}
+
+.badge {
+  @include ds.typo('body/b4/semibold');
+  display: block;
+  padding: ds.number('paddings & gaps/3XS') ds.number('paddings & gaps/XXS');
+  background: ds.color('background/secondary');
+  color: ds.color('text/primary');
+  border: none;
+  border-radius: ds.number('radius/round');
+  cursor: pointer;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.badgeOutside {
+  background: ds.color('background/primary');
+  color: ds.color('text/secondary');
+}
+
+.badgeAccent {
+  background: ds.color('background/accent');
+  color: ds.color('text/primary');
+}
+
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.8);
+  @include ds.typo('body/b3/medium');
+  color: ds.color('text/secondary');
+}

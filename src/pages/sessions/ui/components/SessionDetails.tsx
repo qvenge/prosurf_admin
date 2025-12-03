@@ -1,11 +1,16 @@
 import { useState } from 'react';
 import styles from './SessionDetails.module.scss';
 import { Button, Icon } from '@/shared/ui';
-import { useSession, useBookings, type BookingExtended } from '@/shared/api';
+import {
+  useSession,
+  useBookings,
+  type BookingExtended
+} from '@/shared/api';
 import { formatDate, formatTime } from '@/shared/lib/format-utils';
 
-import { AddBookingForm } from './AddBookingForm'
-import { TrashRegular, UserRegular } from '@/shared/ds/icons';
+import { AddBookingForm } from './AddBookingForm';
+import { BookingDetails } from './BookingDetails';
+import { UserRegular, CaretRightBold } from '@/shared/ds/icons';
 
 export interface SessionDetailsProps {
   sessionId: string;
@@ -21,13 +26,17 @@ export function SessionDetails({ sessionId }: SessionDetailsProps) {
     limit: 100
   });
   const [isAddBookingOpen, setIsAddBookingOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<BookingExtended | null>(null);
+
+  // Фильтруем EXPIRED бронирования - они не нужны в списке
+  const activeBookings = bookingsData?.items.filter(b => b.status !== 'EXPIRED') ?? [];
 
   const getClientName = (booking: BookingExtended) => {
-    if (booking.client?.firstName || booking.client?.lastName) {
-      return `${booking.client.firstName || ''} ${booking.client.lastName || ''}`.trim();
+    if (booking.user?.firstName || booking.user?.lastName) {
+      return `${booking.user.firstName || ''} ${booking.user.lastName || ''}`.trim();
     }
-    if (booking.client?.username) {
-      return `@${booking.client.username}`;
+    if (booking.user?.username) {
+      return `@${booking.user.username}`;
     }
     if (booking.guestContact?.firstName || booking.guestContact?.lastName) {
       return `${booking.guestContact.firstName || ''} ${booking.guestContact.lastName || ''}`.trim();
@@ -38,32 +47,62 @@ export function SessionDetails({ sessionId }: SessionDetailsProps) {
     return 'Неизвестно';
   };
 
-  const getPaymentMethodText = (booking: BookingExtended) => {
-    const paymentInfo = booking.paymentInfo;
+  const getPaymentStatusText = (booking: BookingExtended) => {
+    // HOLD = оплата ещё не завершена
+    if (booking.status === 'HOLD') {
+      return 'Ожидает оплаты';
+    }
 
-    // Check if paymentInfo is an object with method property (not an array)
+    // EXPIRED = оплата не была произведена вовремя
+    if (booking.status === 'EXPIRED') {
+      return 'Не оплачено';
+    }
+
+    // CANCELLED = отменено
+    if (booking.status === 'CANCELLED') {
+      return '';
+    }
+
+    // CONFIRMED - смотрим на isPaid и paymentInfo
+    if (!booking.isPaid) {
+      return 'Не оплачено';
+    }
+
+    const paymentInfo = booking.paymentInfo;
     if (paymentInfo && typeof paymentInfo === 'object' && !Array.isArray(paymentInfo) && 'method' in paymentInfo) {
-      const method = paymentInfo.method;
-      switch (method) {
-        case 'card':
-          return 'Карта';
-        case 'certificate':
-          return 'Сертификат';
-        case 'pass':
-          return 'Абонемент';
-        case 'bonus':
-          return 'Бонусы';
-        case 'composite':
-          return 'Комбинированный';
-        default:
-          return 'Не оплачено';
+      if (paymentInfo.method === 'pass') {
+        return 'Абонемент';
       }
     }
 
-    return 'Не оплачено';
+    return 'Оплачено';
+  };
+
+  const getBookingStatusText = (status: string) => {
+    switch (status) {
+      case 'HOLD':
+        return 'Ожидание';
+      case 'CONFIRMED':
+        return 'Подтверждено';
+      case 'CANCELLED':
+        return 'Отменено';
+      case 'EXPIRED':
+        return 'Истекло';
+      default:
+        return status;
+    }
   };
 
   if (!data) return null;
+
+  if (selectedBooking) {
+    return (
+      <BookingDetails
+        booking={selectedBooking}
+        onBack={() => setSelectedBooking(null)}
+      />
+    );
+  }
 
   if (isAddBookingOpen) {
     return (
@@ -106,14 +145,18 @@ export function SessionDetails({ sessionId }: SessionDetailsProps) {
         <div className={styles.bookingsList}>
           {bookingsLoading && <div>Загрузка записей...</div>}
           {bookingsError && <div>Ошибка загрузки записей</div>}
-          {bookingsData?.items.length === 0 && <div>Нет записей</div>}
-          {bookingsData?.items.length && bookingsData.items.map((booking) => (
-            <div key={booking.id} className={styles.booking}>
+          {!bookingsLoading && !bookingsError && activeBookings.length === 0 && <div>Нет записей</div>}
+          {activeBookings.map((booking) => (
+            <div
+              key={booking.id}
+              className={styles.bookingClickable}
+              onClick={() => setSelectedBooking(booking)}
+            >
               <div className={styles.bookingUserAvatarWrapper}>
-                {booking.client?.photoUrl ? (
+                {booking.user?.photoUrl ? (
                   <img
                     className={styles.bookingUserAvatar}
-                    src={booking.client.photoUrl}
+                    src={booking.user.photoUrl}
                     alt="Avatar"
                   />
                 ) : (
@@ -122,9 +165,29 @@ export function SessionDetails({ sessionId }: SessionDetailsProps) {
               </div>
               <div className={styles.bookingInfo}>
                 <div className={styles.bookingUserName}>{getClientName(booking)}</div>
-                <div className={styles.bookingPaymentMethod}>{getPaymentMethodText(booking)}</div>
+                <div className={styles.bookingMeta}>
+                  <span className={styles.bookingStatus} data-status={booking.status}>
+                    {getBookingStatusText(booking.status)}
+                  </span>
+                  {booking.status !== 'CANCELLED' && (
+                    <>
+                      <span className={styles.bookingMetaSeparator}>•</span>
+                      <span
+                        className={styles.bookingPayment}
+                        data-status={booking.status === 'CONFIRMED' && booking.isPaid ? 'paid' : 'unpaid'}
+                      >
+                        {getPaymentStatusText(booking)}
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
-              <Icon className={styles.bookingCancelBtn} src={TrashRegular} width={20} height={20} />
+              <Icon
+                className={styles.bookingChevron}
+                src={CaretRightBold}
+                width={20}
+                height={20}
+              />
             </div>
           ))}
         </div>

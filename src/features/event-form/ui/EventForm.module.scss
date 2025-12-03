@@ -94,79 +94,76 @@
 .photosSection {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: ds.number('paddings & gaps/S');
 }
 
 .photoHint {
-  font-size: 14px;
-  color: var(--text-secondary, #666);
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/secondary');
   margin: 0;
 }
 
+.photoHintLabel {
+  color: ds.color('text/primary');
+}
+
 .photoGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 12px;
-  max-width: 480px;
-}
-
-.photoUpload {
-  aspect-ratio: 1;
-  min-height: 80px;
-}
-
-.uploadPlaceholder {
   display: flex;
-  width: 100%;
-  height: 100%;
-  justify-content: center;
-  align-items: center;
-  aspect-ratio: 1/1;
-  border-radius: 50%;
-  border: 1px solid ds.color('border/primary');
-  color: ds.color('graphic/secondary');
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: ds.color('background/secondary');
-  }
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.imagePreview {
+.photoItem {
   position: relative;
-  width: 100%;
-  height: 100%;
-  aspect-ratio: 1/1;
-  border-radius: 50%;
+  width: 140px;
+  height: 96px;
+  border-radius: ds.number('radius/M');
   overflow: hidden;
-  border: 1px solid ds.color('border/primary');
-  cursor: pointer;
 }
 
-.imagePreviewImg {
+.photoImage {
   width: 100%;
   height: 100%;
-  display: block;
   object-fit: cover;
-  aspect-ratio: 1/1;
 }
 
-.imageRemove {
+.photoRemove {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  padding: 4px;
-  background: ds.color('background/primary');
-  border-radius: 50%;
-  box-shadow: ds.effect('Shadow/M');
-  color: ds.color('graphic/secondary');
+  top: 6px;
+  right: 6px;
+  padding: 2px;
+  background: ds.color('overlay/primary');
+  border-radius: ds.number('radius/round');
+  color: ds.color('graphic/accent');
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.photoAdd {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 140px;
+  height: 96px;
+  background: ds.color('background/secondary');
+  border-radius: ds.number('radius/M');
+  color: ds.color('text/accent');
+  cursor: pointer;
   transition: background-color 0.2s;
 
   &:hover {
-    background: ds.color('background/secondary');
-    color: ds.color('text/error/primary');
+    background: ds.color('background/tertiary');
   }
+}
+
+.photoAddText {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/accent');
 }
 
 .actions {

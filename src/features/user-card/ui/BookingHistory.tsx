@@ -1,7 +1,7 @@
 import type { Client, BookingExtended } from '@/shared/api';
 import { useBookings } from '@/shared/api';
 import { Icon, Loader } from '@/shared/ui';
-import { BarbellFill, ConfettiFill } from '@/shared/ds/icons';
+import { BarbellBold, ConfettiBold } from '@/shared/ds/icons';
 import { AirplaneTiltFill } from '@/shared/ds/icons/_index';
 import { formatDate, formatTime } from '@/shared/lib/format-utils';
 import styles from './BookingHistory.module.scss';
@@ -15,13 +15,13 @@ function getEventTypeInfo(labels?: string[]): { icon: string; label: string } {
     return { icon: AirplaneTiltFill, label: 'Тур' };
   }
   if (labels?.includes('activity')) {
-    return { icon: ConfettiFill, label: 'Ивент' };
+    return { icon: ConfettiBold, label: 'Ивент' };
   }
   if (labels?.includes('training:surfskate')) {
-    return { icon: BarbellFill, label: 'Серфскейт' };
+    return { icon: BarbellBold, label: 'Серфскейт' };
   }
   // Default: training:surfing or any other
-  return { icon: BarbellFill, label: 'Серфинг' };
+  return { icon: BarbellBold, label: 'Серфинг' };
 }
 
 function getPaymentLabel(paymentInfo?: BookingExtended['paymentInfo']): string | null {

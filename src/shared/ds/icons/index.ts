@@ -85,6 +85,7 @@ export { default as UsersRegular } from '@/shared/ds/icons/20/users_regular.svg'
 export { default as UsersFill } from '@/shared/ds/icons/20/users_fill.svg';
 export { default as BarbellRegular } from '@/shared/ds/icons/20/barbell_regular.svg';
 export { default as BarbellFill } from '@/shared/ds/icons/20/barbell_fill.svg';
+export { default as BarbellBold } from '@/shared/ds/icons/20/barbell_bold.svg';
 export { default as TicketRegular } from '@/shared/ds/icons/20/ticket_regular.svg';
 export { default as TicketFill } from '@/shared/ds/icons/20/ticket_fill.svg';
 export { default as TicketBold } from '@/shared/ds/icons/20/ticket_bold.svg';
@@ -92,6 +93,7 @@ export { default as CertificateRegular } from '@/shared/ds/icons/20/certificate_
 export { default as CertificateFill } from '@/shared/ds/icons/20/certificate_fill.svg';
 export { default as ConfettiRegular } from '@/shared/ds/icons/20/confetti_regular.svg';
 export { default as ConfettiFill } from '@/shared/ds/icons/20/confetti_fill.svg';
+export { default as ConfettiBold } from '@/shared/ds/icons/20/confetti_bold.svg';
 
 export { default as TrashRegular } from '@/shared/ds/icons/20/trash_regular.svg';
 export { default as TrashBold } from '@/shared/ds/icons/20/trash_bold.svg';

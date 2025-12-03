@@ -49,7 +49,7 @@ export function useEventsData({ eventType }: UseEventsDataProps = {}) {
       return {
         id: event.id,
         title: event.title,
-        status: event.status,
+        status: event.status ?? 'ACTIVE',
         location: event.location,
         prepayment: ticket?.prepayment?.price && ticket.prepayment.price.amountMinor > 0 ? formatPrice(ticket.prepayment.price) : null,
         price: ticket?.full.price && ticket.full.price.amountMinor > 0 ? formatPrice(ticket.full.price) : null,

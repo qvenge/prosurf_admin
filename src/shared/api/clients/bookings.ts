@@ -224,4 +224,19 @@ export const bookingsClient = {
 
     return validateResponse(response.data, PaymentSchema);
   },
+
+  /**
+   * Mark booking as paid (ADMIN only)
+   * POST /bookings/{id}/mark-paid
+   *
+   * Marks a booking with deferred payment (isPaid=false) as paid.
+   * Only works for CONFIRMED bookings that haven't been paid yet.
+   *
+   * @param id - Booking ID to mark as paid
+   * @returns Promise resolving to updated booking
+   */
+  async markBookingAsPaid(id: string): Promise<Booking> {
+    const response = await apiClient.post(`/bookings/${encodeURIComponent(id)}/mark-paid`);
+    return validateResponse(response.data, BookingSchema);
+  },
 };

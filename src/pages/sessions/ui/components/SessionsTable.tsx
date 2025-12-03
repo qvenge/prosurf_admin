@@ -11,12 +11,11 @@ import {
 import clsx from 'clsx';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ArrowDownBold, ArrowUpBold, CaretRightBold, TrashBold } from '@/shared/ds/icons';
-import { Icon, IconButton, SideModal, Modal, Button } from '@/shared/ui';
+import { Icon, IconButton, Modal, Button } from '@/shared/ui';
 import { capitalize } from '@/shared/lib/string';
 import { useSessionsInfinite, useDeleteSession, type Session } from '@/shared/api';
 import { formatDate, formatTime, formatPrice } from '@/shared/lib/format-utils';
 import styles from './SessionsTable.module.scss';
-import { SessionDetails } from './SessionDetails';
 
 type SessionRowData = {
   id: string;
@@ -39,7 +38,6 @@ export function SessionsTable({ className, eventType, eventId }: SessionsTablePr
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const bodyContainerRef = useRef<HTMLDivElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
-  const openedSession = searchParams.get('sessionId');
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
 
   const deleteSessionMutation = useDeleteSession();
@@ -305,13 +303,6 @@ export function SessionsTable({ className, eventType, eventId }: SessionsTablePr
           </div>
         )}
       </div>
-
-      {openedSession != null && <SideModal onClose={() => {
-        searchParams.delete('sessionId');
-        setSearchParams(searchParams);
-      }}>
-        <SessionDetails sessionId={openedSession} />
-      </SideModal>}
 
       {sessionToDelete && (
         <Modal onClose={cancelDelete}>

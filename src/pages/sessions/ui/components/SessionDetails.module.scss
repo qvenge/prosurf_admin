@@ -146,6 +146,49 @@
     color: ds.color('text/success');
   }
 
+  &Meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    @include ds.typo('body/b4/medium');
+  }
+
+  &MetaSeparator {
+    color: ds.color('text/secondary');
+  }
+
+  &Status {
+    &[data-status='HOLD'] {
+      color: ds.color('text/warning');
+    }
+
+    &[data-status='CONFIRMED'] {
+      color: ds.color('text/success');
+    }
+
+    &[data-status='CANCELLED'],
+    &[data-status='EXPIRED'] {
+      color: ds.color('text/secondary');
+    }
+  }
+
+  &Payment {
+    &[data-status='paid'] {
+      color: ds.color('text/success');
+    }
+
+    &[data-status='unpaid'] {
+      color: ds.color('text/error/primary');
+    }
+  }
+
+  &Actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
   &CancelBtn {
     cursor: pointer;
     color: ds.color('graphic/secondary');
@@ -156,7 +199,17 @@
   }
 }
 
-.booking + .booking::after {
+.cancelButton {
+  color: ds.color('text/error/primary');
+  border-color: ds.color('border/error');
+
+  &:hover {
+    background: ds.color('background/error');
+  }
+}
+
+.booking + .booking::after,
+.bookingClickable + .bookingClickable::after {
   content: '';
   position: absolute;
   bottom: calc(100% + 12px);
@@ -164,4 +217,106 @@
   right: 0;
   height: 1px;
   background: ds.color('border/primary');
+}
+
+.bookingClickable {
+  @extend .booking;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.7;
+  }
+
+  &:active {
+    opacity: 0.5;
+  }
+}
+
+.bookingChevron {
+  color: ds.color('graphic/secondary');
+  flex-shrink: 0;
+}
+
+// Booking Details Page
+.bookingDetailsContent {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  flex-grow: 1;
+}
+
+.bookingDetailsClient {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bookingDetailsClientInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bookingDetailsClientName {
+  @include ds.typo('body/b2/semibold');
+  color: ds.color('text/primary');
+}
+
+.bookingDetailsClientPhone {
+  @include ds.typo('body/b3/regular');
+  color: ds.color('text/secondary');
+}
+
+.bookingDetailsInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: ds.color('background/secondary');
+  border-radius: 12px;
+}
+
+.bookingDetailsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bookingDetailsLabel {
+  @include ds.typo('body/b3/regular');
+  color: ds.color('text/secondary');
+}
+
+.bookingDetailsValue {
+  @include ds.typo('body/b3/medium');
+  color: ds.color('text/primary');
+
+  &[data-status='HOLD'] {
+    color: ds.color('text/warning');
+  }
+
+  &[data-status='CONFIRMED'] {
+    color: ds.color('text/success');
+  }
+
+  &[data-status='CANCELLED'],
+  &[data-status='EXPIRED'] {
+    color: ds.color('text/secondary');
+  }
+
+  &[data-payment='paid'] {
+    color: ds.color('text/success');
+  }
+
+  &[data-payment='unpaid'] {
+    color: ds.color('text/error/primary');
+  }
+}
+
+.bookingDetailsActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: auto;
 }

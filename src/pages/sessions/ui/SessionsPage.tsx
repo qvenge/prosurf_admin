@@ -1,6 +1,8 @@
-import { Header, Button, Icon, SideModal, SegmentedButtons } from '@/shared/ui';
+import { Header, Button, Icon, SideModal, AlternativeTabs, SegmentedButtons } from '@/shared/ui';
 import { SessionsTable } from './components/SessionsTable';
+import { SessionsCalendar } from './components/SessionsCalendar';
 import { SessionForm } from './components/SessionForm';
+import { SessionDetails } from './components/SessionDetails';
 import { PlusBold, XBold } from '@/shared/ds/icons';
 import styles from './SessionsPage.module.scss';
 import { useState, useEffect } from 'react';
@@ -15,10 +17,17 @@ const eventTypeOptions = [
   { value: 'activity', label: 'Ивенты' },
 ];
 
+const views = [
+  { value: 'calendar', label: 'Календарь' },
+  { value: 'list', label: 'Список' }
+];
+
 export function SessionsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const eventId = searchParams.get('eventId');
+  const sessionId = searchParams.get('sessionId');
 
+  const [selectedView, setSelectedView] = useState(views[0].value);
   const [selectedEventType, setSelectedEventType] = useState(eventTypeOptions[0].value);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -46,14 +55,19 @@ export function SessionsPage() {
     setIsModalOpen(false);
   };
 
+  const handleCloseSession = () => {
+    searchParams.delete('sessionId');
+    setSearchParams(searchParams);
+  };
+
   return (
     <>
       <Header title={'Записи'}>
         <SegmentedButtons
-          options={eventTypeOptions}
-          value={selectedEventType}
+          options={views}
+          value={selectedView}
           onChange={(value) => {
-            setSelectedEventType(value);
+            setSelectedView(value);
           }}
         />
         <Button
@@ -71,6 +85,11 @@ export function SessionsPage() {
       </Header>
       <div className={styles.page}>
         <div className={styles.filters}>
+          <AlternativeTabs
+            items={eventTypeOptions}
+            value={selectedEventType}
+            onChange={setSelectedEventType}
+          />
           {eventId && (
             <div className={styles.filterBadge}>
               <span>Событие: {event?.title ?? 'Загрузка...'}</span>
@@ -80,11 +99,24 @@ export function SessionsPage() {
             </div>
           )}
         </div>
-        <SessionsTable eventType={selectedEventType} eventId={eventId} className={styles.table} />
+        {selectedView === 'calendar' ? (
+          <SessionsCalendar
+            eventType={selectedEventType}
+            eventId={eventId}
+            className={styles.table}
+          />
+        ) : (
+          <SessionsTable eventType={selectedEventType} eventId={eventId} className={styles.table} />
+        )}
       </div>
       {isModalOpen && (
         <SideModal onClose={handleClose}>
           <SessionForm onClose={handleClose} />
+        </SideModal>
+      )}
+      {sessionId && (
+        <SideModal onClose={handleCloseSession}>
+          <SessionDetails sessionId={sessionId} />
         </SideModal>
       )}
     </>

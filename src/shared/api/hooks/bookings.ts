@@ -129,18 +129,37 @@ export const useCancelBooking = () => {
 // Confirm booking mutation (ADMIN only)
 export const useConfirmBooking = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id: string) => bookingsClient.confirmBooking(id),
     onSuccess: (confirmedBooking, bookingId) => {
       // Update the specific booking in cache
       queryClient.setQueryData(bookingsKeys.detail(bookingId), confirmedBooking);
-      
+
       // Invalidate bookings lists
       queryClient.invalidateQueries({ queryKey: bookingsKeys.lists() });
     },
     onError: (error) => {
       console.error('Failed to confirm booking:', error);
+    },
+  });
+};
+
+// Mark booking as paid mutation (ADMIN only)
+export const useMarkBookingAsPaid = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => bookingsClient.markBookingAsPaid(id),
+    onSuccess: (paidBooking, bookingId) => {
+      // Update the specific booking in cache
+      queryClient.setQueryData(bookingsKeys.detail(bookingId), paidBooking);
+
+      // Invalidate bookings lists
+      queryClient.invalidateQueries({ queryKey: bookingsKeys.lists() });
+    },
+    onError: (error) => {
+      console.error('Failed to mark booking as paid:', error);
     },
   });
 };

@@ -1,6 +1,6 @@
 import { useMemo, useEffect } from 'react';
 import { UploadImageInput, Icon, ButtonContainer } from '@/shared/ui';
-import { CameraRegular, TrashRegular } from '@/shared/ds/icons';
+import { CameraRegular, XBold } from '@/shared/ds/icons';
 import { useEventFormContext } from '../lib/context';
 import { maxImages } from '../lib/constants';
 import styles from './EventForm.module.scss';
@@ -58,57 +58,52 @@ export function EventFormImages() {
   return (
     <div className={styles.photosSection}>
       <p className={styles.photoHint}>
-        {totalImages} / {maxImages} фотографий
+        <span className={styles.photoHintLabel}>Фотографии:</span> не более {maxImages}
       </p>
       <div className={styles.photoGrid}>
         {/* Existing images */}
         {existingImageUrls.map((url, index) => (
-          <div key={`existing-${index}`} className={styles.photoUpload}>
-            <div className={styles.imagePreview}>
-              <img
-                src={url}
-                alt={`Event image ${index + 1}`}
-                className={styles.imagePreviewImg}
-              />
-              <ButtonContainer
-                className={styles.imageRemove}
-                onClick={(e) => handleRemoveExisting(index, e)}
-              >
-                <Icon src={TrashRegular} width={20} height={20} />
-              </ButtonContainer>
-            </div>
+          <div key={`existing-${index}`} className={styles.photoItem}>
+            <img
+              src={url}
+              alt={`Event image ${index + 1}`}
+              className={styles.photoImage}
+            />
+            <ButtonContainer
+              className={styles.photoRemove}
+              onClick={(e) => handleRemoveExisting(index, e)}
+            >
+              <Icon src={XBold} width={16} height={16} />
+            </ButtonContainer>
           </div>
         ))}
 
         {/* New images */}
         {newImagePreviews.map((preview, index) => (
-          <div key={`new-${index}`} className={styles.photoUpload}>
-            <div className={styles.imagePreview}>
-              <img
-                src={preview}
-                alt={`New image ${index + 1}`}
-                className={styles.imagePreviewImg}
-              />
-              <ButtonContainer
-                className={styles.imageRemove}
-                onClick={(e) => handleRemoveNew(index, e)}
-              >
-                <Icon src={TrashRegular} width={20} height={20} />
-              </ButtonContainer>
-            </div>
+          <div key={`new-${index}`} className={styles.photoItem}>
+            <img
+              src={preview}
+              alt={`New image ${index + 1}`}
+              className={styles.photoImage}
+            />
+            <ButtonContainer
+              className={styles.photoRemove}
+              onClick={(e) => handleRemoveNew(index, e)}
+            >
+              <Icon src={XBold} width={16} height={16} />
+            </ButtonContainer>
           </div>
         ))}
 
         {/* Upload button */}
         {canAddMore && (
           <UploadImageInput
-            className={styles.photoUpload}
+            className={styles.photoAdd}
             multiple
             onChange={handleImageChange}
           >
-            <div className={styles.uploadPlaceholder}>
-              <Icon src={CameraRegular} width={36} height={36} />
-            </div>
+            <Icon src={CameraRegular} width={20} height={20} />
+            <span className={styles.photoAddText}>Добавить</span>
           </UploadImageInput>
         )}
       </div>

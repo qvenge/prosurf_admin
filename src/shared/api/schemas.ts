@@ -116,7 +116,7 @@ export const EventSchema = z.object({
   createdAt: z.string().datetime(),
   labels: z.array(z.string()).optional(),
   attributes: z.record(z.string(), AttributeValueSchema).optional(),
-  status: EventStatusSchema,
+  status: EventStatusSchema.optional(),
   images: z.array(z.string()).optional(),
 });
 
@@ -256,7 +256,7 @@ export const BookRequestSchema = z.object({
 });
 
 export const BookingExtendedSchema = BookingSchema.extend({
-  client: ClientSchema.optional(),
+  user: ClientSchema.optional(),
   guestContact: GuestContactSchema.nullable().optional(),
   session: z.lazy(() => SessionSchema).optional(),
   paymentInfo: z.union([
