@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Header, SegmentedButtons } from '@/shared/ui';
-import { SeasonTicketsTab } from './components';
+import { SeasonTicketsTab, ContentTab } from './components';
 import styles from './SettingsPage.module.scss';
 
 const tabOptions = [
@@ -25,6 +25,7 @@ export function SettingsPage() {
         />
       </Header>
       <div className={styles.page}>
+        {selectedTab === 'content' && <ContentTab />}
         {selectedTab === 'season-tickets' && <SeasonTicketsTab />}
       </div>
     </>

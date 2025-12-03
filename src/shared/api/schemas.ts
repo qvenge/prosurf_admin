@@ -832,3 +832,31 @@ export const AdminFiltersSchema = z.object({
   cursor: CursorParamSchema,
   limit: LimitParamSchema,
 });
+
+// Image schemas
+export const ImageSchema = z.object({
+  id: z.string(),
+  url: z.string(),
+  objectName: z.string(),
+  originalName: z.string(),
+  mimetype: z.string(),
+  size: z.number(),
+  tags: z.array(z.string()),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+export const ImageFiltersSchema = z.object({
+  cursor: CursorParamSchema,
+  limit: LimitParamSchema,
+  q: z.string().optional(),
+  mimetype: z.string().optional(),
+  'tags.any': z.array(z.string()).optional(),
+  'tags.all': z.array(z.string()).optional(),
+  'tags.none': z.array(z.string()).optional(),
+  minSize: z.number().optional(),
+  maxSize: z.number().optional(),
+  uploadedAfter: z.string().datetime().optional(),
+  uploadedBefore: z.string().datetime().optional(),
+  uploadedByAdminId: z.string().optional(),
+});

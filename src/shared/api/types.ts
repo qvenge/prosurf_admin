@@ -165,6 +165,10 @@ export type SeasonTicketFilters = z.infer<typeof schemas.SeasonTicketFiltersSche
 export type WaitlistFilters = z.infer<typeof schemas.WaitlistFiltersSchema>;
 export type AuditLogFilters = z.infer<typeof schemas.AuditLogFiltersSchema>;
 export type SeasonTicketPlanFilters = z.infer<typeof schemas.SeasonTicketPlanFiltersSchema>;
+export type ImageFilters = z.infer<typeof schemas.ImageFiltersSchema>;
+
+// Image types
+export type Image = z.infer<typeof schemas.ImageSchema>;
 
 // Common parameter types
 export type CursorParam = z.infer<typeof schemas.CursorParamSchema>;

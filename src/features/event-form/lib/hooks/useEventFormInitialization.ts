@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useEvent } from '@/shared/api';
-import type { FormData } from '../types';
+import type { FormData, Category } from '../types';
 import { convertEventDataToFormData } from '../utils';
 import { defaultFormData } from '../constants';
 
-export function useEventFormInitialization(eventId?: string) {
+export function useEventFormInitialization(eventId?: string, categories?: Category[]) {
   const [isInitialized, setIsInitialized] = useState(false);
 
   const isEditMode = !!eventId;
@@ -16,7 +16,7 @@ export function useEventFormInitialization(eventId?: string) {
       return null;
     }
 
-    const convertedData = convertEventDataToFormData(eventData);
+    const convertedData = convertEventDataToFormData(eventData, categories);
     const newFormData: FormData = {
       ...defaultFormData,
       ...convertedData,

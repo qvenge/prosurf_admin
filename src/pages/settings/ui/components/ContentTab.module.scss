@@ -1,0 +1,5 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/3XL');
+}

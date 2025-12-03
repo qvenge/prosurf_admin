@@ -80,7 +80,10 @@ export function UploadImageInput({
         ref={fileInputRef}
         onChange={handleFileChange}
       />
-      <ButtonContainer onClick={handleClick}>
+      <ButtonContainer
+        className={styles.button}
+        onClick={handleClick}
+      >
         {children}
       </ButtonContainer>
     </div>

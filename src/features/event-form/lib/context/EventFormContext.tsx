@@ -58,7 +58,7 @@ export function EventFormProvider({
   categories,
   labels
 }: EventFormProviderProps) {
-  const { isEditMode, isInitialLoading, initializeFormData } = useEventFormInitialization(eventId);
+  const { isEditMode, isInitialLoading, initializeFormData } = useEventFormInitialization(eventId, categories);
 
   // Initialize form data with default category if categories are provided
   const initialFormData = (() => {
