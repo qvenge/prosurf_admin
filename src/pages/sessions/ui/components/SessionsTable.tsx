@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState, useEffect } from 'react';
+import { useMemo, useRef, useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router';
 import {
   useReactTable,
   getCoreRowModel,
@@ -37,7 +38,8 @@ const columnHelper = createColumnHelper<SessionRowData>();
 export function SessionsTable({ className, eventType, eventId }: SessionsTableProps) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const bodyContainerRef = useRef<HTMLDivElement>(null);
-  const [openedSession, setOpenedSession] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const openedSession = searchParams.get('sessionId');
   const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
 
   const deleteSessionMutation = useDeleteSession();
@@ -99,6 +101,11 @@ export function SessionsTable({ className, eventType, eventId }: SessionsTablePr
       };
     });
   }, [_sessionsData]);
+
+  const handleEdit = useCallback((sessionId: string) => {
+    searchParams.set('sessionId', sessionId);
+    setSearchParams(searchParams);
+  }, [searchParams, setSearchParams]);
 
   const columns = useMemo(
     () => [
@@ -168,7 +175,7 @@ export function SessionsTable({ className, eventType, eventId }: SessionsTablePr
         ),
       }),
     ],
-    []
+    [handleEdit]
   );
 
   const sessionToDeleteData = sessionsData.find(s => s.id === sessionToDelete);
@@ -194,10 +201,6 @@ export function SessionsTable({ className, eventType, eventId }: SessionsTablePr
     estimateSize: () => 80,
     overscan: 5,
   });
-
-  const handleEdit = (eventId: string) => {
-    setOpenedSession(eventId);
-  };
 
   // Infinite scroll detection
   useEffect(() => {
@@ -303,7 +306,10 @@ export function SessionsTable({ className, eventType, eventId }: SessionsTablePr
         )}
       </div>
 
-      {openedSession != null && <SideModal onClose={() => setOpenedSession(null)}>
+      {openedSession != null && <SideModal onClose={() => {
+        searchParams.delete('sessionId');
+        setSearchParams(searchParams);
+      }}>
         <SessionDetails sessionId={openedSession} />
       </SideModal>}
 

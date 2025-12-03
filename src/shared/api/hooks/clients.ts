@@ -50,6 +50,7 @@ export const useClient = (id: string) => {
     queryKey: clientsKeys.detail(id),
     queryFn: () => clientsClient.getClientById(id),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!id,
   });
 };
 

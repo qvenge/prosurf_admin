@@ -1,23 +1,24 @@
+import { useSearchParams } from 'react-router';
 import { Header } from '@/shared/ui';
 import { UsersTable } from './components/UsersTable';
 import styles from './UsersPage.module.scss';
-import type { Client } from '@/shared/api';
+import { useClient } from '@/shared/api';
 import { SideModal } from '@/shared/ui';
 import { UserCard } from '@/features/user-card';
-import { useState } from 'react';
 
 export function UsersPage() {
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [clientData, setClientData] = useState<Client | undefined>(undefined);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const clientId = searchParams.get('clientId');
+  const { data: clientData } = useClient(clientId ?? '');
 
-  const handleOpen = (client: Client) => {
-    setClientData(client);
-    setIsModalOpen(true);
+  const handleOpen = (telegramId: string) => {
+    searchParams.set('clientId', telegramId);
+    setSearchParams(searchParams);
   };
 
   const handleClose = () => {
-    setIsModalOpen(false);
-    setClientData(undefined);
+    searchParams.delete('clientId');
+    setSearchParams(searchParams);
   };
 
   return (
@@ -30,9 +31,8 @@ export function UsersPage() {
           handleEdit={handleOpen}
         />
       </div>
-      {isModalOpen && clientData && (
+      {clientId && clientData && (
         <SideModal onClose={handleClose}>
-          {/* TODO: Add client details component */}
           <UserCard client={clientData} />
         </SideModal>
       )}

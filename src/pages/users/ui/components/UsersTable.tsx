@@ -29,7 +29,7 @@ type PlanRowData = {
 };
 
 export interface SessionsTableProps extends React.HTMLAttributes<HTMLDivElement> {
-  handleEdit?: (client: Client) => void;
+  handleEdit?: (telegramId: string) => void;
 }
 
 const columnHelper = createColumnHelper<PlanRowData>();
@@ -37,7 +37,6 @@ const columnHelper = createColumnHelper<PlanRowData>();
 export function UsersTable({ className, handleEdit }: SessionsTableProps) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const bodyContainerRef = useRef<HTMLDivElement>(null);
-  const [allItems, setAllItems] = useState<Client[]>([]);
 
   const {
     data: rawData,
@@ -52,7 +51,7 @@ export function UsersTable({ className, handleEdit }: SessionsTableProps) {
 
   const normalizeFn = (item: Client): PlanRowData => {
     return {
-      id: item.telegramId,
+      id: item.id,
       telegramId: item.telegramId,
       name: [item.lastName, item.firstName].filter(Boolean).join(' ') || item.username || 'Без имени',
       dateOfBirth: item.dateOfBirth ? formatDate(item.dateOfBirth) : undefined,
@@ -68,7 +67,6 @@ export function UsersTable({ className, handleEdit }: SessionsTableProps) {
     if (!rawData?.pages) return [];
 
     const _rawData = rawData.pages.flatMap((page: { items: Client[] }) => page.items);
-    setAllItems(_rawData);
 
     return _rawData.map(normalizeFn);
   }, [rawData]);
@@ -136,18 +134,12 @@ export function UsersTable({ className, handleEdit }: SessionsTableProps) {
             src={CaretRightBold}
             type="secondary"
             size="s"
-            onClick={() => {
-              const client = allItems.find(c => c.telegramId === info.row.original.telegramId);
-
-              if (client && handleEdit) {
-                handleEdit(client);
-              }
-            }}
+            onClick={() => handleEdit?.(info.row.original.id)}
           />
         ),
       }),
     ],
-    [handleEdit, allItems]
+    [handleEdit]
   );
 
   const [sorting, setSorting] = useState<SortingState>([]);
