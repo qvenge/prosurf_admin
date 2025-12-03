@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormData } from '../types';
-import { defaultFormData } from '../constants';
+import { defaultFormData, maxImages } from '../constants';
 
 export function useEventFormState(initialData: FormData = defaultFormData) {
   const [formData, setFormData] = useState<FormData>(initialData);
@@ -10,10 +10,17 @@ export function useEventFormState(initialData: FormData = defaultFormData) {
   };
 
   const handleImageAdd = (files: File[]) => {
-    setFormData(prev => ({
-      ...prev,
-      images: [...prev.images, ...files].slice(0, 10), // Max 10 images per OpenAPI spec
-    }));
+    setFormData(prev => {
+      // Calculate remaining slots considering both existing and new images
+      const totalCurrentImages = prev.existingImages.length + prev.images.length;
+      const remainingSlots = maxImages - totalCurrentImages;
+      const filesToAdd = files.slice(0, remainingSlots);
+
+      return {
+        ...prev,
+        images: [...prev.images, ...filesToAdd],
+      };
+    });
   };
 
   const handleImageRemove = (index: number) => {
@@ -23,11 +30,19 @@ export function useEventFormState(initialData: FormData = defaultFormData) {
     }));
   };
 
+  const handleExistingImageRemove = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      existingImages: prev.existingImages.filter((_, i) => i !== index),
+    }));
+  };
+
   return {
     formData,
     setFormData,
     handleInputChange,
     handleImageAdd,
     handleImageRemove,
+    handleExistingImageRemove,
   };
 }

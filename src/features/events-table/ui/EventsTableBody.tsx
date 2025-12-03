@@ -26,14 +26,14 @@ export const EventsTableBody = forwardRef<HTMLDivElement | null, EventsTableBody
         {/* Loading state for pagination */}
         {isFetchingNextPage && (
           <div className={styles.paginationLoading}>
-            Loading more trainings...
+            Загрузка мероприятий...
           </div>
         )}
 
         {/* End of list indicator */}
         {!hasNextPage && eventsCount > 0 && (
           <div className={styles.endOfList}>
-            No more trainings to load
+            Все мероприятия загружены
           </div>
         )}
       </div>

@@ -24,6 +24,7 @@ export interface FormData {
   price: string;
   capacity: string;
   images: File[];
+  existingImages: string[];
   description: string;
   whatToBring: string;
   category?: string;

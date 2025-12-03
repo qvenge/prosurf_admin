@@ -7,6 +7,7 @@ export const defaultFormData: FormData = {
   price: '',
   capacity: '',
   images: [],
+  existingImages: [],
   description: '',
   whatToBring: '',
 };

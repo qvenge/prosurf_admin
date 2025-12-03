@@ -1,5 +1,6 @@
 import type { SeasonTicket } from '@/shared/api';
 import { TextButton } from '@/shared/ui';
+import { formatDate } from '@/shared/lib/format-utils';
 import styles from './SeasonTicketCard.module.scss';
 
 interface SeasonTicketCardProps {
@@ -15,7 +16,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export function SeasonTicketCard({ ticket, onCancel, isCancelling }: SeasonTicketCardProps) {
-  const expirationDate = new Date(ticket.validUntil).toLocaleDateString('ru-RU');
+  const expirationDate = formatDate(ticket.validUntil);
   const isActive = ticket.status === 'ACTIVE';
 
   return (

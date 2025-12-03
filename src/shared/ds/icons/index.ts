@@ -101,3 +101,5 @@ export { default as ArrowUpBold } from '@/shared/ds/icons/20/arrow-up_bold.svg';
 export { default as WalletBold } from '@/shared/ds/icons/20/wallet_bold.svg';
 export { default as GiftBold } from '@/shared/ds/icons/20/gift_bold.svg';
 export { default as ClockCounterClockwiseBold } from '@/shared/ds/icons/20/clock-counter-clockwise_bold.svg';
+
+export { default as ArrowCounterClockwiseRegular } from '@/shared/ds/icons/20/arrow-counter-clockwise_regular.svg';

@@ -1,8 +1,15 @@
 .root {
   display: flex;
   flex-direction: column;
-  gap: ds.number('paddings & gaps/XL');
   width: 100%;
+  flex-grow: 1;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: ds.number('paddings & gaps/XL');
 }
 
 .emptyTitle {
@@ -40,6 +47,22 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.ticketDeleted {
+  opacity: 0.5;
+
+  .ticketName {
+    text-decoration: line-through;
+  }
+}
+
+.ticketPending {
+  .ticketField {
+    border-style: dashed;
+    border-color: ds.color('border/accent');
+    background: ds.color('background/secondary');
+  }
 }
 
 .addButtonWrapper {

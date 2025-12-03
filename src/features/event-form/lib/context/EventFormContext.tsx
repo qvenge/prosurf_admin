@@ -15,6 +15,7 @@ interface EventFormContextValue {
   handleInputChange: (field: keyof FormData, value: string | File[]) => void;
   handleImageAdd: (files: File[]) => void;
   handleImageRemove: (index: number) => void;
+  handleExistingImageRemove: (index: number) => void;
 
   // Validation
   errors: ValidationErrors;
@@ -74,6 +75,7 @@ export function EventFormProvider({
     handleInputChange,
     handleImageAdd,
     handleImageRemove,
+    handleExistingImageRemove,
   } = useEventFormState(initialFormData);
 
   const { errors, clearError, validateForm } = useEventFormValidation();
@@ -115,6 +117,7 @@ export function EventFormProvider({
     handleInputChange: handleInputChangeWithClearError,
     handleImageAdd,
     handleImageRemove,
+    handleExistingImageRemove,
 
     // Validation
     errors,

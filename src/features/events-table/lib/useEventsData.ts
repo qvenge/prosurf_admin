@@ -5,6 +5,7 @@ import { formatPrice } from '@/shared/lib/format-utils';
 export type EventRowData = {
   id: string;
   title: string;
+  status: 'ACTIVE' | 'CANCELLED';
   location: string | null | undefined;
   prepayment?: string | null;
   price: string | null;
@@ -48,6 +49,7 @@ export function useEventsData({ eventType }: UseEventsDataProps = {}) {
       return {
         id: event.id,
         title: event.title,
+        status: event.status,
         location: event.location,
         prepayment: ticket?.prepayment?.price && ticket.prepayment.price.amountMinor > 0 ? formatPrice(ticket.prepayment.price) : null,
         price: ticket?.full.price && ticket.full.price.amountMinor > 0 ? formatPrice(ticket.full.price) : null,

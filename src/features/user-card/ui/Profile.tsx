@@ -1,5 +1,6 @@
 import type { Client } from '@/shared/api';
 import { TextInput } from '@/shared/ui';
+import { APP_TIMEZONE } from '@/shared/lib/timezone';
 import styles from './Profile.module.scss';
 
 export interface ProfileProps {
@@ -7,12 +8,12 @@ export interface ProfileProps {
   onDeletePhoto?: () => void;
 }
 
-function formatDate(dateString: string | null | undefined): string {
+function formatBirthDate(dateString: string | null | undefined): string {
   if (!dateString) return '';
   const date = new Date(dateString);
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const year = date.getFullYear();
+  const day = date.toLocaleDateString('ru-RU', { day: '2-digit', timeZone: APP_TIMEZONE });
+  const month = date.toLocaleDateString('ru-RU', { month: '2-digit', timeZone: APP_TIMEZONE });
+  const year = date.toLocaleDateString('ru-RU', { year: 'numeric', timeZone: APP_TIMEZONE });
   return `${day}.${month}.${year}г`;
 }
 
@@ -22,7 +23,7 @@ function getInitials(firstName?: string | null, lastName?: string | null): strin
   return first + last || '?';
 }
 
-export function Profile({ client, onDeletePhoto }: ProfileProps) {
+export function Profile({ client, onDeletePhoto: _onDeletePhoto }: ProfileProps) {
   return (
     <div className={styles.root}>
       <div className={styles.avatarSection}>
@@ -70,7 +71,7 @@ export function Profile({ client, onDeletePhoto }: ProfileProps) {
         {client.dateOfBirth && (
           <TextInput
             label="Дата рождения"
-            value={formatDate(client.dateOfBirth)}
+            value={formatBirthDate(client.dateOfBirth)}
             readOnly
           />
         )}

@@ -9,10 +9,10 @@ import {
 } from '@tanstack/react-table';
 import clsx from 'clsx';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ArrowDownBold, ArrowUpBold, CaretRightBold } from '@/shared/ds/icons';
-import { Icon, IconButton, SideModal } from '@/shared/ui';
+import { ArrowDownBold, ArrowUpBold, CaretRightBold, TrashBold } from '@/shared/ds/icons';
+import { Icon, IconButton, SideModal, Modal, Button } from '@/shared/ui';
 import { capitalize } from '@/shared/lib/string';
-import { useSessionsInfinite, type Session } from '@/shared/api';
+import { useSessionsInfinite, useDeleteSession, type Session } from '@/shared/api';
 import { formatDate, formatTime, formatPrice } from '@/shared/lib/format-utils';
 import styles from './SessionsTable.module.scss';
 import { SessionDetails } from './SessionDetails';
@@ -20,6 +20,7 @@ import { SessionDetails } from './SessionDetails';
 type SessionRowData = {
   id: string;
   title: string;
+  status: 'SCHEDULED' | 'CANCELLED' | 'COMPLETE' | undefined;
   location: string | null | undefined;
   price: string | null;
   occupied: string;
@@ -37,6 +38,24 @@ export function SessionsTable({ className, eventType, eventId }: SessionsTablePr
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const bodyContainerRef = useRef<HTMLDivElement>(null);
   const [openedSession, setOpenedSession] = useState<string | null>(null);
+  const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
+
+  const deleteSessionMutation = useDeleteSession();
+
+  const handleDelete = (sessionId: string) => {
+    setSessionToDelete(sessionId);
+  };
+
+  const confirmDelete = () => {
+    if (sessionToDelete) {
+      deleteSessionMutation.mutate({ id: sessionToDelete });
+      setSessionToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setSessionToDelete(null);
+  };
 
   const {
     data: _sessionsData,
@@ -67,6 +86,7 @@ export function SessionsTable({ className, eventType, eventId }: SessionsTablePr
       return {
         id: session.id,
         title: event.title,
+        status: session.status,
         location: event.location,
         price: minPrice ? formatPrice(minPrice) : null,
         occupied: (() => {
@@ -85,6 +105,20 @@ export function SessionsTable({ className, eventType, eventId }: SessionsTablePr
       columnHelper.accessor('title', {
         header: 'Название',
         cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('status', {
+        header: 'Статус',
+        cell: info => {
+          const status = info.getValue();
+          const labels: Record<string, string> = {
+            SCHEDULED: 'Запланировано',
+            CANCELLED: 'Отменено',
+            COMPLETE: 'Завершено',
+          };
+          return status ? (
+            <span className={styles[`status${status}`]}>{labels[status] ?? status}</span>
+          ) : null;
+        },
       }),
       columnHelper.accessor('location', {
         header: 'Место',
@@ -117,17 +151,27 @@ export function SessionsTable({ className, eventType, eventId }: SessionsTablePr
       columnHelper.display({
         id: 'actions',
         cell: info => (
-          <IconButton
-            src={CaretRightBold}
-            type="secondary"
-            size="s"
-            onClick={() => handleEdit(info.row.original.id)}
-          />
+          <>
+            <IconButton
+              src={TrashBold}
+              type="secondary"
+              size="s"
+              onClick={() => handleDelete(info.row.original.id)}
+            />
+            <IconButton
+              src={CaretRightBold}
+              type="secondary"
+              size="s"
+              onClick={() => handleEdit(info.row.original.id)}
+            />
+          </>
         ),
       }),
     ],
     []
   );
+
+  const sessionToDeleteData = sessionsData.find(s => s.id === sessionToDelete);
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -161,7 +205,6 @@ export function SessionsTable({ className, eventType, eventId }: SessionsTablePr
     if (!container) return;
 
     const handleScroll = () => {
-      console.log('scrolling');
       const { scrollTop, scrollHeight, clientHeight } = container;
       const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100; // 100px threshold
 
@@ -175,11 +218,11 @@ export function SessionsTable({ className, eventType, eventId }: SessionsTablePr
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   if (sessionsLoading) {
-    return <div className={styles.loading}>Loading training sessions...</div>;
+    return <div className={styles.loading}>Загрузка...</div>;
   }
 
   if (sessionsError) {
-    return <div className={styles.error}>Error loading training sessions</div>;
+    return <div className={styles.error}>Ошибка загрузки сеансов</div>;
   }
 
   return (
@@ -248,14 +291,14 @@ export function SessionsTable({ className, eventType, eventId }: SessionsTablePr
         {/* Loading state for pagination */}
         {isFetchingNextPage && (
           <div className={styles.paginationLoading}>
-            Loading more sessions...
+            Загрузка сеансов...
           </div>
         )}
 
         {/* End of list indicator */}
         {!hasNextPage && sessionsData.length > 0 && (
           <div className={styles.endOfList}>
-            No more sessions to load
+            Все сеансы загружены
           </div>
         )}
       </div>
@@ -263,6 +306,23 @@ export function SessionsTable({ className, eventType, eventId }: SessionsTablePr
       {openedSession != null && <SideModal onClose={() => setOpenedSession(null)}>
         <SessionDetails sessionId={openedSession} />
       </SideModal>}
+
+      {sessionToDelete && (
+        <Modal onClose={cancelDelete}>
+          <div className={styles.deleteModal}>
+            <h3>Удалить сеанс?</h3>
+            <p>Вы уверены, что хотите удалить "{sessionToDeleteData?.title}"?</p>
+            <div className={styles.deleteModalActions}>
+              <Button type="secondary" size="m" onClick={cancelDelete}>
+                Отмена
+              </Button>
+              <Button type="primary" size="m" onClick={confirmDelete}>
+                Удалить
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

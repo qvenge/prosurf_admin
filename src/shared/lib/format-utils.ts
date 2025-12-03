@@ -1,4 +1,5 @@
 import type { Price } from '@/shared/api';
+import { APP_TIMEZONE } from './timezone';
 
 export const formatDuration = (start: string, end: string | null) => {
   if (!end) return undefined;
@@ -37,10 +38,10 @@ export const formatPrice = (price: Price) => new Intl.NumberFormat(
 
 export const formatDate = (date: string | Date) => new Intl.DateTimeFormat(
   'ru-RU',
-  {day: '2-digit', month: 'long', year: 'numeric'}
+  { day: '2-digit', month: 'long', year: 'numeric', timeZone: APP_TIMEZONE }
 ).format(date instanceof Date ? date : new Date(date));
 
 export const formatTime = (date: string | Date) => new Intl.DateTimeFormat(
   'ru-RU',
-  {hour: '2-digit', minute: '2-digit'}
+  { hour: '2-digit', minute: '2-digit', timeZone: APP_TIMEZONE }
 ).format(date instanceof Date ? date : new Date(date));

@@ -13,7 +13,7 @@ export function useEventFormApi(labels?: string[]) {
 
   const updateEvent = async (eventId: string, formData: FormData) => {
     const eventUpdateData = convertFormDataToEventUpdateDto(formData, labels);
-    await updateEventMutation.mutateAsync({ id: eventId, data: eventUpdateData });
+    await updateEventMutation.mutateAsync({ id: eventId, data: eventUpdateData, force: true });
   };
 
   const isLoading = createEventMutation.isPending || updateEventMutation.isPending;

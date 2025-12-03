@@ -92,24 +92,35 @@ export const sessionsClient = {
   /**
    * Update session (ADMIN only)
    * PATCH /sessions/{id}
+   * @param force - Force update even if session has active bookings
    */
-  async updateSession(id: string, data: SessionUpdateDto): Promise<Session> {
+  async updateSession(id: string, data: SessionUpdateDto, force?: boolean): Promise<Session> {
     const validatedData = SessionUpdateDtoSchema.parse(data);
-    
+    const queryParams = force ? '?force=true' : '';
+
     const response = await apiClient.patch(
-      `/sessions/${encodeURIComponent(id)}`, 
+      `/sessions/${encodeURIComponent(id)}${queryParams}`,
       validatedData
     );
     return validateResponse(response.data, SessionSchema);
   },
 
   /**
-   * Cancel session (set status to CANCELLED) (ADMIN only)
+   * Delete session (ADMIN only)
    * DELETE /sessions/{id}
+   * - No bookings: Hard delete (returns null)
+   * - Has bookings + force: Soft cancel, sets status to CANCELLED (returns Session)
+   * - Has bookings + no force: Throws 409 Conflict error
+   * @param force - Force cancel even if session has active bookings
    */
-  async cancelSession(id: string): Promise<Session> {
-    const response = await apiClient.delete(`/sessions/${encodeURIComponent(id)}`);
-    return validateResponse(response.data, SessionSchema);
+  async deleteSession(id: string, force?: boolean): Promise<Session | null> {
+    const queryParams = force ? '?force=true' : '';
+    const response = await apiClient.delete(`/sessions/${encodeURIComponent(id)}${queryParams}`);
+    // Hard delete returns empty response, soft cancel returns Session
+    if (response.data) {
+      return validateResponse(response.data, SessionSchema);
+    }
+    return null;
   },
 
   /**

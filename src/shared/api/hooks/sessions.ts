@@ -113,18 +113,18 @@ export const useSession = (id: string) => {
 // Update session mutation (ADMIN only)
 export const useUpdateSession = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: SessionUpdateDto }) => 
-      sessionsClient.updateSession(id, data),
+    mutationFn: ({ id, data, force }: { id: string; data: SessionUpdateDto; force?: boolean }) =>
+      sessionsClient.updateSession(id, data, force),
     onSuccess: (updatedSession, variables) => {
       // Update the specific session in cache
       queryClient.setQueryData(sessionsKeys.detail(variables.id), updatedSession);
-      
+
       // Invalidate sessions lists and event sessions
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
-      queryClient.invalidateQueries({ 
-        predicate: (query) => 
+      queryClient.invalidateQueries({
+        predicate: (query) =>
           query.queryKey.includes('sessions') && query.queryKey.includes(updatedSession.event.id)
       });
     },
@@ -134,28 +134,42 @@ export const useUpdateSession = () => {
   });
 };
 
-// Cancel session mutation (ADMIN only)
-export const useCancelSession = () => {
+// Delete session mutation (ADMIN only)
+// - No bookings: Hard delete (returns null)
+// - Has bookings + force: Soft cancel (returns Session with status CANCELLED)
+// - Has bookings + no force: Throws 409 Conflict error
+export const useDeleteSession = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => sessionsClient.cancelSession(id),
-    onSuccess: (cancelledSession, sessionId) => {
-      // Update the specific session in cache
-      queryClient.setQueryData(sessionsKeys.detail(sessionId), cancelledSession);
+    mutationFn: ({ id, force }: { id: string; force?: boolean }) =>
+      sessionsClient.deleteSession(id, force),
+    onSuccess: (result, variables) => {
+      // Remove or update the specific session in cache
+      if (result) {
+        // Soft cancel - update cache with cancelled session
+        queryClient.setQueryData(sessionsKeys.detail(variables.id), result);
+      } else {
+        // Hard delete - remove from cache
+        queryClient.removeQueries({ queryKey: sessionsKeys.detail(variables.id) });
+      }
 
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
       queryClient.invalidateQueries({
-        predicate: (query) =>
-          query.queryKey.includes('sessions') && query.queryKey.includes(cancelledSession.event.id)
+        predicate: (query) => query.queryKey.includes('sessions')
       });
     },
     onError: (error) => {
-      console.error('Failed to cancel session:', error);
+      console.error('Failed to delete session:', error);
     },
   });
 };
+
+/**
+ * @deprecated Use useDeleteSession instead
+ */
+export const useCancelSession = useDeleteSession;
 
 // Bulk delete sessions mutation (ADMIN only)
 export const useBulkDeleteSessions = () => {

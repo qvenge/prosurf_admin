@@ -24,7 +24,7 @@
 .gridHeader,
 .gridRow {
   display: grid;
-  grid-template-columns: 1fr 1fr 120px 120px 140px minmax(100px, 250px);
+  grid-template-columns: 1fr 110px 1fr 120px 120px 140px minmax(100px, 250px);
   width: 100%;
 }
 
@@ -114,6 +114,7 @@
 .headerCellActions,
 .cellActions {
   justify-content: flex-end;
+  gap: ds.number('paddings & gaps/XS');
 }
 
 .cellDatetime {
@@ -127,4 +128,58 @@
   text-align: center;
   color: ds.color('text/secondary');
   @include ds.typo('body/b4/medium');
+}
+
+.deleteModal {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/M');
+  padding: ds.number('paddings & gaps/L');
+  min-width: 320px;
+  background: ds.color('background/primary');
+  border-radius: ds.number('radius/L');
+
+  h3 {
+    @include ds.typo('header/h4/bold');
+    color: ds.color('text/primary');
+    margin: 0;
+  }
+
+  p {
+    @include ds.typo('body/b3/regular');
+    color: ds.color('text/secondary');
+    margin: 0;
+  }
+}
+
+.deleteModalActions {
+  display: flex;
+  gap: ds.number('paddings & gaps/S');
+  justify-content: flex-end;
+  margin-top: ds.number('paddings & gaps/S');
+}
+
+// Status badge styles
+.statusSCHEDULED {
+  @include ds.typo('body/b4/medium');
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: ds.color('background/success');
+  color: ds.color('text/success');
+}
+
+.statusCANCELLED {
+  @include ds.typo('body/b4/medium');
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: ds.color('background/error');
+  color: ds.color('text/error/primary');
+}
+
+.statusCOMPLETE {
+  @include ds.typo('body/b4/medium');
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: ds.color('background/secondary');
+  color: ds.color('text/secondary');
 }

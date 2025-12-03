@@ -10,9 +10,6 @@ export function App() {
   const navigate = useNavigate();
   const isOnLoginPage = location.pathname.startsWith('/login');
 
-  console.log('isAuthenticated', isAuthenticated)
-  console.log('isLoading', isLoading)
-
   useEffect(() => {
     if (isLoading) {
       return;

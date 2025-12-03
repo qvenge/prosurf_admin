@@ -65,12 +65,13 @@ export const useCreateEvent = () => {
 };
 
 // Update event mutation (ADMIN only)
+// force=true allows updating even if event has sessions with active bookings
 export const useUpdateEvent = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: EventUpdateDto }) =>
-      eventsClient.updateEvent(id, data),
+    mutationFn: ({ id, data, force }: { id: string; data: EventUpdateDto; force?: boolean }) =>
+      eventsClient.updateEvent(id, data, force),
     onSuccess: (updatedEvent, variables) => {
       // Update the specific event in cache
       queryClient.setQueryData(eventsKeys.detail(variables.id), updatedEvent);
@@ -80,6 +81,26 @@ export const useUpdateEvent = () => {
     },
     onError: (error) => {
       console.error('Failed to update event:', error);
+    },
+  });
+};
+
+// Delete event mutation (ADMIN only)
+// force=true allows deleting even if event has sessions with active bookings
+export const useDeleteEvent = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, force }: { id: string; force?: boolean }) =>
+      eventsClient.deleteEvent(id, force),
+    onSuccess: (_, variables) => {
+      // Remove from cache
+      queryClient.removeQueries({ queryKey: eventsKeys.detail(variables.id) });
+      // Invalidate events lists
+      queryClient.invalidateQueries({ queryKey: eventsKeys.lists() });
+    },
+    onError: (error) => {
+      console.error('Failed to delete event:', error);
     },
   });
 };

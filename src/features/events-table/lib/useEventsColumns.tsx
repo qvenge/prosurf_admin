@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Link } from 'react-router';
-import { PencilSimpleBold } from '@/shared/ds/icons';
+import { PencilSimpleBold, TrashBold } from '@/shared/ds/icons';
 import { IconButton } from '@/shared/ui';
 import { type EventRowData } from './useEventsData';
 import styles from '../ui/EventsTable.module.scss'
@@ -10,14 +10,23 @@ const columnHelper = createColumnHelper<EventRowData>();
 
 interface UseEventsColumnsProps {
   handleEdit?: (eventId: string) => void;
+  handleDelete?: (eventId: string) => void;
 }
 
-export function useEventsColumns({ handleEdit }: UseEventsColumnsProps) {
+export function useEventsColumns({ handleEdit, handleDelete }: UseEventsColumnsProps) {
   return useMemo(
     () => [
       columnHelper.accessor('title', {
         header: 'Название',
         cell: info => info.getValue(),
+      }),
+      columnHelper.accessor('status', {
+        header: 'Статус',
+        cell: info => {
+          const status = info.getValue();
+          const label = status === 'ACTIVE' ? 'Активно' : 'Отменено';
+          return <span className={styles[`status${status}`]}>{label}</span>;
+        },
       }),
       columnHelper.accessor('location', {
         header: 'Место',
@@ -51,15 +60,23 @@ export function useEventsColumns({ handleEdit }: UseEventsColumnsProps) {
       columnHelper.display({
         id: 'actions',
         cell: info => (
-          <IconButton
-            src={PencilSimpleBold}
-            type="secondary"
-            size="s"
-            onClick={() => handleEdit?.(info.row.original.id)}
-          />
+          <>
+            <IconButton
+              src={TrashBold}
+              type="secondary"
+              size="s"
+              onClick={() => handleDelete?.(info.row.original.id)}
+            />
+            <IconButton
+              src={PencilSimpleBold}
+              type="secondary"
+              size="s"
+              onClick={() => handleEdit?.(info.row.original.id)}
+            />
+          </>
         ),
       }),
     ],
-    [handleEdit]
+    [handleEdit, handleDelete]
   );
 }

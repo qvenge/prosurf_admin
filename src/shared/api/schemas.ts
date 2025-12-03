@@ -104,6 +104,8 @@ export const AttributeValueSchema = z.union([
   z.array(z.string()),
 ]);
 
+export const EventStatusSchema = z.enum(['ACTIVE', 'CANCELLED']);
+
 export const EventSchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -114,6 +116,8 @@ export const EventSchema = z.object({
   createdAt: z.string().datetime(),
   labels: z.array(z.string()).optional(),
   attributes: z.record(z.string(), AttributeValueSchema).optional(),
+  status: EventStatusSchema,
+  images: z.array(z.string()).optional(),
 });
 
 export const EventCreateDtoSchema = z.object({
@@ -136,10 +140,11 @@ export const EventUpdateDtoSchema = z.object({
   labels: z.array(z.string()).optional(),
   attributes: z.record(z.string(), AttributeValueSchema).optional(),
   images: z.array(z.instanceof(File)).optional(),
+  existingImages: z.array(z.string()).optional(),
 });
 
 // Session schemas
-export const SessionStatusSchema = z.enum(['SCHEDULED', 'CANCELLED']);
+export const SessionStatusSchema = z.enum(['SCHEDULED', 'CANCELLED', 'COMPLETE']);
 
 export const SessionSchema = z.object({
   id: z.string(),

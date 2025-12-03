@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { formatDuration, formatAvailability, formatPrice } from '../format-utils';
+import { APP_TIMEZONE } from '../timezone';
 import type { Session } from '@/shared/api';
 
 interface SessionItem {
@@ -22,9 +23,9 @@ export const useSessionGroups = (sessions: Session[]) => {
 
     const groupedSessions = sessions.reduce((groups, session) => {
       const sessionDate = new Date(session.startsAt);
-      const dayName = sessionDate.toLocaleDateString('ru-RU', { weekday: 'long' });
-      const day = sessionDate.getDate();
-      const monthName = sessionDate.toLocaleDateString('ru-RU', { month: 'long' });
+      const dayName = sessionDate.toLocaleDateString('ru-RU', { weekday: 'long', timeZone: APP_TIMEZONE });
+      const day = sessionDate.toLocaleDateString('ru-RU', { day: 'numeric', timeZone: APP_TIMEZONE });
+      const monthName = sessionDate.toLocaleDateString('ru-RU', { month: 'long', timeZone: APP_TIMEZONE });
       const dateKey = `${dayName} • ${day} ${monthName}`;
 
       if (!groups[dateKey]) {
@@ -37,9 +38,10 @@ export const useSessionGroups = (sessions: Session[]) => {
 
       groups[dateKey].push({
         id: session.id,
-        time: new Date(session.startsAt).toLocaleTimeString('ru-RU', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
+        time: new Date(session.startsAt).toLocaleTimeString('ru-RU', {
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: APP_TIMEZONE
         }),
         duration: formatDuration(session.startsAt, endsAt) ?? 'Не указано',
         title: session.event.title,

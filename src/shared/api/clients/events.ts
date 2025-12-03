@@ -86,8 +86,9 @@ export const eventsClient = {
   /**
    * Update event (ADMIN only)
    * PATCH /events/{id}
+   * @param force - Force update even if event has sessions with active bookings
    */
-  async updateEvent(id: string, data: EventUpdateDto): Promise<Event> {
+  async updateEvent(id: string, data: EventUpdateDto, force?: boolean): Promise<Event> {
     const validatedData = EventUpdateDtoSchema.parse(data);
 
     // Construct FormData for multipart/form-data
@@ -116,15 +117,23 @@ export const eventsClient = {
       formData.append('attributes', JSON.stringify(validatedData.attributes));
     }
 
-    // Add image files
+    // Add new image files
     if (validatedData.images && validatedData.images.length > 0) {
       validatedData.images.forEach((file) => {
         formData.append('images', file);
       });
     }
 
+    // Send existing images to keep as JSON string
+    // Backend's @Transform decorator parses this to string[]
+    // This triggers "replace mode" - backend merges new uploads with these URLs
+    if (validatedData.existingImages !== undefined) {
+      formData.append('images', JSON.stringify(validatedData.existingImages));
+    }
+
+    const queryParams = force ? '?force=true' : '';
     const response = await apiClient.patch(
-      `/events/${encodeURIComponent(id)}`,
+      `/events/${encodeURIComponent(id)}${queryParams}`,
       formData,
       {
         headers: {

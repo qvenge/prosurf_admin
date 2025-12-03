@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
 import type { Client } from '@/shared/api';
 import { useClientSeasonTickets, useCancelSeasonTicket, useSeasonTicketPlans, useGrantSeasonTicket } from '@/shared/api';
-import { Dropdown, Loader, Icon, IconButton } from '@/shared/ui';
-import { PlusBold, CaretDownBold, TrashRegular } from '@/shared/ds/icons';
+import { Dropdown, Loader, Icon, IconButton, Button } from '@/shared/ui';
+import { PlusBold, CaretDownBold, TrashRegular, ArrowCounterClockwiseRegular } from '@/shared/ds/icons';
 import styles from './SeasonTickets.module.scss';
 
 export interface SeasonTicketsProps {
@@ -11,29 +11,50 @@ export interface SeasonTicketsProps {
 
 export function SeasonTickets({ client }: SeasonTicketsProps) {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownToggleRef = useRef<HTMLButtonElement>(null);
+  const [pendingAdditions, setPendingAdditions] = useState<Array<{ key: string; id: string; name: string }>>([]);
+  const [pendingDeletions, setPendingDeletions] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const dropdownToggleRef = useRef<HTMLButtonElement>(null!);
 
   const { data: ticketsData, isLoading, error } = useClientSeasonTickets(client.id);
   const { data: plansData, isLoading: plansLoading } = useSeasonTicketPlans();
-  const { mutate: cancelTicket, isPending: isCancelling } = useCancelSeasonTicket();
-  const { mutate: grantTicket, isPending: isGranting } = useGrantSeasonTicket();
+  const { mutateAsync: cancelTicket } = useCancelSeasonTicket();
+  const { mutateAsync: grantTicket } = useGrantSeasonTicket();
 
   const handleCancel = (ticketId: string) => {
-    if (confirm('Вы уверены, что хотите отменить этот абонемент?')) {
-      cancelTicket(ticketId);
+    setPendingDeletions((prev) => [...prev, ticketId]);
+  };
+
+  const handleUndoCancel = (ticketId: string) => {
+    setPendingDeletions((prev) => prev.filter((id) => id !== ticketId));
+  };
+
+  const handleGrant = (planId: string, planName: string) => {
+    setPendingAdditions((prev) => [...prev, { key: crypto.randomUUID(), id: planId, name: planName }]);
+    setDropdownOpen(false);
+  };
+
+  const handleUndoGrant = (key: string) => {
+    setPendingAdditions((prev) => prev.filter((p) => p.key !== key));
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      for (const ticketId of pendingDeletions) {
+        await cancelTicket(ticketId);
+      }
+      for (const addition of pendingAdditions) {
+        await grantTicket({ clientId: client.id, data: { planId: addition.id } });
+      }
+      setPendingAdditions([]);
+      setPendingDeletions([]);
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleGrant = (planId: string) => {
-    grantTicket(
-      { clientId: client.id, data: { planId } },
-      {
-        onSuccess: () => {
-          setDropdownOpen(false);
-        },
-      }
-    );
-  };
+  const hasPendingChanges = pendingAdditions.length > 0 || pendingDeletions.length > 0;
 
   if (isLoading) {
     return (
@@ -50,100 +71,128 @@ export function SeasonTickets({ client }: SeasonTicketsProps) {
   const ticketsList = ticketsData?.items ?? [];
   const activeTickets = ticketsList.filter((t) => t.status === 'ACTIVE');
   const plans = plansData?.items ?? [];
-  const hasTickets = activeTickets.length > 0;
+  const hasTickets = activeTickets.length > 0 || pendingAdditions.length > 0;
 
   return (
     <div className={styles.root}>
-      {hasTickets ? (
-        <>
-          <div className={styles.ticketsList}>
-            {activeTickets.map((ticket) => (
-              <div key={ticket.id} className={styles.ticketRow}>
-                <div className={styles.ticketField}>
-                  <span className={styles.ticketName}>{ticket.plan.name}</span>
+      <div className={styles.content}>
+        {hasTickets ? (
+          <>
+            <div className={styles.ticketsList}>
+              {activeTickets.map((ticket) => {
+                const isDeleted = pendingDeletions.includes(ticket.id);
+                return (
+                  <div key={ticket.id} className={`${styles.ticketRow} ${isDeleted ? styles.ticketDeleted : ''}`}>
+                    <div className={styles.ticketField}>
+                      <span className={styles.ticketName}>{ticket.plan.name}</span>
+                    </div>
+                    <IconButton
+                      type="secondary"
+                      size="l"
+                      src={isDeleted ? ArrowCounterClockwiseRegular : TrashRegular}
+                      onClick={() => isDeleted ? handleUndoCancel(ticket.id) : handleCancel(ticket.id)}
+                      disabled={isSaving}
+                    />
+                  </div>
+                );
+              })}
+              {pendingAdditions.map((addition) => (
+                <div key={addition.key} className={`${styles.ticketRow} ${styles.ticketPending}`}>
+                  <div className={styles.ticketField}>
+                    <span className={styles.ticketName}>{addition.name}</span>
+                  </div>
+                  <IconButton
+                    type="secondary"
+                    size="l"
+                    src={ArrowCounterClockwiseRegular}
+                    onClick={() => handleUndoGrant(addition.key)}
+                    disabled={isSaving}
+                  />
                 </div>
-                <IconButton
-                  type="secondary"
-                  size="l"
-                  src={TrashRegular}
-                  onClick={() => handleCancel(ticket.id)}
-                  disabled={isCancelling}
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className={styles.addButtonWrapper}>
-            <button
-              ref={dropdownToggleRef}
-              type="button"
-              className={styles.addButton}
-              onClick={() => setDropdownOpen(!isDropdownOpen)}
-              disabled={plansLoading || isGranting}
-            >
-              <Icon src={PlusBold} width={20} height={20} />
-              <span>Добавить еще</span>
-              <Icon src={CaretDownBold} width={16} height={16} />
-            </button>
-
-            <Dropdown
-              className={styles.dropdown}
-              isOpen={isDropdownOpen}
-              onClose={() => setDropdownOpen(false)}
-              togglerRef={dropdownToggleRef}
-            >
-              {plans.map((plan) => (
-                <button
-                  key={plan.id}
-                  type="button"
-                  className={styles.dropdownItem}
-                  onClick={() => handleGrant(plan.id)}
-                  disabled={isGranting}
-                >
-                  {plan.name}
-                </button>
               ))}
-            </Dropdown>
-          </div>
-        </>
-      ) : (
-        <>
-          <p className={styles.emptyTitle}>Нет абонемента</p>
+            </div>
 
-          <div className={styles.addButtonWrapper}>
-            <button
-              ref={dropdownToggleRef}
-              type="button"
-              className={styles.addButtonPressed}
-              onClick={() => setDropdownOpen(!isDropdownOpen)}
-              disabled={plansLoading || isGranting}
-            >
-              <Icon src={PlusBold} width={20} height={20} />
-              <span>Добавить</span>
-              <Icon src={CaretDownBold} width={16} height={16} />
-            </button>
+            <div className={styles.addButtonWrapper}>
+              <button
+                ref={dropdownToggleRef}
+                type="button"
+                className={styles.addButton}
+                onClick={() => setDropdownOpen(!isDropdownOpen)}
+                disabled={plansLoading || isSaving}
+              >
+                <Icon src={PlusBold} width={20} height={20} />
+                <span>Добавить еще</span>
+                <Icon src={CaretDownBold} width={16} height={16} />
+              </button>
 
-            <Dropdown
-              className={styles.dropdown}
-              isOpen={isDropdownOpen}
-              onClose={() => setDropdownOpen(false)}
-              togglerRef={dropdownToggleRef}
-            >
-              {plans.map((plan) => (
-                <button
-                  key={plan.id}
-                  type="button"
-                  className={styles.dropdownItem}
-                  onClick={() => handleGrant(plan.id)}
-                  disabled={isGranting}
-                >
-                  {plan.name}
-                </button>
-              ))}
-            </Dropdown>
-          </div>
-        </>
-      )}
+              <Dropdown
+                className={styles.dropdown}
+                isOpen={isDropdownOpen}
+                onClose={() => setDropdownOpen(false)}
+                togglerRef={dropdownToggleRef}
+              >
+                {plans.map((plan) => (
+                  <button
+                    key={plan.id}
+                    type="button"
+                    className={styles.dropdownItem}
+                    onClick={() => handleGrant(plan.id, plan.name)}
+                    disabled={isSaving}
+                  >
+                    {plan.name}
+                  </button>
+                ))}
+              </Dropdown>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className={styles.emptyTitle}>Нет абонемента</p>
+
+            <div className={styles.addButtonWrapper}>
+              <button
+                ref={dropdownToggleRef}
+                type="button"
+                className={styles.addButtonPressed}
+                onClick={() => setDropdownOpen(!isDropdownOpen)}
+                disabled={plansLoading || isSaving}
+              >
+                <Icon src={PlusBold} width={20} height={20} />
+                <span>Добавить</span>
+                <Icon src={CaretDownBold} width={16} height={16} />
+              </button>
+
+              <Dropdown
+                className={styles.dropdown}
+                isOpen={isDropdownOpen}
+                onClose={() => setDropdownOpen(false)}
+                togglerRef={dropdownToggleRef}
+              >
+                {plans.map((plan) => (
+                  <button
+                    key={plan.id}
+                    type="button"
+                    className={styles.dropdownItem}
+                    onClick={() => handleGrant(plan.id, plan.name)}
+                    disabled={isSaving}
+                  >
+                    {plan.name}
+                  </button>
+                ))}
+              </Dropdown>
+            </div>
+          </>
+        )}
+      </div>
+      <Button
+        type="primary"
+        size="l"
+        streched
+        onClick={handleSave}
+        disabled={!hasPendingChanges || isSaving}
+      >
+        Сохранить
+      </Button>
     </div>
   );
 }

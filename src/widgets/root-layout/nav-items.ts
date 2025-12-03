@@ -2,9 +2,6 @@ import {
   CalendarBlankRegular,
   CalendarBlankFill,
 
-  ListChecksRegular,
-  ListChecksFill,
-
   ListBulletsRegular,
   ListBulletsFill,
 

@@ -3,6 +3,7 @@ import { useBookings } from '@/shared/api';
 import { Icon, Loader } from '@/shared/ui';
 import { BarbellFill, ConfettiFill } from '@/shared/ds/icons';
 import { AirplaneTiltFill } from '@/shared/ds/icons/_index';
+import { formatDate, formatTime } from '@/shared/lib/format-utils';
 import styles from './BookingHistory.module.scss';
 
 export interface BookingHistoryProps {
@@ -31,23 +32,6 @@ function getPaymentLabel(paymentInfo?: BookingExtended['paymentInfo']): string |
   }
 
   return null;
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('ru-RU', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-}
-
-function formatTime(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleTimeString('ru-RU', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
 }
 
 export function BookingHistory({ client }: BookingHistoryProps) {

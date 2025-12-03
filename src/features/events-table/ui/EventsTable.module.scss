@@ -24,7 +24,7 @@
 .gridHeader,
 .gridRow {
   display: grid;
-  grid-template-columns: 2fr 2fr minmax(120px, 1fr) minmax(170px, 1fr) minmax(170px, 1fr) minmax(100px, 1fr);
+  grid-template-columns: 2fr 100px 2fr minmax(120px, 1fr) minmax(170px, 1fr) minmax(170px, 1fr) minmax(100px, 1fr);
   width: 100%;
 }
 
@@ -111,6 +111,7 @@
 .headerCellActions,
 .cellActions {
   justify-content: flex-end;
+  gap: ds.number('paddings & gaps/XS');
 }
 
 .cellDatetime {
@@ -134,4 +135,59 @@
 .link {
   color: ds.color('text/accent');
   text-decoration: none;
+}
+
+.deleteModal {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/M');
+  padding: ds.number('paddings & gaps/L');
+  min-width: 320px;
+  background: ds.color('background/primary');
+  border-radius: ds.number('radius/L');
+
+  h3 {
+    @include ds.typo('header/h4/bold');
+    color: ds.color('text/primary');
+    margin: 0;
+  }
+
+  p {
+    @include ds.typo('body/b3/regular');
+    color: ds.color('text/secondary');
+    margin: 0;
+  }
+}
+
+.deleteModalActions {
+  display: flex;
+  gap: ds.number('paddings & gaps/S');
+  justify-content: flex-end;
+  margin-top: ds.number('paddings & gaps/S');
+}
+
+// Status badge styles
+.statusACTIVE,
+.statusSCHEDULED {
+  @include ds.typo('body/b4/medium');
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: ds.color('background/success');
+  color: ds.color('text/success');
+}
+
+.statusCANCELLED {
+  @include ds.typo('body/b4/medium');
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: ds.color('background/error');
+  color: ds.color('text/error/primary');
+}
+
+.statusCOMPLETE {
+  @include ds.typo('body/b4/medium');
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: ds.color('background/secondary');
+  color: ds.color('text/secondary');
 }
