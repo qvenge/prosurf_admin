@@ -662,7 +662,7 @@ export function EventForm({ onClose, eventId, rangeMode = false }: EventFormProp
             label="Описание тренировки"
             placeholder="Введите текст"
             value={formData.description}
-            onChange={(e) => handleInputChange('description', e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('description', e.target.value)}
             maxLength={500}
             showCounter
             autoResize
@@ -672,7 +672,7 @@ export function EventForm({ onClose, eventId, rangeMode = false }: EventFormProp
             label="Что с собой?"
             placeholder="Введите текст"
             value={formData.whatToBring}
-            onChange={(e) => handleInputChange('whatToBring', e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('whatToBring', e.target.value)}
             maxLength={500}
             showCounter
             autoResize

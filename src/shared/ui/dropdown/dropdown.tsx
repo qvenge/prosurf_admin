@@ -9,7 +9,7 @@ export interface DropdownProps extends React.HTMLAttributes<HTMLDivElement> {
   isOpen?: boolean;
   onClose?: () => void;
   children?: React.ReactNode;
-  togglerRef?: React.RefObject<HTMLElement>;
+  togglerRef?: React.RefObject<HTMLElement | null>;
 }
 
 export function Dropdown({

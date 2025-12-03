@@ -11,7 +11,7 @@ export function EventFormDescription() {
         label="Описание"
         placeholder="Введите текст"
         value={formData.description}
-        onChange={(e) => handleInputChange('description', e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('description', e.target.value)}
         maxLength={maxDescriptionLength}
         showCounter
         autoResize
@@ -21,7 +21,7 @@ export function EventFormDescription() {
         label="FAQ"
         placeholder="Введите текст"
         value={formData.whatToBring}
-        onChange={(e) => handleInputChange('whatToBring', e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange('whatToBring', e.target.value)}
         maxLength={maxDescriptionLength}
         showCounter
         autoResize

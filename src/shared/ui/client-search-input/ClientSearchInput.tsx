@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import clsx from 'clsx';
 import { useClientsInfinite, type Client } from '@/shared/api';
 import { TextInput } from '@/shared/ui/text-input';
 import { Dropdown } from '@/shared/ui/dropdown';

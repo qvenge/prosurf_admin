@@ -3,7 +3,7 @@
 import clsx from 'clsx';
 import { useEffect, useRef, useCallback } from 'react';
 import { camelize, pluralize } from '@/shared/lib/string';
-import styles from './Textarea.module.scss';
+import styles from './textarea.module.scss';
 
 type Parent = React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
