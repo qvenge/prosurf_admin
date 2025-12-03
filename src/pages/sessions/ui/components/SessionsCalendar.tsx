@@ -98,9 +98,13 @@ function formatDateKey(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-function isEventHighlighted(session: Session): boolean {
+type SessionType = 'training' | 'tour' | 'activity';
+
+function getSessionType(session: Session): SessionType {
   const labels = session.event.labels ?? [];
-  return labels.some(label => label === 'tour' || label === 'activity');
+  if (labels.includes('tour')) return 'tour';
+  if (labels.includes('activity')) return 'activity';
+  return 'training';
 }
 
 export function SessionsCalendar({ eventType, eventId, className }: SessionsCalendarProps) {
@@ -262,7 +266,8 @@ export function SessionsCalendar({ eventType, eventId, className }: SessionsCale
                           className={clsx(
                             styles.badge,
                             !day.isCurrentMonth && styles.badgeOutside,
-                            day.isCurrentMonth && isEventHighlighted(session) && styles.badgeAccent
+                            day.isCurrentMonth && getSessionType(session) === 'tour' && styles.badgeAccent,
+                            day.isCurrentMonth && getSessionType(session) === 'activity' && styles.badgeSuccess
                           )}
                           onClick={() => handleSessionClick(session.id)}
                         >

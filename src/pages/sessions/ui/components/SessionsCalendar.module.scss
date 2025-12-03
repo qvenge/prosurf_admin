@@ -131,6 +131,11 @@
   color: ds.color('text/primary');
 }
 
+.badgeSuccess {
+  background: ds.color('background/success');
+  color: ds.color('text/primary');
+}
+
 .loadingOverlay {
   position: absolute;
   inset: 0;
