@@ -2,7 +2,6 @@ import { createBrowserRouter } from 'react-router';
 import { App } from './ui/App';
 
 import { RootLayout } from '@/widgets/root-layout';
-import { CalendarPage } from '@/pages/calendar';
 import { LoginPage } from '@/pages/login';
 import { SessionsPage } from '@/pages/sessions';
 import { UsersPage } from '@/pages/users';
@@ -23,10 +22,6 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            Component: CalendarPage
-          },
-          {
-            path: 'sessions',
             Component: SessionsPage
           },
           {
@@ -45,4 +40,6 @@ export const router = createBrowserRouter([
       },
     ],
   },
-]);
+], {
+  basename: import.meta.env.BASE_URL,
+});

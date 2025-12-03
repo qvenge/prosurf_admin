@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   const apiTarget = env.VITE_API_TARGET || 'http://localhost:3000'
 
   return {
-    // base: '/prosurf_admin/',
+    base: '/prosurf_admin/',
     plugins: [react()],
     server: {
       proxy: {

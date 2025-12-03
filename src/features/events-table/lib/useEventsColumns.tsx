@@ -52,7 +52,7 @@ export function useEventsColumns({ handleEdit, handleDelete }: UseEventsColumnsP
         id: 'dates',
         header: 'Сеансы',
         cell: info => (
-          <Link className={styles.link} to={`/sessions?eventId=${info.row.original.id}`}>
+          <Link className={styles.link} to={`/?eventId=${info.row.original.id}`}>
               Перейти
           </Link>
         ),

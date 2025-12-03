@@ -19,7 +19,7 @@ export const navItems = [
     title: 'Сеансы',
     iconDefault: CalendarBlankRegular,
     iconActive: CalendarBlankFill,
-    path: '/sessions'
+    path: '/'
   },
   {
     id: 'users',
