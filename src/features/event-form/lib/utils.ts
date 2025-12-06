@@ -25,14 +25,14 @@ export function convertFormDataToEventCreateDto(formData: FormData, labels: stri
         name: 'Разовое посещение',
         prepayment: prepaymentInKopecks ? {
           price: {
-            currency: 'RUB',
+            currency: formData.currency,
             amountMinor: prepaymentInKopecks,
           },
           description: 'Предоплата',
         } : undefined,
         full: {
           price: {
-            currency: 'RUB',
+            currency: formData.currency,
             amountMinor: priceInKopecks,
           },
           description: 'Полная стоимость',
@@ -108,6 +108,8 @@ export function convertEventDataToFormData(
     ? (ticketWithPrice.full.price.amountMinor / 100).toString()
     : '';
 
+  const currency = (ticketWithPrice?.full.price.currency as 'RUB' | 'USD') || 'RUB';
+
   // Extract description and whatToBring from description array
   const descriptions = eventData.description || [];
   const descriptionItem = descriptions.find(d => d.heading === 'Описание тренировки' || d.heading === 'Описание');
@@ -119,6 +121,7 @@ export function convertEventDataToFormData(
     location: eventData.location || '',
     prepayment,
     price,
+    currency,
     capacity: eventData.capacity?.toString() || '',
     images: [],
     existingImages: eventData.images || [],

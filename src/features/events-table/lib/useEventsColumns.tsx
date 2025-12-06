@@ -30,7 +30,7 @@ export function useEventsColumns({ handleEdit, handleDelete }: UseEventsColumnsP
       }),
       columnHelper.accessor('location', {
         header: 'Место',
-        cell: info => info.getValue() || 'Not specified',
+        cell: info => info.getValue() || '—',
       }),
       columnHelper.display({
         id: 'price',

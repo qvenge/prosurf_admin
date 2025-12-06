@@ -17,10 +17,6 @@ export function useEventFormValidation() {
       newErrors.title = 'Название обязательно';
     }
 
-    if (!formData.location.trim()) {
-      newErrors.location = 'Место обязательно';
-    }
-
     if (!formData.price.trim()) {
       newErrors.price = 'Цена обязательна';
     } else if (isNaN(Number(formData.price))) {

@@ -53,18 +53,30 @@ export function EventFormMainInfo() {
         hint={errors.prepayment}
       />
 
-      <TextInput
-        label="Цена"
-        name="price"
-        placeholder="7900"
-        type="number"
-        step="1"
-        min="0"
-        value={formData.price}
-        onChange={(e) => handleInputChangeWithClearError('price', e.target.value)}
-        error={!!errors.price}
-        hint={errors.price}
-      />
+      <div className={styles.priceRow}>
+        <TextInput
+          label="Цена"
+          name="price"
+          placeholder="7900"
+          type="number"
+          step="1"
+          min="0"
+          value={formData.price}
+          onChange={(e) => handleInputChangeWithClearError('price', e.target.value)}
+          error={!!errors.price}
+          hint={errors.price}
+        />
+        <Select
+          label="Валюта"
+          name="currency"
+          options={[
+            { label: '₽ RUB', value: 'RUB' },
+            { label: '$ USD', value: 'USD' },
+          ]}
+          value={formData.currency}
+          onChange={(value) => handleInputChangeWithClearError('currency', value)}
+        />
+      </div>
 
       <TextInput
         label="Кол-во мест"

@@ -22,6 +22,7 @@ export interface FormData {
   location: string;
   prepayment: string;
   price: string;
+  currency: 'RUB' | 'USD';
   capacity: string;
   images: File[];
   existingImages: string[];

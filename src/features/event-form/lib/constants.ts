@@ -5,6 +5,7 @@ export const defaultFormData: FormData = {
   location: '',
   prepayment: '',
   price: '',
+  currency: 'RUB',
   capacity: '',
   images: [],
   existingImages: [],
