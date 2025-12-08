@@ -792,6 +792,78 @@ export const CertificateFiltersSchema = z.object({
   limit: LimitParamSchema,
 });
 
+// Certificate Admin schemas
+export const CertificateStatusSchema = z.enum(['PENDING_ACTIVATION', 'ACTIVATED', 'EXPIRED']);
+
+export const ClientInfoSchema = z.object({
+  id: z.string(),
+  firstName: z.string().nullable().optional(),
+  lastName: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
+  photoUrl: z.string().nullable().optional(),
+});
+
+export const CertificateAdminSchema = z.object({
+  id: z.string(),
+  code: z.string(),
+  type: CertificateTypeSchema,
+  status: CertificateStatusSchema,
+  data: z.union([
+    DenominationCertDataSchema,
+    PassesCertDataSchema,
+  ]),
+  purchasedBy: ClientInfoSchema.nullable().optional(),
+  activatedBy: ClientInfoSchema.nullable().optional(),
+  activatedAt: z.string().datetime().nullable().optional(),
+  expiresAt: z.string().datetime().nullable().optional(),
+  createdAt: z.string().datetime(),
+});
+
+export const CertificateAdminPaginatedResponseSchema = z.object({
+  items: z.array(CertificateAdminSchema),
+  total: z.number().int(),
+  page: z.number().int(),
+  limit: z.number().int(),
+  totalPages: z.number().int(),
+});
+
+// Sort criterion for multi-column sorting
+export const CertificateSortFieldSchema = z.enum([
+  'createdAt',
+  'activatedAt',
+  'expiresAt',
+  'type',
+  'purchasedByName',
+  'activatedByName',
+]);
+
+export const SortCriterionSchema = z.object({
+  field: CertificateSortFieldSchema,
+  order: z.enum(['asc', 'desc']),
+});
+
+export const CertificateAdminFiltersSchema = z.object({
+  page: z.number().int().min(1).optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+  type: CertificateTypeSchema.optional(),
+  status: CertificateStatusSchema.optional(),
+  clientSearch: z.string().optional(),
+  sort: z.array(SortCriterionSchema).optional(),
+});
+
+export const AdminCreateCertificateDtoSchema = z.object({
+  type: CertificateTypeSchema,
+  amount: PriceSchema.optional(),
+  passes: z.number().int().min(1).optional(),
+  expiresAt: z.string().datetime().optional(),
+  purchasedByClientId: z.string().optional(),
+});
+
+export const AdminUpdateCertificateDtoSchema = z.object({
+  expiresAt: z.string().datetime().optional(),
+  status: CertificateStatusSchema.optional(),
+});
+
 export const SeasonTicketFiltersSchema = z.object({
   clientId: z.string().optional(),
   sessionId: z.string().optional(),

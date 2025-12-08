@@ -1,0 +1,52 @@
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: ds.number('paddings & gaps/M') 0;
+}
+
+.info {
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/secondary');
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: ds.number('paddings & gaps/S');
+}
+
+.pages {
+  display: flex;
+  align-items: center;
+  gap: ds.number('paddings & gaps/XS');
+}
+
+.pageButton {
+  @include ds.typo('body/b4/medium');
+  min-width: 32px;
+  height: 32px;
+  padding: 0 ds.number('paddings & gaps/S');
+  border: 1px solid ds.color('border/primary');
+  border-radius: ds.number('radius/S');
+  background: ds.color('background/primary');
+  color: ds.color('text/primary');
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: ds.color('background/secondary');
+  }
+
+  &.active {
+    background: ds.color('background/button-main/default');
+    color: ds.color('text/primary');
+    border-color: ds.color('background/button-main/default');
+  }
+}
+
+.ellipsis {
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/tertiary');
+  padding: 0 ds.number('paddings & gaps/XS');
+}

@@ -1,0 +1,136 @@
+.tableContainer {
+  border: 1px solid ds.color('border/primary');
+  border-radius: ds.number('radius/M');
+  background: ds.color('background/primary');
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.th {
+  @include ds.typo('body/b4/semibold');
+  padding: ds.number('paddings & gaps/M') ds.number('paddings & gaps/M');
+  text-align: left;
+  background: ds.color('background/secondary');
+  color: ds.color('text/primary');
+  border-bottom: 1px solid ds.color('border/primary');
+  white-space: nowrap;
+
+  &.sortable {
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+      background: ds.color('background/tertiary');
+    }
+  }
+}
+
+.thContent {
+  display: inline-flex;
+  align-items: center;
+  gap: ds.number('paddings & gaps/XS');
+}
+
+.sortIcon {
+  width: 16px;
+  height: 16px;
+  color: ds.color('text/accent');
+}
+
+.sortIconInactive {
+  color: ds.color('text/secondary');
+}
+
+.sortOrder {
+  @include ds.typo('body/b5/medium');
+  color: ds.color('text/accent');
+  margin-left: 2px;
+  font-size: 10px;
+}
+
+.td {
+  @include ds.typo('body/b4/regular');
+  padding: ds.number('paddings & gaps/M') ds.number('paddings & gaps/M');
+  color: ds.color('text/primary');
+  border-bottom: 1px solid ds.color('border/primary');
+  vertical-align: middle;
+}
+
+.row {
+  &:hover {
+    background: ds.color('background/secondary');
+  }
+
+  &:last-child .td {
+    border-bottom: none;
+  }
+}
+
+.type {
+  @include ds.typo('body/b5/medium');
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: ds.color('background/secondary');
+  color: ds.color('text/secondary');
+
+  &.typedenomination {
+    background: ds.color('background/success');
+    color: ds.color('text/success');
+  }
+
+  &.typepasses {
+    background: ds.color('background/secondary');
+    color: ds.color('text/accent');
+  }
+}
+
+.status {
+  &.statusEXPIRED {
+    color: ds.color('text/error/primary');
+  }
+}
+
+.actions {
+  display: flex;
+  gap: ds.number('paddings & gaps/XS');
+  justify-content: flex-end;
+}
+
+.loading,
+.empty {
+  @include ds.typo('body/b4/regular');
+  text-align: center;
+  padding: ds.number('paddings & gaps/XL') ds.number('paddings & gaps/M');
+  color: ds.color('text/tertiary');
+}
+
+.deleteModal {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/M');
+  padding: ds.number('paddings & gaps/L');
+  min-width: 320px;
+
+  h3 {
+    @include ds.typo('header/h4/semibold');
+    color: ds.color('text/primary');
+    margin: 0;
+  }
+
+  p {
+    @include ds.typo('body/b4/regular');
+    color: ds.color('text/secondary');
+    margin: 0;
+  }
+}
+
+.deleteModalActions {
+  display: flex;
+  gap: ds.number('paddings & gaps/M');
+  justify-content: flex-end;
+  margin-top: ds.number('paddings & gaps/M');
+}

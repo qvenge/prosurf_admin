@@ -1,0 +1,12 @@
+.filters {
+  display: flex;
+  gap: ds.number('paddings & gaps/M');
+  flex-wrap: wrap;
+  margin-bottom: ds.number('paddings & gaps/L');
+}
+
+.option {
+  // @include ds.typo('body/b4/regular');
+  // color: ds.color('text/primary');
+  white-space: nowrap;
+}

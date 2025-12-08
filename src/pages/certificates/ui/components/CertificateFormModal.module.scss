@@ -1,0 +1,42 @@
+.modal {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/L');
+  padding: ds.number('paddings & gaps/L');
+  min-width: 400px;
+}
+
+.title {
+  @include ds.typo('header/h3/semibold');
+  color: ds.color('text/primary');
+  margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/M');
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/XS');
+}
+
+.label {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/secondary');
+}
+
+.actions {
+  display: flex;
+  gap: ds.number('paddings & gaps/M');
+  justify-content: flex-end;
+  margin-top: ds.number('paddings & gaps/M');
+}
+
+.error {
+  @include ds.typo('body/b5/regular');
+  color: ds.color('text/error/primary');
+}

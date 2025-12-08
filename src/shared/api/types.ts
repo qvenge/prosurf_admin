@@ -79,10 +79,21 @@ export type Refund = z.infer<typeof schemas.RefundSchema>;
 
 // Certificate types
 export type CertificateType = z.infer<typeof schemas.CertificateTypeSchema>;
+export type CertificateStatus = z.infer<typeof schemas.CertificateStatusSchema>;
 export type DenominationCertData = z.infer<typeof schemas.DenominationCertDataSchema>;
 export type PassesCertData = z.infer<typeof schemas.PassesCertDataSchema>;
 export type Certificate = z.infer<typeof schemas.CertificateSchema>;
 export type CertificateCreateDto = z.infer<typeof schemas.CertificateCreateDtoSchema>;
+
+// Certificate Admin types
+export type ClientInfo = z.infer<typeof schemas.ClientInfoSchema>;
+export type CertificateAdmin = z.infer<typeof schemas.CertificateAdminSchema>;
+export type CertificateAdminPaginatedResponse = z.infer<typeof schemas.CertificateAdminPaginatedResponseSchema>;
+export type CertificateSortField = z.infer<typeof schemas.CertificateSortFieldSchema>;
+export type SortCriterion = z.infer<typeof schemas.SortCriterionSchema>;
+export type CertificateAdminFilters = z.infer<typeof schemas.CertificateAdminFiltersSchema>;
+export type AdminCreateCertificateDto = z.infer<typeof schemas.AdminCreateCertificateDtoSchema>;
+export type AdminUpdateCertificateDto = z.infer<typeof schemas.AdminUpdateCertificateDtoSchema>;
 
 // Season ticket types
 export type SeasonTicketMatchMode = z.infer<typeof schemas.SeasonTicketMatchModeSchema>;

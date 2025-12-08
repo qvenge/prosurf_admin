@@ -11,6 +11,12 @@ import {
   GearSixRegular,
   GearSixFill,
 
+  // TicketRegular,
+  // TicketFill,
+
+  CertificateRegular,
+  CertificateFill
+
 } from '@/shared/ds/icons';
 
 export const navItems = [
@@ -34,6 +40,13 @@ export const navItems = [
     iconDefault: ListBulletsRegular,
     iconActive: ListBulletsFill,
     path: '/templates'
+  },
+  {
+    id: 'certificates',
+    title: 'Сертификаты',
+    iconDefault: CertificateRegular,
+    iconActive: CertificateFill,
+    path: '/certificates'
   },
   {
     id: 'settings',

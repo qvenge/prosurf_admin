@@ -1,0 +1,50 @@
+.clientCell {
+  display: flex;
+  align-items: center;
+  gap: ds.number('paddings & gaps/S');
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.avatarPlaceholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: ds.color('background/secondary');
+  color: ds.color('text/secondary');
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  @include ds.typo('body/b4/medium');
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.name {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/primary');
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.phone {
+  @include ds.typo('body/b5/regular');
+  color: ds.color('text/secondary');
+}
+
+.empty {
+  color: ds.color('text/tertiary');
+}
