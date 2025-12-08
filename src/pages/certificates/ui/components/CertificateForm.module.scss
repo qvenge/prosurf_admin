@@ -1,9 +1,8 @@
-.modal {
+.root {
   display: flex;
   flex-direction: column;
   gap: ds.number('paddings & gaps/L');
   padding: ds.number('paddings & gaps/L');
-  min-width: 400px;
 }
 
 .title {

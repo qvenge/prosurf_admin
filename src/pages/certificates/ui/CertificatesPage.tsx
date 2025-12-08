@@ -1,11 +1,11 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
-import { Button } from '@/shared/ui';
+import { Button, SideModal } from '@/shared/ui';
 import { useCertificatesAdmin, type CertificateAdminFilters, type SortCriterion } from '@/shared/api';
 import { CertificatesTable } from './components/CertificatesTable';
 import { CertificatesFilters } from './components/CertificatesFilters';
 import { CertificatePagination } from './components/CertificatePagination';
-import { CertificateFormModal } from './components/CertificateFormModal';
+import { CertificateForm } from './components/CertificateForm';
 import styles from './CertificatesPage.module.scss';
 
 function serializeSort(sort: SortCriterion[]): string {
@@ -131,7 +131,9 @@ export function CertificatesPage() {
       </div>
 
       {modalState.isOpen && (
-        <CertificateFormModal certificateId={modalState.certificateId} onClose={handleCloseModal} />
+        <SideModal onClose={handleCloseModal}>
+          <CertificateForm certificateId={modalState.certificateId} onClose={handleCloseModal} />
+        </SideModal>
       )}
     </div>
   );

@@ -22,8 +22,8 @@ interface CertificatesTableProps {
 }
 
 const TYPE_LABELS: Record<string, string> = {
-  denomination: 'Денежный',
-  passes: 'На посещение',
+  denomination: 'Номинал',
+  passes: 'Разовый',
 };
 
 const COLUMNS: Array<{
@@ -105,7 +105,7 @@ export function CertificatesTable({
     if ('amount' in cert.data) {
       return formatPrice(cert.data.amount);
     }
-    return `${cert.data.passes} посещение`;
+    return `-`;
   };
 
   return (
