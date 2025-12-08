@@ -35,8 +35,8 @@
   flex: 1;
   display: flex;
   align-items: center;
-  height: 48px;
-  padding: 0 ds.number('paddings & gaps/S');
+  min-height: 48px;
+  padding: ds.number('paddings & gaps/XS') ds.number('paddings & gaps/S');
   border: 1px solid ds.color('border/primary');
   border-radius: ds.number('radius/M');
 }
@@ -47,14 +47,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.ticketDeleted {
-  opacity: 0.5;
-
-  .ticketName {
-    text-decoration: line-through;
-  }
 }
 
 .ticketPending {

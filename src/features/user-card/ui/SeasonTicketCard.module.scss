@@ -1,68 +1,50 @@
 .card {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  background: ds.color('background/secondary');
+  gap: ds.number('paddings & gaps/XXS');
+  align-items: center;
+  padding: ds.number('paddings & gaps/XS') ds.number('paddings & gaps/S');
+  border: 1px solid ds.color('border/primary');
   border-radius: ds.number('radius/M');
 }
 
-.header {
+.content {
+  flex: 1;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/3XS');
+  min-height: 48px;
+  min-width: 0;
+  justify-content: center;
 }
 
-.planName {
-  @include ds.typo('body/b4/medium');
+.name {
+  @include ds.typo('body/b3/regular');
   color: ds.color('text/primary');
-}
-
-.status {
-  @include ds.typo('body/b5/regular');
-  padding: 4px 8px;
-  border-radius: ds.number('radius/S');
-}
-
-.statusACTIVE {
-  background: ds.color('background/success');
-  color: ds.color('text/success');
-}
-
-.statusEXPIRED {
-  background: ds.color('background/warning');
-  color: ds.color('text/warning');
-}
-
-.statusCANCELLED {
-  background: ds.color('background/error');
-  color: ds.color('text/error/primary');
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .details {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .detail {
-  display: flex;
-  justify-content: space-between;
-}
-
-.label {
-  @include ds.typo('body/b5/regular');
+  @include ds.typo('body/b4/regular');
   color: ds.color('text/secondary');
 }
 
-.value {
+.separator {
   @include ds.typo('body/b4/regular');
-  color: ds.color('text/primary');
+  color: ds.color('text/secondary');
 }
 
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 8px;
-  border-top: 1px solid ds.color('border/primary');
+.deleted {
+  opacity: 0.5;
+
+  .name {
+    text-decoration: line-through;
+  }
 }

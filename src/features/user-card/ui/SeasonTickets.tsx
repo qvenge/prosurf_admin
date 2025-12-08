@@ -2,7 +2,8 @@ import { useState, useRef } from 'react';
 import type { Client } from '@/shared/api';
 import { useClientSeasonTickets, useCancelSeasonTicket, useSeasonTicketPlans, useGrantSeasonTicket } from '@/shared/api';
 import { Dropdown, Loader, Icon, IconButton, Button } from '@/shared/ui';
-import { PlusBold, CaretDownBold, TrashRegular, ArrowCounterClockwiseRegular } from '@/shared/ds/icons';
+import { PlusBold, CaretDownBold, ArrowCounterClockwiseRegular } from '@/shared/ds/icons';
+import { SeasonTicketCard } from './SeasonTicketCard';
 import styles from './SeasonTickets.module.scss';
 
 export interface SeasonTicketsProps {
@@ -79,23 +80,16 @@ export function SeasonTickets({ client }: SeasonTicketsProps) {
         {hasTickets ? (
           <>
             <div className={styles.ticketsList}>
-              {activeTickets.map((ticket) => {
-                const isDeleted = pendingDeletions.includes(ticket.id);
-                return (
-                  <div key={ticket.id} className={`${styles.ticketRow} ${isDeleted ? styles.ticketDeleted : ''}`}>
-                    <div className={styles.ticketField}>
-                      <span className={styles.ticketName}>{ticket.plan.name}</span>
-                    </div>
-                    <IconButton
-                      type="secondary"
-                      size="l"
-                      src={isDeleted ? ArrowCounterClockwiseRegular : TrashRegular}
-                      onClick={() => isDeleted ? handleUndoCancel(ticket.id) : handleCancel(ticket.id)}
-                      disabled={isSaving}
-                    />
-                  </div>
-                );
-              })}
+              {activeTickets.map((ticket) => (
+                <SeasonTicketCard
+                  key={ticket.id}
+                  ticket={ticket}
+                  isDeleted={pendingDeletions.includes(ticket.id)}
+                  disabled={isSaving}
+                  onDelete={() => handleCancel(ticket.id)}
+                  onRestore={() => handleUndoCancel(ticket.id)}
+                />
+              ))}
               {pendingAdditions.map((addition) => (
                 <div key={addition.key} className={`${styles.ticketRow} ${styles.ticketPending}`}>
                   <div className={styles.ticketField}>
