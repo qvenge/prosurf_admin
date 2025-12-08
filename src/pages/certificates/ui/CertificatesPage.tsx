@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
+import { useSearchParams } from 'react-router';
 import { Button } from '@/shared/ui';
 import { useCertificatesAdmin, type CertificateAdminFilters, type SortCriterion } from '@/shared/api';
 import { CertificatesTable } from './components/CertificatesTable';
@@ -7,41 +8,85 @@ import { CertificatePagination } from './components/CertificatePagination';
 import { CertificateFormModal } from './components/CertificateFormModal';
 import styles from './CertificatesPage.module.scss';
 
-export function CertificatesPage() {
-  const [filters, setFilters] = useState<CertificateAdminFilters>({
-    page: 1,
-    limit: 20,
-    sort: [],
+function serializeSort(sort: SortCriterion[]): string {
+  return sort.map((s) => `${s.field}:${s.order}`).join(',');
+}
+
+function parseSort(param: string | null): SortCriterion[] {
+  if (!param) return [];
+  return param.split(',').map((item) => {
+    const [field, order] = item.split(':');
+    return { field, order: order as 'asc' | 'desc' };
   });
+}
+
+export function CertificatesPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [modalState, setModalState] = useState<{ isOpen: boolean; certificateId: string | null }>({
     isOpen: false,
     certificateId: null,
   });
 
+  const filters: CertificateAdminFilters = useMemo(
+    () => ({
+      page: Number(searchParams.get('page')) || 1,
+      limit: Number(searchParams.get('limit')) || 20,
+      sort: parseSort(searchParams.get('sort')),
+      type: (searchParams.get('type') as CertificateAdminFilters['type']) || undefined,
+      status: (searchParams.get('status') as CertificateAdminFilters['status']) || undefined,
+      clientSearch: searchParams.get('clientSearch') || undefined,
+    }),
+    [searchParams]
+  );
+
   const { data, isLoading } = useCertificatesAdmin(filters);
 
-  const handleFilterChange = useCallback((newFilters: Partial<CertificateAdminFilters>) => {
-    setFilters((prev) => ({
-      ...prev,
-      ...newFilters,
-      page: 1, // Reset to first page when filters change
-    }));
-  }, []);
+  const handleFilterChange = useCallback(
+    (newFilters: Partial<CertificateAdminFilters>) => {
+      const params = new URLSearchParams(searchParams);
+      params.set('page', '1');
 
-  const handleSortChange = useCallback((sort: SortCriterion[]) => {
-    setFilters((prev) => ({
-      ...prev,
-      sort,
-      page: 1, // Reset to first page when sort changes
-    }));
-  }, []);
+      Object.entries(newFilters).forEach(([key, value]) => {
+        if (value === undefined || value === null || value === '') {
+          params.delete(key);
+        } else if (key === 'sort' && Array.isArray(value)) {
+          if (value.length > 0) {
+            params.set('sort', serializeSort(value));
+          } else {
+            params.delete('sort');
+          }
+        } else {
+          params.set(key, String(value));
+        }
+      });
 
-  const handlePageChange = useCallback((page: number) => {
-    setFilters((prev) => ({
-      ...prev,
-      page,
-    }));
-  }, []);
+      setSearchParams(params);
+    },
+    [searchParams, setSearchParams]
+  );
+
+  const handleSortChange = useCallback(
+    (sort: SortCriterion[]) => {
+      const params = new URLSearchParams(searchParams);
+      params.set('page', '1');
+      if (sort.length > 0) {
+        params.set('sort', serializeSort(sort));
+      } else {
+        params.delete('sort');
+      }
+      setSearchParams(params);
+    },
+    [searchParams, setSearchParams]
+  );
+
+  const handlePageChange = useCallback(
+    (page: number) => {
+      const params = new URLSearchParams(searchParams);
+      params.set('page', String(page));
+      setSearchParams(params);
+    },
+    [searchParams, setSearchParams]
+  );
 
   const handleCreate = useCallback(() => {
     setModalState({ isOpen: true, certificateId: null });

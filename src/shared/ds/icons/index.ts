@@ -105,3 +105,5 @@ export { default as GiftBold } from '@/shared/ds/icons/20/gift_bold.svg';
 export { default as ClockCounterClockwiseBold } from '@/shared/ds/icons/20/clock-counter-clockwise_bold.svg';
 
 export { default as ArrowCounterClockwiseRegular } from '@/shared/ds/icons/20/arrow-counter-clockwise_regular.svg';
+
+export { default as MagnifyingGlassRegular } from '@/shared/ds/icons/20/magnifying-glass_regular.svg';
