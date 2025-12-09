@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Button, Select, TextInput, ClientSearchInput } from '@/shared/ui';
+import { Button, Select, TextInput, ClientSearchInput, Icon, ButtonContainer } from '@/shared/ui';
+import { CopyRegular, CheckRegular } from '@/shared/ds/icons';
 import {
   useCreateCertificateAdmin,
   useUpdateCertificateAdmin,
@@ -43,6 +44,7 @@ export function CertificateForm({ certificateId, onClose }: CertificateFormProps
   // Form state for edit
   const [editExpiresAt, setEditExpiresAt] = useState('');
   const [editStatus, setEditStatus] = useState('');
+  const [copied, setCopied] = useState(false);
 
   // Load certificate data when editing
   useEffect(() => {
@@ -108,10 +110,22 @@ export function CertificateForm({ certificateId, onClose }: CertificateFormProps
           <>
             <div className={styles.field}>
               <span className={styles.label}>Код</span>
-              <TextInput value={certificate?.code || ''} disabled />
+              <TextInput value={certificate?.code || ''} readOnly>
+                <ButtonContainer
+                  onClick={() => {
+                    if (certificate?.code) {
+                      navigator.clipboard.writeText(certificate.code);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    }
+                  }}
+                >
+                  <Icon src={copied ? CheckRegular : CopyRegular} width={20} height={20} />
+                </ButtonContainer>
+              </TextInput>
             </div>
 
-            <div className={styles.field}>
+            {/* <div className={styles.field}>
               <span className={styles.label}>Статус</span>
               <Select
                 value={editStatus}
@@ -119,7 +133,7 @@ export function CertificateForm({ certificateId, onClose }: CertificateFormProps
                 onChange={setEditStatus}
                 placeholder="Выберите статус"
               />
-            </div>
+            </div> */}
 
             <div className={styles.field}>
               <span className={styles.label}>Срок действия</span>

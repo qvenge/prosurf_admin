@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
-import { Button, SideModal } from '@/shared/ui';
+import { Button, SideModal, Header, Icon } from '@/shared/ui';
+import { PlusBold } from '@/shared/ds/icons';
 import { useCertificatesAdmin, type CertificateAdminFilters, type SortCriterion } from '@/shared/api';
 import { CertificatesTable } from './components/CertificatesTable';
 import { CertificatesFilters } from './components/CertificatesFilters';
@@ -101,15 +102,19 @@ export function CertificatesPage() {
   }, []);
 
   return (
-    <div className={styles.page}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Сертификаты</h1>
-        <Button type="primary" size="m" onClick={handleCreate}>
-          Создать сертификат
+    <>
+      <Header title="Сертификаты">
+        <Button type="primary" size="l" onClick={handleCreate}>
+          <Icon
+            className={styles.addIcon}
+            src={PlusBold}
+            width={20}
+            height={20}
+          />
+          Добавить
         </Button>
-      </div>
-
-      <div className={styles.content}>
+      </Header>
+      <div className={styles.page}>
         <CertificatesFilters filters={filters} onFilterChange={handleFilterChange} />
 
         <CertificatesTable
@@ -135,6 +140,6 @@ export function CertificatesPage() {
           <CertificateForm certificateId={modalState.certificateId} onClose={handleCloseModal} />
         </SideModal>
       )}
-    </div>
+    </>
   );
 }

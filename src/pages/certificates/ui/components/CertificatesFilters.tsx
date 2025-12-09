@@ -1,5 +1,8 @@
+import { useState, useEffect, useRef } from 'react';
 import { Select, TextInput } from '@/shared/ui';
 import type { CertificateAdminFilters } from '@/shared/api';
+import { MagnifyingGlassRegular } from '@/shared/ds/icons';
+import { useDebounce } from '@/shared/lib/hooks/useDebounce';
 import styles from './CertificatesFilters.module.scss';
 
 interface CertificatesFiltersProps {
@@ -21,6 +24,24 @@ const statusOptions = [
 ];
 
 export function CertificatesFilters({ filters, onFilterChange }: CertificatesFiltersProps) {
+  const [searchValue, setSearchValue] = useState(filters.clientSearch || '');
+  const debouncedSearch = useDebounce(searchValue, 300);
+  const isInternalChange = useRef(false);
+
+  useEffect(() => {
+    if (!isInternalChange.current) {
+      setSearchValue(filters.clientSearch || '');
+    }
+    isInternalChange.current = false;
+  }, [filters.clientSearch]);
+
+  useEffect(() => {
+    if (debouncedSearch !== filters.clientSearch) {
+      isInternalChange.current = true;
+      onFilterChange({ clientSearch: debouncedSearch || undefined });
+    }
+  }, [debouncedSearch, filters.clientSearch, onFilterChange]);
+
   return (
     <div className={styles.filters}>
       <Select
@@ -42,8 +63,9 @@ export function CertificatesFilters({ filters, onFilterChange }: CertificatesFil
       />
 
       <TextInput
-        value={filters.clientSearch || ''}
-        onChange={(e) => onFilterChange({ clientSearch: e.target.value || undefined })}
+        leftIcon={MagnifyingGlassRegular}
+        value={searchValue}
+        onChange={(e) => setSearchValue(e.target.value)}
         placeholder="Поиск по клиенту"
       />
     </div>

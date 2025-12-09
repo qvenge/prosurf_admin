@@ -47,6 +47,7 @@ export { default as XRegular } from '@/shared/ds/icons/20/x_regular.svg';
 export { default as WaveformFill } from '@/shared/ds/icons/20/waveform_fill.svg';
 
 export { default as CheckBold } from '@/shared/ds/icons/20/check_bold.svg';
+export { default as CheckRegular } from '@/shared/ds/icons/20/check_regular.svg';
 
 export { default as EyeClosedRegular } from '@/shared/ds/icons/20/eye-closed_regular.svg';
 export { default as EyeRegular } from '@/shared/ds/icons/20/eye_regular.svg';
@@ -107,3 +108,4 @@ export { default as ClockCounterClockwiseBold } from '@/shared/ds/icons/20/clock
 export { default as ArrowCounterClockwiseRegular } from '@/shared/ds/icons/20/arrow-counter-clockwise_regular.svg';
 
 export { default as MagnifyingGlassRegular } from '@/shared/ds/icons/20/magnifying-glass_regular.svg';
+export { default as CopyRegular } from '@/shared/ds/icons/20/copy_regular.svg';

@@ -18,6 +18,7 @@ interface TextInputProps extends Omit<Parent, 'type' | 'size'> {
   hint?: string;
   error?: boolean;
   size?: 'small' | 'medium' | 'large';
+  leftIcon?: string;
 }
 
 export function TextInput({
@@ -30,6 +31,7 @@ export function TextInput({
   hint,
   size = 'large',
   error,
+  leftIcon,
   children,
   ...inputProps
 }: TextInputProps) {
@@ -101,6 +103,14 @@ export function TextInput({
         {label}
       </label>}
       <div className={styles.inputWrapper}>
+        {leftIcon && (
+          <Icon
+            className={styles.leftIcon}
+            src={leftIcon}
+            width={20}
+            height={20}
+          />
+        )}
         <input
           ref={inputRef}
           className={styles.input}

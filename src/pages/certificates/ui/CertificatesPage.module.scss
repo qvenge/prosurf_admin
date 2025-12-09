@@ -1,24 +1,6 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: ds.number('paddings & gaps/L');
-  padding: ds.number('paddings & gaps/L');
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.title {
-  @include ds.typo('header/h2/semibold');
-  color: ds.color('text/primary');
-  margin: 0;
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
   gap: ds.number('paddings & gaps/M');
+  padding: ds.number('paddings & gaps/L');
 }
