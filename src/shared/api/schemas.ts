@@ -932,3 +932,52 @@ export const ImageFiltersSchema = z.object({
   uploadedBefore: z.string().datetime().optional(),
   uploadedByAdminId: z.string().optional(),
 });
+
+// ========================================
+// Page-Based Pagination Schemas for Admin
+// ========================================
+
+// Generic page-based pagination response schema
+export const PageBasedPaginatedResponseSchema = <T>(itemSchema: z.ZodSchema<T>) =>
+  z.object({
+    items: z.array(itemSchema),
+    total: z.number().int(),
+    page: z.number().int(),
+    limit: z.number().int(),
+    totalPages: z.number().int(),
+  });
+
+// Admin entity list filter schemas
+export const ClientAdminFiltersSchema = z.object({
+  page: z.number().int().min(1).optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+  search: z.string().optional(),
+});
+
+export const EventAdminFiltersSchema = z.object({
+  page: z.number().int().min(1).optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+  search: z.string().optional(),
+  status: EventStatusSchema.optional(),
+  labels: z.array(z.string()).optional(),
+});
+
+export const SessionAdminFiltersSchema = z.object({
+  page: z.number().int().min(1).optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+  eventId: z.string().optional(),
+  status: SessionStatusSchema.optional(),
+  labels: z.array(z.string()).optional(),
+});
+
+export const SeasonTicketPlanAdminFiltersSchema = z.object({
+  page: z.number().int().min(1).optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+  search: z.string().optional(),
+});
+
+// Page-based paginated response schemas for admin entities
+export const ClientAdminPaginatedResponseSchema = PageBasedPaginatedResponseSchema(ClientSchema);
+export const EventAdminPaginatedResponseSchema = PageBasedPaginatedResponseSchema(EventSchema);
+export const SessionAdminPaginatedResponseSchema = PageBasedPaginatedResponseSchema(SessionSchema);
+export const SeasonTicketPlanAdminPaginatedResponseSchema = PageBasedPaginatedResponseSchema(SeasonTicketPlanSchema);

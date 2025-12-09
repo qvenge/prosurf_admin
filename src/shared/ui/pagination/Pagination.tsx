@@ -1,19 +1,21 @@
 import { Button } from '@/shared/ui';
-import styles from './CertificatePagination.module.scss';
+import styles from './Pagination.module.scss';
 
-interface CertificatePaginationProps {
+export interface PaginationProps {
   page: number;
   totalPages: number;
   total: number;
   onPageChange: (page: number) => void;
+  className?: string;
 }
 
-export function CertificatePagination({
+export function Pagination({
   page,
   totalPages,
   total,
   onPageChange,
-}: CertificatePaginationProps) {
+  className,
+}: PaginationProps) {
   // Generate page numbers to show
   const getPageNumbers = (): (number | 'ellipsis')[] => {
     const pages: (number | 'ellipsis')[] = [];
@@ -41,14 +43,14 @@ export function CertificatePagination({
 
   if (totalPages <= 1) {
     return (
-      <div className={styles.pagination}>
+      <div className={`${styles.pagination} ${className || ''}`}>
         <span className={styles.info}>Всего: {total}</span>
       </div>
     );
   }
 
   return (
-    <div className={styles.pagination}>
+    <div className={`${styles.pagination} ${className || ''}`}>
       <span className={styles.info}>Всего: {total}</span>
 
       <div className={styles.controls}>

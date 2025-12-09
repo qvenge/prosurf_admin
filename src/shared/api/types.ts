@@ -227,3 +227,28 @@ export interface QueryKeyFactory {
   details: () => readonly string[];
   detail: (id: string) => readonly string[];
 }
+
+// ========================================
+// Page-Based Pagination Types for Admin
+// ========================================
+
+// Generic page-based pagination response type
+export interface PageBasedPaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+// Admin entity filter types
+export type ClientAdminFilters = z.infer<typeof schemas.ClientAdminFiltersSchema>;
+export type EventAdminFilters = z.infer<typeof schemas.EventAdminFiltersSchema>;
+export type SessionAdminFilters = z.infer<typeof schemas.SessionAdminFiltersSchema>;
+export type SeasonTicketPlanAdminFilters = z.infer<typeof schemas.SeasonTicketPlanAdminFiltersSchema>;
+
+// Admin entity paginated response types
+export type ClientAdminPaginatedResponse = z.infer<typeof schemas.ClientAdminPaginatedResponseSchema>;
+export type EventAdminPaginatedResponse = z.infer<typeof schemas.EventAdminPaginatedResponseSchema>;
+export type SessionAdminPaginatedResponse = z.infer<typeof schemas.SessionAdminPaginatedResponseSchema>;
+export type SeasonTicketPlanAdminPaginatedResponse = z.infer<typeof schemas.SeasonTicketPlanAdminPaginatedResponseSchema>;

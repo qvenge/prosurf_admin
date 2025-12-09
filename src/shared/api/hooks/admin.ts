@@ -10,6 +10,10 @@ import type {
   AuditLog,
   AuditLogFilters,
   PaginatedResponse,
+  ClientAdminFilters,
+  EventAdminFilters,
+  SessionAdminFilters,
+  SeasonTicketPlanAdminFilters,
 } from '../types';
 
 // Query key factory for admin operations
@@ -24,6 +28,11 @@ export const adminKeys = {
   // Admin-only operations
   auditLogs: (filters?: AuditLogFilters) => [...adminKeys.all, 'audit-logs', filters] as const,
   jobs: () => [...adminKeys.all, 'jobs'] as const,
+  // Admin entity lists (page-based pagination)
+  clientsAdmin: (filters?: ClientAdminFilters) => [...adminKeys.all, 'clients-admin', filters] as const,
+  eventsAdmin: (filters?: EventAdminFilters) => [...adminKeys.all, 'events-admin', filters] as const,
+  sessionsAdmin: (filters?: SessionAdminFilters) => [...adminKeys.all, 'sessions-admin', filters] as const,
+  seasonTicketPlansAdmin: (filters?: SeasonTicketPlanAdminFilters) => [...adminKeys.all, 'season-ticket-plans-admin', filters] as const,
 } as const;
 
 // ============================================
@@ -201,5 +210,53 @@ export const useRunCertificateExpiryJob = () => {
 export const useRunSeasonTicketExpiryJob = () => {
   return useMutation({
     mutationFn: () => adminClient.runSeasonTicketExpiryJob(),
+  });
+};
+
+// ============================================
+// Admin Entity List Hooks (Page-Based Pagination)
+// ============================================
+
+/**
+ * Get clients list with page-based pagination
+ */
+export const useClientsAdmin = (filters?: ClientAdminFilters) => {
+  return useQuery({
+    queryKey: adminKeys.clientsAdmin(filters),
+    queryFn: () => adminClient.getClientsAdmin(filters),
+    staleTime: 30 * 1000, // 30 seconds
+  });
+};
+
+/**
+ * Get events list with page-based pagination
+ */
+export const useEventsAdmin = (filters?: EventAdminFilters) => {
+  return useQuery({
+    queryKey: adminKeys.eventsAdmin(filters),
+    queryFn: () => adminClient.getEventsAdmin(filters),
+    staleTime: 30 * 1000,
+  });
+};
+
+/**
+ * Get sessions list with page-based pagination
+ */
+export const useSessionsAdmin = (filters?: SessionAdminFilters) => {
+  return useQuery({
+    queryKey: adminKeys.sessionsAdmin(filters),
+    queryFn: () => adminClient.getSessionsAdmin(filters),
+    staleTime: 30 * 1000,
+  });
+};
+
+/**
+ * Get season ticket plans list with page-based pagination
+ */
+export const useSeasonTicketPlansAdmin = (filters?: SeasonTicketPlanAdminFilters) => {
+  return useQuery({
+    queryKey: adminKeys.seasonTicketPlansAdmin(filters),
+    queryFn: () => adminClient.getSeasonTicketPlansAdmin(filters),
+    staleTime: 30 * 1000,
   });
 };

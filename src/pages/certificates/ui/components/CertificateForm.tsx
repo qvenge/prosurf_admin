@@ -21,12 +21,6 @@ const typeOptions = [
   { value: 'passes', label: 'Разовый' },
 ];
 
-const statusOptions = [
-  { value: 'PENDING_ACTIVATION', label: 'Ожидает активации' },
-  { value: 'ACTIVATED', label: 'Активирован' },
-  { value: 'EXPIRED', label: 'Истёк' },
-];
-
 export function CertificateForm({ certificateId, onClose }: CertificateFormProps) {
   const isEditing = Boolean(certificateId);
 

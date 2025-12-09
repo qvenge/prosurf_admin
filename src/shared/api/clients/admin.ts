@@ -9,7 +9,15 @@ import {
   AuditLogSchema,
   JobExecutionResultSchema,
   PaginatedResponseSchema,
-  AuditLogFiltersSchema
+  AuditLogFiltersSchema,
+  ClientAdminFiltersSchema,
+  ClientAdminPaginatedResponseSchema,
+  EventAdminFiltersSchema,
+  EventAdminPaginatedResponseSchema,
+  SessionAdminFiltersSchema,
+  SessionAdminPaginatedResponseSchema,
+  SeasonTicketPlanAdminFiltersSchema,
+  SeasonTicketPlanAdminPaginatedResponseSchema,
 } from '../schemas';
 import type {
   Admin,
@@ -21,7 +29,15 @@ import type {
   AuditLog,
   JobExecutionResult,
   PaginatedResponse,
-  AuditLogFilters
+  AuditLogFilters,
+  ClientAdminFilters,
+  ClientAdminPaginatedResponse,
+  EventAdminFilters,
+  EventAdminPaginatedResponse,
+  SessionAdminFilters,
+  SessionAdminPaginatedResponse,
+  SeasonTicketPlanAdminFilters,
+  SeasonTicketPlanAdminPaginatedResponse,
 } from '../types';
 
 /**
@@ -163,5 +179,57 @@ export const adminClient = {
   async runSeasonTicketExpiryJob(): Promise<JobExecutionResult> {
     const response = await apiClient.post('/admin/jobs/run/season-ticket-expiry');
     return validateResponse(response.data, JobExecutionResultSchema);
+  },
+
+  // ============================================
+  // Admin Entity List Endpoints (Page-Based Pagination)
+  // ============================================
+
+  /**
+   * Get clients list for admin (ADMIN only)
+   * GET /admin/clients
+   */
+  async getClientsAdmin(filters?: ClientAdminFilters): Promise<ClientAdminPaginatedResponse> {
+    const validatedFilters = ClientAdminFiltersSchema.parse(filters || {});
+    const queryString = createQueryString(validatedFilters);
+
+    const response = await apiClient.get(`/admin/clients${queryString}`);
+    return validateResponse(response.data, ClientAdminPaginatedResponseSchema);
+  },
+
+  /**
+   * Get events list for admin (ADMIN only)
+   * GET /admin/events
+   */
+  async getEventsAdmin(filters?: EventAdminFilters): Promise<EventAdminPaginatedResponse> {
+    const validatedFilters = EventAdminFiltersSchema.parse(filters || {});
+    const queryString = createQueryString(validatedFilters);
+
+    const response = await apiClient.get(`/admin/events${queryString}`);
+    return validateResponse(response.data, EventAdminPaginatedResponseSchema);
+  },
+
+  /**
+   * Get sessions list for admin (ADMIN only)
+   * GET /admin/sessions
+   */
+  async getSessionsAdmin(filters?: SessionAdminFilters): Promise<SessionAdminPaginatedResponse> {
+    const validatedFilters = SessionAdminFiltersSchema.parse(filters || {});
+    const queryString = createQueryString(validatedFilters);
+
+    const response = await apiClient.get(`/admin/sessions${queryString}`);
+    return validateResponse(response.data, SessionAdminPaginatedResponseSchema);
+  },
+
+  /**
+   * Get season ticket plans list for admin (ADMIN only)
+   * GET /admin/season-ticket-plans
+   */
+  async getSeasonTicketPlansAdmin(filters?: SeasonTicketPlanAdminFilters): Promise<SeasonTicketPlanAdminPaginatedResponse> {
+    const validatedFilters = SeasonTicketPlanAdminFiltersSchema.parse(filters || {});
+    const queryString = createQueryString(validatedFilters);
+
+    const response = await apiClient.get(`/admin/season-ticket-plans${queryString}`);
+    return validateResponse(response.data, SeasonTicketPlanAdminPaginatedResponseSchema);
   },
 };

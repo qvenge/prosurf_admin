@@ -1,11 +1,10 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
-import { Button, SideModal, Header, Icon } from '@/shared/ui';
+import { Button, SideModal, Header, Icon, Pagination, type SortCriterion } from '@/shared/ui';
 import { PlusBold } from '@/shared/ds/icons';
-import { useCertificatesAdmin, type CertificateAdminFilters, type SortCriterion } from '@/shared/api';
+import { useCertificatesAdmin, type CertificateAdminFilters } from '@/shared/api';
 import { CertificatesTable } from './components/CertificatesTable';
 import { CertificatesFilters } from './components/CertificatesFilters';
-import { CertificatePagination } from './components/CertificatePagination';
 import { CertificateForm } from './components/CertificateForm';
 import styles from './CertificatesPage.module.scss';
 
@@ -28,16 +27,18 @@ export function CertificatesPage() {
     certificateId: null,
   });
 
-  const filters: CertificateAdminFilters = useMemo(
+  const sort = useMemo(() => parseSort(searchParams.get('sort')), [searchParams]);
+
+  const filters = useMemo(
     () => ({
       page: Number(searchParams.get('page')) || 1,
       limit: Number(searchParams.get('limit')) || 20,
-      sort: parseSort(searchParams.get('sort')),
+      sort: sort as CertificateAdminFilters['sort'],
       type: (searchParams.get('type') as CertificateAdminFilters['type']) || undefined,
       status: (searchParams.get('status') as CertificateAdminFilters['status']) || undefined,
       clientSearch: searchParams.get('clientSearch') || undefined,
     }),
-    [searchParams]
+    [searchParams, sort]
   );
 
   const { data, isLoading } = useCertificatesAdmin(filters);
@@ -120,13 +121,13 @@ export function CertificatesPage() {
         <CertificatesTable
           data={data?.items || []}
           isLoading={isLoading}
-          sort={filters.sort || []}
+          sort={sort}
           onSortChange={handleSortChange}
           onEdit={handleEdit}
         />
 
-        {data && data.totalPages > 1 && (
-          <CertificatePagination
+        {data && (
+          <Pagination
             page={data.page}
             totalPages={data.totalPages}
             total={data.total}

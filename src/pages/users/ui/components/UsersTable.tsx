@@ -1,250 +1,143 @@
-import { useMemo, useRef, useState, useEffect } from 'react';
-import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  flexRender,
-  createColumnHelper,
-  type SortingState,
-} from '@tanstack/react-table';
-import clsx from 'clsx';
-import { ArrowDownBold, ArrowUpBold, CaretRightBold } from '@/shared/ds/icons';
-import { Icon, IconButton } from '@/shared/ui';
-import { capitalize } from '@/shared/lib/string';
-import { useClientsInfinite, type Client, type SeasonTicket } from '@/shared/api';
+import { useMemo, useState } from 'react';
+import { CaretRightBold } from '@/shared/ds/icons';
+import { DataTable, Pagination, IconButton, type ColumnDef } from '@/shared/ui';
+import { useClientsAdmin } from '@/shared/api/hooks/admin';
+import type { Client } from '@/shared/api';
 import { formatDate, formatTime } from '@/shared/lib/format-utils';
 import styles from './UsersTable.module.scss';
 
-type PlanRowData = {
-  id: string; // telegramId is the id for clients
+type UserRowData = {
+  id: string;
   telegramId: Client['telegramId'];
   name: string;
-  seasonTickets: SeasonTicket[];
   createdDate: string;
   createdTime: string;
   phone?: string | null;
-  email?: string;
   dateOfBirth?: string | null;
   photoUrl?: string | null;
 };
 
-export interface SessionsTableProps extends React.HTMLAttributes<HTMLDivElement> {
-  handleEdit?: (telegramId: string) => void;
+export interface UsersTableProps extends React.HTMLAttributes<HTMLDivElement> {
+  handleEdit?: (clientId: string) => void;
 }
 
-const columnHelper = createColumnHelper<PlanRowData>();
+export function UsersTable({ className, handleEdit }: UsersTableProps) {
+  const [page, setPage] = useState(1);
 
-export function UsersTable({ className, handleEdit }: SessionsTableProps) {
-  const tableContainerRef = useRef<HTMLDivElement>(null);
-  const bodyContainerRef = useRef<HTMLDivElement>(null);
-
-  const {
-    data: rawData,
-    isLoading: trainingLoading,
-    error: trainingError,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage
-  } = useClientsInfinite({
-    limit: 100
+  const { data, isLoading, error } = useClientsAdmin({
+    page,
+    limit: 20,
   });
 
-  const normalizeFn = (item: Client): PlanRowData => {
-    return {
+  // Transform data for display
+  const usersData: UserRowData[] = useMemo(() => {
+    if (!data?.items) return [];
+
+    return data.items.map((item: Client) => ({
       id: item.id,
       telegramId: item.telegramId,
       name: [item.lastName, item.firstName].filter(Boolean).join(' ') || item.username || 'Без имени',
       dateOfBirth: item.dateOfBirth ? formatDate(item.dateOfBirth) : undefined,
       photoUrl: item.photoUrl,
-      seasonTickets: [],
       phone: item.phone,
       createdDate: formatDate(item.createdAt),
-      createdTime: formatTime(item.createdAt)
-    };
-  }
+      createdTime: formatTime(item.createdAt),
+    }));
+  }, [data]);
 
-  const data = useMemo(() => {
-    if (!rawData?.pages) return [];
-
-    const _rawData = rawData.pages.flatMap((page: { items: Client[] }) => page.items);
-
-    return _rawData.map(normalizeFn);
-  }, [rawData]);
-
-  const columns = useMemo(
-    () => [
-      columnHelper.display({
-        id: 'personalInfo',
-        header: 'Личные данные',
-        cell: info => (
-          <div className={styles.personalInfoContainer}>
-            {info.row.original.photoUrl ? (
-              <img src={info.row.original.photoUrl} alt="User Avatar" className={styles.avatar} />
-            ) : (
-              <div className={styles.avatarPlaceholder} />
-            )}
-            <div className={styles.personalInfo}>
-              <div className={styles.name}>{info.row.original.name}</div>
-              {info.row.original.dateOfBirth && (
-                <div className={styles.dateOfBirth}>{info.row.original.dateOfBirth}</div>
-              )}
-            </div>
-          </div>
-        ),
-      }),
-      columnHelper.display({
-        id: 'seasonTicket',
-        header: 'Абонемент',
-        cell: () => (
-          <div className={styles.seasonTicket}>
-            <div className={styles.seasonTicketSeats}>—</div>
-          </div>
-        ),
-      }),
-      columnHelper.display({
-        id: 'contacts',
-        header: 'Контакты',
-        cell: (info) => (
-          <div className={styles.contacts}>
-            {info.row.original.phone && (
-              <div className={styles.contactsPhone}>{info.row.original.phone}</div>
+  const columns: ColumnDef<UserRowData>[] = useMemo(() => [
+    {
+      id: 'personalInfo',
+      label: 'Личные данные',
+      render: (item) => (
+        <div className={styles.personalInfoContainer}>
+          {item.photoUrl ? (
+            <img src={item.photoUrl} alt="User Avatar" className={styles.avatar} />
+          ) : (
+            <div className={styles.avatarPlaceholder} />
+          )}
+          <div className={styles.personalInfo}>
+            <div className={styles.name}>{item.name}</div>
+            {item.dateOfBirth && (
+              <div className={styles.dateOfBirth}>{item.dateOfBirth}</div>
             )}
           </div>
-        ),
-      }),
-      columnHelper.accessor('telegramId', {
-        header: 'Telegram ID',
-        cell: info => info.getValue(),
-      }),
-      columnHelper.display({
-        id: 'created',
-        header: 'Дата регистрации',
-        cell: (info) => (
-          <div className={styles.created}>
-            <div className={styles.createdDate}>{info.row.original.createdDate}</div>
-            <div className={styles.createdTime}>{info.row.original.createdTime}</div>
-          </div>
-        ),
-      }),
-      columnHelper.display({
-        id: 'actions',
-        cell: info => (
-          <IconButton
-            className={styles.editButton}
-            src={CaretRightBold}
-            type="secondary"
-            size="s"
-            onClick={() => handleEdit?.(info.row.original.id)}
-          />
-        ),
-      }),
-    ],
-    [handleEdit]
-  );
-
-  const [sorting, setSorting] = useState<SortingState>([]);
-
-  const table = useReactTable({
-    data,
-    columns,
-    state: {
-      sorting,
+        </div>
+      ),
     },
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-  });
+    {
+      id: 'seasonTicket',
+      label: 'Абонемент',
+      render: () => (
+        <div className={styles.seasonTicket}>
+          <div className={styles.seasonTicketSeats}>—</div>
+        </div>
+      ),
+    },
+    {
+      id: 'contacts',
+      label: 'Контакты',
+      render: (item) => (
+        <div className={styles.contacts}>
+          {item.phone && (
+            <div className={styles.contactsPhone}>{item.phone}</div>
+          )}
+        </div>
+      ),
+    },
+    {
+      id: 'telegramId',
+      label: 'Telegram ID',
+      render: (item) => item.telegramId,
+    },
+    {
+      id: 'created',
+      label: 'Дата регистрации',
+      render: (item) => (
+        <div className={styles.created}>
+          <div className={styles.createdDate}>{item.createdDate}</div>
+          <div className={styles.createdTime}>{item.createdTime}</div>
+        </div>
+      ),
+    },
+    {
+      id: 'actions',
+      label: '',
+      width: '80px',
+      align: 'right',
+      render: (item) => (
+        <IconButton
+          className={styles.editButton}
+          src={CaretRightBold}
+          type="secondary"
+          size="s"
+          onClick={() => handleEdit?.(item.id)}
+        />
+      ),
+    },
+  ], [handleEdit]);
 
-  const { rows } = table.getRowModel();
-
-  // Infinite scroll detection
-  useEffect(() => {
-    const container = bodyContainerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = container;
-      const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100; // 100px threshold
-
-      if (isNearBottom && hasNextPage && !isFetchingNextPage) {
-        fetchNextPage();
-      }
-    };
-
-    container.addEventListener('scroll', handleScroll);
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  if (trainingLoading) {
-    return <div className={styles.loading}>Загрузка...</div>;
-  }
-
-  if (trainingError) {
+  if (error) {
     return <div className={styles.error}>Ошибка загрузки данных</div>;
   }
 
   return (
-    <div className={clsx(className, styles.tableContainer)} ref={tableContainerRef}>
-      {/* Fixed Header */}
-      <div className={styles.headerContainer}>
-        {table.getHeaderGroups().map(headerGroup => (
-          <div key={headerGroup.id} className={styles.gridHeader}>
-            {headerGroup.headers.map(header => (
-              <div
-                key={header.id}
-                className={clsx(
-                  styles.headerCell,
-                  styles[`headerCell${capitalize(header.id, true)}`],
-                  header.column.getCanSort() && styles.headerCellSortable
-                )}
-                onClick={header.column.getToggleSortingHandler()}
-              >
-                {flexRender(header.column.columnDef.header, header.getContext())}
-                {header.column.getCanSort() && (
-                  <Icon
-                    className={clsx(styles.sortIndicator, header.column.getIsSorted() && styles.sortIndicatorActive)}
-                    src={header.column.getIsSorted() === 'asc' ? ArrowUpBold : ArrowDownBold}
-                    width={16}
-                    height={16}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-
-      {/* Scrollable Body */}
-      <div className={styles.bodyContainer} ref={bodyContainerRef}>
-        <div className={styles.gridBody}>
-          {rows.map(row => (
-            <div key={row.id} className={styles.gridRow}>
-              {row.getVisibleCells().map(cell => (
-                <div
-                  key={cell.id}
-                  className={clsx(styles.cell, styles[`cell${capitalize(cell.column.id, true)}`])}
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-
-        {/* Loading state for pagination */}
-        {isFetchingNextPage && (
-          <div className={styles.paginationLoading}>
-            Загрузка...
-          </div>
-        )}
-
-        {/* End of list indicator */}
-        {!hasNextPage && data.length > 0 && (
-          <div className={styles.endOfList}>
-            Все клиенты загружены
-          </div>
-        )}
-      </div>
+    <div className={className}>
+      <DataTable
+        columns={columns}
+        data={usersData}
+        isLoading={isLoading}
+        emptyMessage="Нет клиентов"
+        getRowKey={(item) => item.id}
+      />
+      {data && (
+        <Pagination
+          page={data.page}
+          totalPages={data.totalPages}
+          total={data.total}
+          onPageChange={setPage}
+        />
+      )}
     </div>
   );
 }

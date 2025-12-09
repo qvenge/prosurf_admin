@@ -1,16 +1,11 @@
-import { useRef, useState } from 'react';
-import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  type SortingState,
-} from '@tanstack/react-table';
-import clsx from 'clsx';
-import { useEventsData, useEventsColumns, useInfiniteScroll } from '../lib';
+import { useState, useMemo } from 'react';
+import { Link } from 'react-router';
+import { useEventsAdmin } from '@/shared/api/hooks/admin';
 import { useDeleteEvent } from '@/shared/api/hooks/events';
-import { Modal, Button } from '@/shared/ui';
-import { EventsTableHeader } from './EventsTableHeader';
-import { EventsTableBody } from './EventsTableBody';
+import { DataTable, Pagination, Modal, Button, IconButton, type ColumnDef } from '@/shared/ui';
+import { PencilSimpleBold, TrashBold } from '@/shared/ds/icons';
+import { formatPrice } from '@/shared/lib/format-utils';
+import type { Event } from '@/shared/api';
 import styles from './EventsTable.module.scss';
 
 export interface EventsTableProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -18,19 +13,25 @@ export interface EventsTableProps extends React.HTMLAttributes<HTMLDivElement> {
   handleEdit?: (eventId: string) => void;
 }
 
+type EventRowData = {
+  id: string;
+  title: string;
+  status: 'ACTIVE' | 'CANCELLED';
+  location: string | null | undefined;
+  prepayment?: string | null;
+  price: string | null;
+  capacity?: number;
+};
+
 export function EventsTable({ className, eventType, handleEdit }: EventsTableProps) {
-  const tableContainerRef = useRef<HTMLDivElement>(null);
-  const bodyContainerRef = useRef<HTMLDivElement | null>(null);
+  const [page, setPage] = useState(1);
   const [eventToDelete, setEventToDelete] = useState<string | null>(null);
 
-  const {
-    eventsData,
-    isLoading,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage
-  } = useEventsData({ eventType });
+  const { data, isLoading, error } = useEventsAdmin({
+    page,
+    limit: 20,
+    labels: eventType ? [eventType] : undefined,
+  });
 
   const deleteEventMutation = useDeleteEvent();
 
@@ -49,32 +50,107 @@ export function EventsTable({ className, eventType, handleEdit }: EventsTablePro
     setEventToDelete(null);
   };
 
+  // Transform data for display
+  const eventsData: EventRowData[] = useMemo(() => {
+    if (!data?.items) return [];
+
+    return data.items.map((event: Event) => {
+      const ticket = event.tickets.length > 0
+        ? event.tickets.reduce((minTicket, ticket) => {
+            if (ticket.full.price.amountMinor < minTicket.full.price.amountMinor) {
+              return ticket;
+            }
+            return minTicket;
+          })
+        : null;
+
+      return {
+        id: event.id,
+        title: event.title,
+        status: event.status ?? 'ACTIVE',
+        location: event.location,
+        prepayment: ticket?.prepayment?.price && ticket.prepayment.price.amountMinor > 0
+          ? formatPrice(ticket.prepayment.price)
+          : null,
+        price: ticket?.full.price && ticket.full.price.amountMinor > 0
+          ? formatPrice(ticket.full.price)
+          : null,
+        capacity: event.capacity ?? 0,
+      };
+    });
+  }, [data]);
+
   const eventToDeleteData = eventsData.find(e => e.id === eventToDelete);
 
-  const columns = useEventsColumns({ handleEdit, handleDelete });
-  const [sorting, setSorting] = useState<SortingState>([]);
-
-  const table = useReactTable({
-    data: eventsData,
-    columns,
-    state: {
-      sorting,
+  const columns: ColumnDef<EventRowData>[] = useMemo(() => [
+    {
+      id: 'title',
+      label: 'Название',
+      render: (item) => item.title,
     },
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-  });
-
-  useInfiniteScroll({
-    containerRef: bodyContainerRef,
-    onLoadMore: fetchNextPage,
-    hasMore: hasNextPage,
-    isLoading: isFetchingNextPage,
-  });
-
-  if (isLoading) {
-    return <div className={styles.loading}>Загрузка...</div>;
-  }
+    {
+      id: 'status',
+      label: 'Статус',
+      width: '100px',
+      render: (item) => {
+        const label = item.status === 'ACTIVE' ? 'Активно' : 'Отменено';
+        return <span className={styles[`status${item.status}`]}>{label}</span>;
+      },
+    },
+    {
+      id: 'location',
+      label: 'Место',
+      render: (item) => item.location || '—',
+    },
+    {
+      id: 'price',
+      label: 'Цена',
+      render: (item) => (
+        <div className={styles.priceContainer}>
+          <div className={styles.price}>{item.price}</div>
+          {item.prepayment && (
+            <div className={styles.prepayment}>{item.prepayment}</div>
+          )}
+        </div>
+      ),
+    },
+    {
+      id: 'capacity',
+      label: 'Кол-во мест',
+      render: (item) => item.capacity,
+    },
+    {
+      id: 'sessions',
+      label: 'Сеансы',
+      render: (item) => (
+        <Link className={styles.link} to={`/?eventId=${item.id}`}>
+          Перейти
+        </Link>
+      ),
+    },
+    {
+      id: 'actions',
+      label: '',
+      width: '100px',
+      align: 'right',
+      render: (item) => (
+        <div className={styles.actions}>
+          <IconButton
+            src={TrashBold}
+            type="secondary"
+            size="s"
+            onClick={() => handleDelete(item.id)}
+          />
+          <IconButton
+            src={PencilSimpleBold}
+            type="secondary"
+            size="s"
+            onClick={() => handleEdit?.(item.id)}
+          />
+        </div>
+      ),
+    },
+  ], [handleEdit]);
 
   if (error) {
     return <div className={styles.error}>Ошибка загрузки данных</div>;
@@ -82,15 +158,22 @@ export function EventsTable({ className, eventType, handleEdit }: EventsTablePro
 
   return (
     <>
-      <div className={clsx(className, styles.tableContainer)} ref={tableContainerRef}>
-        <EventsTableHeader table={table} />
-        <EventsTableBody
-          ref={bodyContainerRef}
-          table={table}
-          isFetchingNextPage={isFetchingNextPage}
-          hasNextPage={hasNextPage}
-          eventsCount={eventsData.length}
+      <div className={className}>
+        <DataTable
+          columns={columns}
+          data={eventsData}
+          isLoading={isLoading}
+          emptyMessage="Нет мероприятий"
+          getRowKey={(item) => item.id}
         />
+        {data && (
+          <Pagination
+            page={data.page}
+            totalPages={data.totalPages}
+            total={data.total}
+            onPageChange={setPage}
+          />
+        )}
       </div>
       {eventToDelete && (
         <Modal onClose={cancelDelete}>

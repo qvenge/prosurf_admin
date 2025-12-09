@@ -1,105 +1,3 @@
-.tableContainer {
-  border: 1px solid ds.color('border/primary');
-  border-radius: ds.number('radius/M');
-  background: ds.color('background/primary');
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.headerContainer {
-  flex-shrink: 0;
-  background: ds.color('background/secondary');
-  border-bottom: 1px solid ds.color('border/primary');
-}
-
-.bodyContainer {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.gridHeader,
-.gridRow {
-  display: grid;
-  grid-template-columns: 2fr 2fr minmax(170px, 1fr) minmax(170px, 1fr) minmax(170px, 1fr) minmax(120px, 1fr);
-  width: 100%;
-}
-
-.headerCell {
-  @include ds.typo('body/b4/semibold');
-
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-
-  padding: ds.number('paddings & gaps/M');
-  color: ds.color('text/primary');
-  user-select: none;
-  background: ds.color('background/secondary');
-  white-space: nowrap;
-
-  &Sortable {
-    cursor: pointer;
-  }
-
-  &Sortable:hover {
-    background: ds.color('background/tertiary');
-  }
-}
-
-.gridBody {
-  width: 100%;
-}
-
-.sortIndicator {
-  color: ds.color('graphic/secondary');
-}
-
-.sortIndicatorActive {
-  color: ds.color('graphic/accent');
-}
-
-.gridRow {
-  @include ds.typo('body/b4/medium');
-  color: ds.color('text/primary');
-  min-height: 60px;
-}
-
-.cell {
-  padding: ds.number('paddings & gaps/M');
-  color: ds.color('text/primary');
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border-bottom: 1px solid ds.color('border/primary');
-  display: flex;
-  align-items: center;
-}
-
-.cellActions {
-  justify-content: flex-end;
-}
-
-.actionsButtons {
-  display: flex;
-  gap: 8px;
-}
-
-.deleteButton {
-  color: ds.color('text/error/primary');
-}
-
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-  color: ds.color('text/secondary');
-}
-
 .error {
   display: flex;
   justify-content: center;
@@ -111,24 +9,23 @@
   padding: ds.number('paddings & gaps/S') ds.number('paddings & gaps/M');
 }
 
-.headerCellActions,
-.cellActions {
-  justify-content: flex-end;
-}
-
-.cellDatetime {
+.nameContainer {
+  display: flex;
   flex-direction: column;
-  align-items: flex-start;
 }
 
-.paginationLoading,
-.endOfList {
-  padding: ds.number('paddings & gaps/M');
-  text-align: center;
-  color: ds.color('text/secondary');
+.name {
   @include ds.typo('body/b4/medium');
+  color: ds.color('text/primary');
 }
 
 .description {
+  @include ds.typo('body/b4/regular');
   color: ds.color('text/secondary');
+}
+
+.actionsButtons {
+  display: flex;
+  gap: ds.number('paddings & gaps/XS');
+  justify-content: flex-end;
 }
