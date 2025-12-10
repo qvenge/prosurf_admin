@@ -9,7 +9,10 @@ import {
   PaginatedResponseSchema,
   SeasonTicketPlanFiltersSchema,
   SeasonTicketFiltersSchema,
-  EventSchema
+  EventSchema,
+  SeasonTicketAdminSchema,
+  SeasonTicketAdminPaginatedResponseSchema,
+  SeasonTicketAdminFiltersSchema,
 } from '../schemas';
 import type {
   SeasonTicketPlan,
@@ -24,7 +27,10 @@ import type {
   IdempotencyKey,
   Event,
   CursorParam,
-  LimitParam
+  LimitParam,
+  SeasonTicketAdmin,
+  SeasonTicketAdminPaginatedResponse,
+  SeasonTicketAdminFilters,
 } from '../types';
 
 /**
@@ -154,5 +160,38 @@ export const seasonTicketsClient = {
   async cancelSeasonTicket(id: string): Promise<SeasonTicket> {
     const response = await apiClient.post(`/season-tickets/${encodeURIComponent(id)}/cancel`);
     return validateResponse(response.data, SeasonTicketSchema);
+  },
+
+  // ========================================
+  // Admin endpoints
+  // ========================================
+
+  /**
+   * Get all season tickets for admin with page-based pagination
+   * GET /admin/season-tickets
+   */
+  async getSeasonTicketsAdmin(filters?: SeasonTicketAdminFilters): Promise<SeasonTicketAdminPaginatedResponse> {
+    const validatedFilters = SeasonTicketAdminFiltersSchema.parse(filters || {});
+
+    // Serialize sort array to string format: "field:order,field:order"
+    const { sort, ...restFilters } = validatedFilters;
+    const serializedFilters: Record<string, unknown> = { ...restFilters };
+    if (sort && sort.length > 0) {
+      serializedFilters.sort = sort.map((s) => `${s.field}:${s.order}`).join(',');
+    }
+
+    const queryString = createQueryString(serializedFilters);
+
+    const response = await apiClient.get(`/admin/season-tickets${queryString}`);
+    return validateResponse(response.data, SeasonTicketAdminPaginatedResponseSchema);
+  },
+
+  /**
+   * Get single season ticket by ID for admin
+   * GET /admin/season-tickets/:id
+   */
+  async getSeasonTicketAdmin(id: string): Promise<SeasonTicketAdmin> {
+    const response = await apiClient.get(`/admin/season-tickets/${encodeURIComponent(id)}`);
+    return validateResponse(response.data, SeasonTicketAdminSchema);
   },
 };

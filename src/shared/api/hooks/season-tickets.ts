@@ -10,6 +10,7 @@ import type {
   SeasonTicket,
   PaginatedResponse,
   IdempotencyKey,
+  SeasonTicketAdminFilters,
 } from '../types';
 
 export const seasonTicketsKeys = {
@@ -31,11 +32,12 @@ export const useSeasonTicketPlans = (filters?: SeasonTicketPlanFilters) => {
   });
 };
 
-export const useSeasonTicketPlan = (id: string) => {
+export const useSeasonTicketPlan = (id: string, enabled = true) => {
   return useQuery({
     queryKey: seasonTicketsKeys.plan(id),
     queryFn: () => seasonTicketsClient.getSeasonTicketPlan(id),
     staleTime: 10 * 60 * 1000,
+    enabled: enabled && Boolean(id),
   });
 };
 
@@ -159,5 +161,34 @@ export const useCancelSeasonTicket = () => {
       // Also invalidate client-specific queries
       queryClient.invalidateQueries({ queryKey: ['clients'] });
     },
+  });
+};
+
+// ========================================
+// Admin hooks
+// ========================================
+
+export const seasonTicketsAdminKeys = {
+  all: ['season-tickets-admin'] as const,
+  lists: () => [...seasonTicketsAdminKeys.all, 'list'] as const,
+  list: (filters?: SeasonTicketAdminFilters) => [...seasonTicketsAdminKeys.lists(), filters] as const,
+  details: () => [...seasonTicketsAdminKeys.all, 'detail'] as const,
+  detail: (id: string) => [...seasonTicketsAdminKeys.details(), id] as const,
+} as const;
+
+export const useSeasonTicketsAdmin = (filters?: SeasonTicketAdminFilters) => {
+  return useQuery({
+    queryKey: seasonTicketsAdminKeys.list(filters),
+    queryFn: () => seasonTicketsClient.getSeasonTicketsAdmin(filters),
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
+export const useSeasonTicketAdmin = (id: string | null) => {
+  return useQuery({
+    queryKey: seasonTicketsAdminKeys.detail(id!),
+    queryFn: () => seasonTicketsClient.getSeasonTicketAdmin(id!),
+    enabled: Boolean(id),
+    staleTime: 5 * 60 * 1000,
   });
 };

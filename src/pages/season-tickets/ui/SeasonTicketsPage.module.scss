@@ -1,0 +1,45 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/M');
+  padding: ds.number('paddings & gaps/L');
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filterBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: ds.color('background/secondary');
+  border-radius: 6px;
+  font-size: 14px;
+  color: ds.color('text/primary');
+}
+
+.filterBadgeClose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  color: ds.color('graphic/secondary');
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: ds.color('background/tertiary');
+    color: ds.color('graphic/primary');
+  }
+}
+
+.addIcon {
+  margin-right: 8px;
+}

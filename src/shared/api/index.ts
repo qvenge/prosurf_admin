@@ -77,7 +77,7 @@ export { sessionsKeys } from './hooks/sessions';
 export { bookingsKeys } from './hooks/bookings';
 export { paymentsKeys } from './hooks/payments';
 export { certificatesKeys, certificatesAdminKeys } from './hooks/certificates';
-export { seasonTicketsKeys } from './hooks/season-tickets';
+export { seasonTicketsKeys, seasonTicketsAdminKeys } from './hooks/season-tickets';
 export { bonusKeys } from './hooks/bonus';
 export { waitlistKeys } from './hooks/waitlist';
 export { adminKeys } from './hooks/admin';

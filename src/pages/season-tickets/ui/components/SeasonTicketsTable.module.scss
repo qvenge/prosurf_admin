@@ -1,0 +1,54 @@
+.passes {
+  @include ds.typo('body/b4/medium');
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  &.noPasses {
+    color: ds.color('text/error/primary');
+  }
+}
+
+.planLink {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/accent');
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.expired {
+  color: ds.color('text/error/primary');
+}
+
+.status {
+  @include ds.typo('body/b5/medium');
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: ds.color('background/secondary');
+  color: ds.color('text/secondary');
+
+  &.statusACTIVE {
+    background: ds.color('background/success');
+    color: ds.color('text/success');
+  }
+
+  &.statusEXPIRED {
+    background: ds.color('background/warning');
+    color: ds.color('text/warning');
+  }
+
+  &.statusCANCELLED {
+    background: ds.color('background/error');
+    color: ds.color('text/error/primary');
+  }
+}
+
+.actions {
+  display: flex;
+  gap: ds.number('paddings & gaps/XS');
+  justify-content: flex-end;
+}

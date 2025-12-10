@@ -1,0 +1,160 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/L');
+  padding: ds.number('paddings & gaps/L');
+  min-width: 400px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/S');
+}
+
+.title {
+  @include ds.typo('header/h4/semibold');
+  color: ds.color('text/primary');
+  margin: 0;
+}
+
+.status {
+  @include ds.typo('body/b4/medium');
+  padding: 4px 12px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-self: flex-start;
+  background: ds.color('background/secondary');
+  color: ds.color('text/secondary');
+
+  &.statusACTIVE {
+    background: ds.color('background/success');
+    color: ds.color('text/success');
+  }
+
+  &.statusCANCELLED {
+    background: ds.color('background/error');
+    color: ds.color('text/error/primary');
+  }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/M');
+}
+
+.sectionTitle {
+  @include ds.typo('body/b3/semibold');
+  color: ds.color('text/primary');
+  margin: 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldLabel {
+  @include ds.typo('body/b5/regular');
+  color: ds.color('text/secondary');
+}
+
+.fieldValue {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/primary');
+}
+
+.ownerRow {
+  display: flex;
+  align-items: center;
+  gap: ds.number('paddings & gaps/M');
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.avatarPlaceholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: ds.color('background/secondary');
+  color: ds.color('text/secondary');
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  @include ds.typo('body/b3/medium');
+}
+
+.ownerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ownerName {
+  @include ds.typo('body/b3/medium');
+  color: ds.color('text/primary');
+}
+
+.ownerPhone {
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/secondary');
+}
+
+.planLink {
+  color: ds.color('text/accent');
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.passesBar {
+  display: flex;
+  align-items: center;
+  gap: ds.number('paddings & gaps/M');
+}
+
+.passesProgress {
+  flex: 1;
+  height: 8px;
+  background: ds.color('background/secondary');
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.passesProgressFill {
+  height: 100%;
+  background: ds.color('background/success');
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.passesText {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/primary');
+  white-space: nowrap;
+}
+
+.expired {
+  color: ds.color('text/error/primary');
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/secondary');
+}

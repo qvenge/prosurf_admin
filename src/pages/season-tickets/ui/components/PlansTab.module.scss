@@ -1,0 +1,10 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 0;
+  min-height: 0;
+}
+
+.table {
+  flex-grow: 1;
+}

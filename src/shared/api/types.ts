@@ -252,3 +252,12 @@ export type ClientAdminPaginatedResponse = z.infer<typeof schemas.ClientAdminPag
 export type EventAdminPaginatedResponse = z.infer<typeof schemas.EventAdminPaginatedResponseSchema>;
 export type SessionAdminPaginatedResponse = z.infer<typeof schemas.SessionAdminPaginatedResponseSchema>;
 export type SeasonTicketPlanAdminPaginatedResponse = z.infer<typeof schemas.SeasonTicketPlanAdminPaginatedResponseSchema>;
+
+// Season Ticket Admin types
+export type SeasonTicketSortField = z.infer<typeof schemas.SeasonTicketSortFieldSchema>;
+export type SeasonTicketAdminSortCriterion = z.infer<typeof schemas.SeasonTicketAdminSortCriterionSchema>;
+export type SeasonTicketAdminFilters = z.infer<typeof schemas.SeasonTicketAdminFiltersSchema>;
+export type SeasonTicketOwnerInfo = z.infer<typeof schemas.SeasonTicketOwnerInfoSchema>;
+export type SeasonTicketPlanInfo = z.infer<typeof schemas.SeasonTicketPlanInfoSchema>;
+export type SeasonTicketAdmin = z.infer<typeof schemas.SeasonTicketAdminSchema>;
+export type SeasonTicketAdminPaginatedResponse = z.infer<typeof schemas.SeasonTicketAdminPaginatedResponseSchema>;

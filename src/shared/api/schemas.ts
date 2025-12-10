@@ -981,3 +981,63 @@ export const ClientAdminPaginatedResponseSchema = PageBasedPaginatedResponseSche
 export const EventAdminPaginatedResponseSchema = PageBasedPaginatedResponseSchema(EventSchema);
 export const SessionAdminPaginatedResponseSchema = PageBasedPaginatedResponseSchema(SessionSchema);
 export const SeasonTicketPlanAdminPaginatedResponseSchema = PageBasedPaginatedResponseSchema(SeasonTicketPlanSchema);
+
+// ========================================
+// Season Ticket Admin Schemas
+// ========================================
+
+export const SeasonTicketSortFieldSchema = z.enum([
+  'ownerName',
+  'remainingPasses',
+  'createdAt',
+  'validUntil',
+  'status',
+]);
+
+export const SeasonTicketAdminSortCriterionSchema = z.object({
+  field: SeasonTicketSortFieldSchema,
+  order: z.enum(['asc', 'desc']),
+});
+
+export const SeasonTicketAdminFiltersSchema = z.object({
+  page: z.number().int().min(1).optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+  ownerSearch: z.string().optional(),
+  planId: z.string().optional(),
+  status: z.array(SeasonTicketStatusSchema).optional(),
+  isExpired: z.boolean().optional(),
+  hasRemainingPasses: z.boolean().optional(),
+  sort: z.array(SeasonTicketAdminSortCriterionSchema).optional(),
+});
+
+export const SeasonTicketOwnerInfoSchema = z.object({
+  id: z.string(),
+  firstName: z.string().nullable().optional(),
+  lastName: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
+  photoUrl: z.string().nullable().optional(),
+});
+
+export const SeasonTicketPlanInfoSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+});
+
+export const SeasonTicketAdminSchema = z.object({
+  id: z.string(),
+  status: SeasonTicketStatusSchema,
+  remainingPasses: z.number().int(),
+  totalPasses: z.number().int(),
+  validUntil: z.string().datetime(),
+  createdAt: z.string().datetime(),
+  owner: SeasonTicketOwnerInfoSchema,
+  plan: SeasonTicketPlanInfoSchema,
+});
+
+export const SeasonTicketAdminPaginatedResponseSchema = z.object({
+  items: z.array(SeasonTicketAdminSchema),
+  total: z.number().int(),
+  page: z.number().int(),
+  limit: z.number().int(),
+  totalPages: z.number().int(),
+});

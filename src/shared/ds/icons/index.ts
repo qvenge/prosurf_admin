@@ -51,6 +51,7 @@ export { default as CheckRegular } from '@/shared/ds/icons/20/check_regular.svg'
 
 export { default as EyeClosedRegular } from '@/shared/ds/icons/20/eye-closed_regular.svg';
 export { default as EyeRegular } from '@/shared/ds/icons/20/eye_regular.svg';
+export { default as EyeBold } from '@/shared/ds/icons/20/eye_bold.svg';
 export { default as EyeSlashRegular } from '@/shared/ds/icons/20/eye-slash_regular.svg';
 
 export { default as XBold } from '@/shared/ds/icons/20/x_bold.svg';

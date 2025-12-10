@@ -11,8 +11,8 @@ import {
   GearSixRegular,
   GearSixFill,
 
-  // TicketRegular,
-  // TicketFill,
+  TicketRegular,
+  TicketFill,
 
   CertificateRegular,
   CertificateFill
@@ -40,6 +40,13 @@ export const navItems = [
     iconDefault: ListBulletsRegular,
     iconActive: ListBulletsFill,
     path: '/templates'
+  },
+  {
+    id: 'season-tickets',
+    title: 'Абонементы',
+    iconDefault: TicketRegular,
+    iconActive: TicketFill,
+    path: '/season-tickets'
   },
   {
     id: 'certificates',

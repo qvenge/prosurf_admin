@@ -8,6 +8,7 @@ import { UsersPage } from '@/pages/users';
 import { SettingsPage } from '@/pages/settings';
 import { TemplatesPage } from '@/pages/templates';
 import { CertificatesPage } from '@/pages/certificates';
+import { SeasonTicketsPage } from '@/pages/season-tickets';
 
 export const router = createBrowserRouter([
   {
@@ -36,6 +37,10 @@ export const router = createBrowserRouter([
           {
             path: 'certificates',
             Component: CertificatesPage
+          },
+          {
+            path: 'season-tickets',
+            Component: SeasonTicketsPage
           },
           {
             path: 'settings',
