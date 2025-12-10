@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router';
 import { CaretRightBold } from '@/shared/ds/icons';
 import { DataTable, Pagination, IconButton, type ColumnDef } from '@/shared/ui';
 import { useClientsAdmin } from '@/shared/api/hooks/admin';
-import type { Client } from '@/shared/api';
+import type { Client, ClientSeasonTicketSummary } from '@/shared/api';
 import { formatDate, formatTime } from '@/shared/lib/format-utils';
 import styles from './UsersTable.module.scss';
 
@@ -15,6 +16,7 @@ type UserRowData = {
   phone?: string | null;
   dateOfBirth?: string | null;
   photoUrl?: string | null;
+  seasonTicketSummary?: ClientSeasonTicketSummary;
 };
 
 export interface UsersTableProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -42,6 +44,7 @@ export function UsersTable({ className, handleEdit }: UsersTableProps) {
       phone: item.phone,
       createdDate: formatDate(item.createdAt),
       createdTime: formatTime(item.createdAt),
+      seasonTicketSummary: item.seasonTicketSummary,
     }));
   }, [data]);
 
@@ -68,11 +71,28 @@ export function UsersTable({ className, handleEdit }: UsersTableProps) {
     {
       id: 'seasonTicket',
       label: 'Абонемент',
-      render: () => (
-        <div className={styles.seasonTicket}>
-          <div className={styles.seasonTicketSeats}>—</div>
-        </div>
-      ),
+      render: (item) => {
+        const summary = item.seasonTicketSummary;
+
+        if (!summary || summary.activeCount === 0) {
+          return (
+            <div className={styles.seasonTicket}>
+              <div className={styles.seasonTicketSeats}>—</div>
+            </div>
+          );
+        }
+
+        return (
+          <div className={styles.seasonTicket}>
+            <Link
+              to={`/season-tickets?clientId=${item.id}`}
+              className={styles.seasonTicketLink}
+            >
+              {summary.remainingPasses} из {summary.totalPasses}
+            </Link>
+          </div>
+        );
+      },
     },
     {
       id: 'contacts',

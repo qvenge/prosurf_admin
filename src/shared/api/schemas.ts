@@ -48,6 +48,13 @@ export const UserUpdateDtoSchema = z.object({
   email: z.string().optional(),
 });
 
+// Season ticket summary schema for client admin response
+export const ClientSeasonTicketSummarySchema = z.object({
+  remainingPasses: z.number().int(),
+  totalPasses: z.number().int(),
+  activeCount: z.number().int(),
+});
+
 // Client schema - matches server ClientDto (Telegram users)
 // Note: Defined early because it's used in BookingExtendedSchema
 export const ClientSchema = z.object({
@@ -61,6 +68,7 @@ export const ClientSchema = z.object({
   photoUrl: z.string().nullable().optional(),
   dateOfBirth: z.string().datetime().nullable().optional(),
   createdAt: z.string().datetime(),
+  seasonTicketSummary: ClientSeasonTicketSummarySchema.optional(),
 });
 
 // Guest contact schema
@@ -1004,6 +1012,7 @@ export const SeasonTicketAdminFiltersSchema = z.object({
   limit: z.number().int().min(1).max(100).optional(),
   ownerSearch: z.string().optional(),
   planId: z.string().optional(),
+  clientId: z.string().optional(),
   status: z.array(SeasonTicketStatusSchema).optional(),
   isExpired: z.boolean().optional(),
   hasRemainingPasses: z.boolean().optional(),

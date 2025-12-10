@@ -138,6 +138,7 @@ export type AdminFilters = z.infer<typeof schemas.AdminFiltersSchema>;
 
 // Client types (Telegram users)
 export type Client = z.infer<typeof schemas.ClientSchema>;
+export type ClientSeasonTicketSummary = z.infer<typeof schemas.ClientSeasonTicketSummarySchema>;
 export type ClientUpdateDto = z.infer<typeof schemas.ClientUpdateDtoSchema>;
 export type ClientFilters = z.infer<typeof schemas.ClientFiltersSchema>;
 

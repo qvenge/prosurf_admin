@@ -5,6 +5,7 @@ import { PlusBold } from '@/shared/ds/icons';
 import {
   useSeasonTicketsAdmin,
   useSeasonTicketPlan,
+  useClient,
   type SeasonTicketAdminFilters,
   type SeasonTicketStatus,
   type SeasonTicketPlan,
@@ -45,11 +46,15 @@ export function SeasonTicketsPage() {
 
   const ticketId = searchParams.get('ticketId');
   const planId = searchParams.get('planId');
+  const clientId = searchParams.get('clientId');
 
   const sort = useMemo(() => parseSort(searchParams.get('sort')), [searchParams]);
 
   // Получить название плана для badge (только если planId есть)
   const { data: plan } = useSeasonTicketPlan(planId || '');
+
+  // Получить имя клиента для badge (только если clientId есть)
+  const { data: clientData } = useClient(clientId || '');
 
   const filters = useMemo(
     () => ({
@@ -58,6 +63,7 @@ export function SeasonTicketsPage() {
       sort: sort as SeasonTicketAdminFilters['sort'],
       ownerSearch: searchParams.get('ownerSearch') || undefined,
       planId: planId || undefined,
+      clientId: clientId || undefined,
       status: searchParams.get('status')
         ? [searchParams.get('status') as SeasonTicketStatus]
         : undefined,
@@ -65,7 +71,7 @@ export function SeasonTicketsPage() {
         ? searchParams.get('hasRemainingPasses') === 'true'
         : undefined,
     }),
-    [searchParams, sort, planId]
+    [searchParams, sort, planId, clientId]
   );
 
   const { data, isLoading } = useSeasonTicketsAdmin(filters);
@@ -80,13 +86,13 @@ export function SeasonTicketsPage() {
           params.delete(key);
         } else if (key === 'sort' && Array.isArray(value)) {
           if (value.length > 0) {
-            params.set('sort', serializeSort(value));
+            params.set('sort', serializeSort(value as SortCriterion[]));
           } else {
             params.delete('sort');
           }
         } else if (key === 'status' && Array.isArray(value)) {
           if (value.length > 0) {
-            params.set('status', value[0]);
+            params.set('status', value[0] as string);
           } else {
             params.delete('status');
           }
@@ -158,6 +164,13 @@ export function SeasonTicketsPage() {
     setSearchParams(params);
   }, [searchParams, setSearchParams]);
 
+  const handleClearClient = useCallback(() => {
+    const params = new URLSearchParams(searchParams);
+    params.delete('clientId');
+    params.set('page', '1');
+    setSearchParams(params);
+  }, [searchParams, setSearchParams]);
+
   // Plans tab handlers
   const handleCreatePlan = useCallback(() => {
     setEditingPlan(undefined);
@@ -208,6 +221,8 @@ export function SeasonTicketsPage() {
               onFilterChange={handleFilterChange}
               planName={plan?.name}
               onClearPlan={planId ? handleClearPlan : undefined}
+              clientName={clientData ? [clientData.lastName, clientData.firstName].filter(Boolean).join(' ') || clientData.username || 'Клиент' : undefined}
+              onClearClient={clientId ? handleClearClient : undefined}
             />
 
             <SeasonTicketsTable

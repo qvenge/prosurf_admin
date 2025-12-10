@@ -10,6 +10,8 @@ interface SeasonTicketsFiltersProps {
   onFilterChange: (filters: Partial<SeasonTicketAdminFilters>) => void;
   planName?: string | null;
   onClearPlan?: () => void;
+  clientName?: string | null;
+  onClearClient?: () => void;
 }
 
 const statusOptions = [
@@ -30,6 +32,8 @@ export function SeasonTicketsFilters({
   onFilterChange,
   planName,
   onClearPlan,
+  clientName,
+  onClearClient,
 }: SeasonTicketsFiltersProps) {
   const [searchValue, setSearchValue] = useState(filters.ownerSearch || '');
   const debouncedSearch = useDebounce(searchValue, 300);
@@ -94,6 +98,15 @@ export function SeasonTicketsFilters({
         <div className={styles.filterBadge}>
           <span>План: {planName}</span>
           <button onClick={onClearPlan} className={styles.filterBadgeClose}>
+            <Icon src={XBold} width={14} height={14} />
+          </button>
+        </div>
+      )}
+
+      {clientName && onClearClient && (
+        <div className={styles.filterBadge}>
+          <span>Клиент: {clientName}</span>
+          <button onClick={onClearClient} className={styles.filterBadgeClose}>
             <Icon src={XBold} width={14} height={14} />
           </button>
         </div>
