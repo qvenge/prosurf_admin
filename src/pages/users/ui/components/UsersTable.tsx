@@ -1,15 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link } from 'react-router';
 import { CaretRightBold } from '@/shared/ds/icons';
-import { DataTable, Pagination, IconButton, type ColumnDef } from '@/shared/ui';
-import { useClientsAdmin } from '@/shared/api/hooks/admin';
+import { DataTable, IconButton, type ColumnDef, type SortCriterion } from '@/shared/ui';
 import type { Client, ClientSeasonTicketSummary } from '@/shared/api';
 import { formatDate, formatTime } from '@/shared/lib/format-utils';
 import styles from './UsersTable.module.scss';
 
 type UserRowData = {
   id: string;
-  telegramId: Client['telegramId'];
+  username?: string | null;
   name: string;
   createdDate: string;
   createdTime: string;
@@ -19,25 +18,28 @@ type UserRowData = {
   seasonTicketSummary?: ClientSeasonTicketSummary;
 };
 
-export interface UsersTableProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface UsersTableProps {
+  className?: string;
+  data: Client[];
+  isLoading: boolean;
+  sort: SortCriterion[];
+  onSortChange: (sort: SortCriterion[]) => void;
   handleEdit?: (clientId: string) => void;
 }
 
-export function UsersTable({ className, handleEdit }: UsersTableProps) {
-  const [page, setPage] = useState(1);
-
-  const { data, isLoading, error } = useClientsAdmin({
-    page,
-    limit: 20,
-  });
-
+export function UsersTable({
+  className,
+  data,
+  isLoading,
+  sort,
+  onSortChange,
+  handleEdit,
+}: UsersTableProps) {
   // Transform data for display
   const usersData: UserRowData[] = useMemo(() => {
-    if (!data?.items) return [];
-
-    return data.items.map((item: Client) => ({
+    return data.map((item: Client) => ({
       id: item.id,
-      telegramId: item.telegramId,
+      username: item.username,
       name: [item.lastName, item.firstName].filter(Boolean).join(' ') || item.username || 'Без имени',
       dateOfBirth: item.dateOfBirth ? formatDate(item.dateOfBirth) : undefined,
       photoUrl: item.photoUrl,
@@ -52,6 +54,8 @@ export function UsersTable({ className, handleEdit }: UsersTableProps) {
     {
       id: 'personalInfo',
       label: 'Личные данные',
+      sortable: true,
+      sortKey: 'firstName',
       render: (item) => (
         <div className={styles.personalInfoContainer}>
           {item.photoUrl ? (
@@ -69,8 +73,39 @@ export function UsersTable({ className, handleEdit }: UsersTableProps) {
       ),
     },
     {
+      id: 'telegram',
+      label: 'Telegram',
+      sortable: true,
+      sortKey: 'username',
+      render: (item) => item.username ? (
+        <a
+          href={`https://t.me/${item.username}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.telegramLink}
+        >
+          @{item.username}
+        </a>
+      ) : '—',
+    },
+    {
+      id: 'contacts',
+      label: 'Контакты',
+      sortable: true,
+      sortKey: 'phone',
+      render: (item) => (
+        <div className={styles.contacts}>
+          {item.phone ? (
+            <div className={styles.contactsPhone}>{item.phone}</div>
+          ) : '—'}
+        </div>
+      ),
+    },
+    {
       id: 'seasonTicket',
       label: 'Абонемент',
+      sortable: true,
+      sortKey: 'seasonTicketPasses',
       render: (item) => {
         const summary = item.seasonTicketSummary;
 
@@ -95,24 +130,10 @@ export function UsersTable({ className, handleEdit }: UsersTableProps) {
       },
     },
     {
-      id: 'contacts',
-      label: 'Контакты',
-      render: (item) => (
-        <div className={styles.contacts}>
-          {item.phone && (
-            <div className={styles.contactsPhone}>{item.phone}</div>
-          )}
-        </div>
-      ),
-    },
-    {
-      id: 'telegramId',
-      label: 'Telegram ID',
-      render: (item) => item.telegramId,
-    },
-    {
       id: 'created',
       label: 'Дата регистрации',
+      sortable: true,
+      sortKey: 'createdAt',
       render: (item) => (
         <div className={styles.created}>
           <div className={styles.createdDate}>{item.createdDate}</div>
@@ -137,10 +158,6 @@ export function UsersTable({ className, handleEdit }: UsersTableProps) {
     },
   ], [handleEdit]);
 
-  if (error) {
-    return <div className={styles.error}>Ошибка загрузки данных</div>;
-  }
-
   return (
     <div className={className}>
       <DataTable
@@ -149,15 +166,9 @@ export function UsersTable({ className, handleEdit }: UsersTableProps) {
         isLoading={isLoading}
         emptyMessage="Нет клиентов"
         getRowKey={(item) => item.id}
+        sort={sort}
+        onSortChange={onSortChange}
       />
-      {data && (
-        <Pagination
-          page={data.page}
-          totalPages={data.totalPages}
-          total={data.total}
-          onPageChange={setPage}
-        />
-      )}
     </div>
   );
 }

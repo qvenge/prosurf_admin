@@ -956,10 +956,26 @@ export const PageBasedPaginatedResponseSchema = <T>(itemSchema: z.ZodSchema<T>) 
   });
 
 // Admin entity list filter schemas
+
+// Client sort schemas
+export const ClientSortFieldSchema = z.enum([
+  'firstName',
+  'username',
+  'phone',
+  'createdAt',
+  'seasonTicketPasses',
+]);
+
+export const ClientAdminSortCriterionSchema = z.object({
+  field: ClientSortFieldSchema,
+  order: z.enum(['asc', 'desc']),
+});
+
 export const ClientAdminFiltersSchema = z.object({
   page: z.number().int().min(1).optional(),
   limit: z.number().int().min(1).max(100).optional(),
   search: z.string().optional(),
+  sort: z.array(ClientAdminSortCriterionSchema).optional(),
 });
 
 export const EventAdminFiltersSchema = z.object({

@@ -67,6 +67,16 @@
   }
 }
 
+.telegramLink {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/accent');
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .contacts {
   display: flex;
   flex-direction: column;

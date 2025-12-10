@@ -1,0 +1,5 @@
+.filters {
+  display: flex;
+  gap: ds.number('paddings & gaps/M');
+  flex-wrap: wrap;
+}

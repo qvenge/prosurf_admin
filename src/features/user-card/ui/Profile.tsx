@@ -62,11 +62,19 @@ export function Profile({ client, onDeletePhoto: _onDeletePhoto }: ProfileProps)
           readOnly
         />
         {client.username && (
-          <TextInput
-            label="Username"
-            value={`@${client.username}`}
-            readOnly
-          />
+          <div className={styles.field}>
+            <span className={styles.fieldLabel}>Telegram</span>
+            <div className={styles.fieldValue}>
+              <a
+                href={`https://t.me/${client.username}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.usernameLink}
+              >
+                @{client.username}
+              </a>
+            </div>
+          </div>
         )}
         {client.dateOfBirth && (
           <TextInput

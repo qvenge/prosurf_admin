@@ -45,6 +45,17 @@ export function SeasonTicketsTable({
         render: (ticket) => <OwnerCell owner={ticket.owner} />,
       },
       {
+        id: 'status',
+        label: 'Статус',
+        sortable: true,
+        sortKey: 'status',
+        render: (ticket) => (
+          <span className={`${styles.status} ${styles[`status${ticket.status}`]}`}>
+            {STATUS_LABELS[ticket.status] || ticket.status}
+          </span>
+        ),
+      },
+      {
         id: 'passes',
         label: 'Посещения',
         sortable: true,
@@ -87,17 +98,6 @@ export function SeasonTicketsTable({
         render: (ticket) => (
           <span className={isExpired(ticket.validUntil) ? styles.expired : ''}>
             {formatDate(ticket.validUntil)}
-          </span>
-        ),
-      },
-      {
-        id: 'status',
-        label: 'Статус',
-        sortable: true,
-        sortKey: 'status',
-        render: (ticket) => (
-          <span className={`${styles.status} ${styles[`status${ticket.status}`]}`}>
-            {STATUS_LABELS[ticket.status] || ticket.status}
           </span>
         ),
       },
