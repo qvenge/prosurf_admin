@@ -471,6 +471,7 @@ export const SeasonTicketPlanSchema = z.object({
   matchMode: SeasonTicketMatchModeSchema.default('ALL').optional(),
   eventIds: z.array(z.string()).nullable().optional(),
   eventFilter: EventFilterSchema,
+  isSystemPlan: z.boolean(),
 });
 
 export const SeasonTicketPlanCreateDtoSchema = z.object({
@@ -482,6 +483,7 @@ export const SeasonTicketPlanCreateDtoSchema = z.object({
   matchMode: SeasonTicketMatchModeSchema.default('ALL').optional(),
   eventIds: z.array(z.string()).nullable().optional(),
   eventFilter: EventFilterSchema,
+  isSystemPlan: z.boolean().optional(),
 });
 
 export const SeasonTicketPlanUpdateDtoSchema = z.object({
@@ -978,12 +980,28 @@ export const ClientAdminFiltersSchema = z.object({
   sort: z.array(ClientAdminSortCriterionSchema).optional(),
 });
 
+// Event sort schemas
+export const EventSortFieldSchema = z.enum([
+  'title',
+  'status',
+  'location',
+  'capacity',
+  'createdAt',
+  'minPrice',
+]);
+
+export const EventAdminSortCriterionSchema = z.object({
+  field: EventSortFieldSchema,
+  order: z.enum(['asc', 'desc']),
+});
+
 export const EventAdminFiltersSchema = z.object({
   page: z.number().int().min(1).optional(),
   limit: z.number().int().min(1).max(100).optional(),
   search: z.string().optional(),
   status: EventStatusSchema.optional(),
   labels: z.array(z.string()).optional(),
+  sort: z.array(EventAdminSortCriterionSchema).optional(),
 });
 
 export const SessionAdminFiltersSchema = z.object({
@@ -998,6 +1016,7 @@ export const SeasonTicketPlanAdminFiltersSchema = z.object({
   page: z.number().int().min(1).optional(),
   limit: z.number().int().min(1).max(100).optional(),
   search: z.string().optional(),
+  includeSystem: z.boolean().optional(),
 });
 
 // Page-based paginated response schemas for admin entities

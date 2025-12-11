@@ -29,3 +29,21 @@
   gap: ds.number('paddings & gaps/XS');
   justify-content: flex-end;
 }
+
+.systemBadge,
+.publicBadge {
+  @include ds.typo('body/b5/medium');
+  padding: 2px ds.number('paddings & gaps/XS');
+  border-radius: ds.number('radius/S');
+  white-space: nowrap;
+}
+
+.systemBadge {
+  color: ds.color('text/warning');
+  background: ds.color('background/warning');
+}
+
+.publicBadge {
+  color: ds.color('text/success');
+  background: ds.color('background/success');
+}

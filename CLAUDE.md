@@ -140,6 +140,27 @@ if (isAuthError(error)) {
 }
 ```
 
+## Styling Guidelines
+
+### Design System Usage
+In SCSS files, always use design system functions for colors and typography:
+
+- **Colors**: Use `ds.color('token-name')` function
+- **Typography**: Use `@include ds.typo('token-name')` mixin
+
+**Example:**
+```scss
+.title {
+  @include ds.typo('header/h4/semibold');
+  color: ds.color('text/primary');
+  margin: 0;
+}
+```
+
+### Token References
+- **Color tokens**: `src/shared/ds/colors/_color-tokens.scss`
+- **Typography tokens**: `src/shared/ds/typography/_typo-tokens.scss`
+
 ## Development Notes
 - The project follows Feature-Sliced Design architectural methodology strictly
 - Uses Telegram Apps UI library, indicating this may be a Telegram Web App

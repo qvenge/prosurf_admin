@@ -14,6 +14,7 @@ type PlanRowData = {
   price: string;
   endsIn: string;
   description?: string | null;
+  isSystemPlan: boolean;
   original: SeasonTicketPlan;
 };
 
@@ -28,6 +29,7 @@ export function PlansTable({ className, handleEdit, handleDelete }: PlansTablePr
   const { data, isLoading, error } = useSeasonTicketPlansAdmin({
     page,
     limit: 20,
+    includeSystem: true,
   });
 
   // Transform data for display
@@ -45,6 +47,7 @@ export function PlansTable({ className, handleEdit, handleDelete }: PlansTablePr
         price: formatPrice(seasonTicket.price),
         endsIn: `${endsIn} ${pluralize(endsIn, ['месяц', 'месяца', 'месяцев'])}`,
         description: seasonTicket.description,
+        isSystemPlan: seasonTicket.isSystemPlan,
         original: seasonTicket,
       };
     });
@@ -61,6 +64,15 @@ export function PlansTable({ className, handleEdit, handleDelete }: PlansTablePr
             <div className={styles.description}>{item.description}</div>
           )}
         </div>
+      ),
+    },
+    {
+      id: 'type',
+      label: 'Тип',
+      render: (item) => (
+        <span className={item.isSystemPlan ? styles.systemBadge : styles.publicBadge}>
+          {item.isSystemPlan ? 'Системный' : 'Публичный'}
+        </span>
       ),
     },
     {

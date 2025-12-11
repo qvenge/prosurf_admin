@@ -246,6 +246,10 @@ export interface PageBasedPaginatedResponse<T> {
 export type ClientSortField = z.infer<typeof schemas.ClientSortFieldSchema>;
 export type ClientAdminSortCriterion = z.infer<typeof schemas.ClientAdminSortCriterionSchema>;
 
+// Event Admin sort types
+export type EventSortField = z.infer<typeof schemas.EventSortFieldSchema>;
+export type EventAdminSortCriterion = z.infer<typeof schemas.EventAdminSortCriterionSchema>;
+
 // Admin entity filter types
 export type ClientAdminFilters = z.infer<typeof schemas.ClientAdminFiltersSchema>;
 export type EventAdminFilters = z.infer<typeof schemas.EventAdminFiltersSchema>;

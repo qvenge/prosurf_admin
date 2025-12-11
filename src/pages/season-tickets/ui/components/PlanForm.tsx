@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TextInput, Select, Button } from '@/shared/ui';
+import { TextInput, Select, Button, Checkbox } from '@/shared/ui';
 import { useCreateSeasonTicketPlan, useUpdateSeasonTicketPlan } from '@/shared/api';
 import type { SeasonTicketPlan, SeasonTicketPlanUpdateDto, SeasonTicketPlanCreateDto } from '@/shared/api';
 import styles from './PlanForm.module.scss';
@@ -17,6 +17,7 @@ interface FormData {
   passes: string;
   price: string;
   expiresIn: string;
+  isSystemPlan: boolean;
 }
 
 const disciplineOptions: Record<DesciplineValue, string> = {
@@ -38,6 +39,7 @@ export function PlanForm({ onClose, planData }: PlanFormProps) {
     passes: String(planData?.passes ?? ''),
     price: String(planData?.price.amountMinor ?? ''),
     expiresIn: planData ? '12' : '',
+    isSystemPlan: planData?.isSystemPlan ?? false,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -123,6 +125,7 @@ export function PlanForm({ onClose, planData }: PlanFormProps) {
             },
           },
           expiresIn: monthsToDays(formData.expiresIn),
+          isSystemPlan: formData.isSystemPlan,
         };
 
         await createPlanMutation.mutateAsync(planCreateData);
@@ -185,6 +188,12 @@ export function PlanForm({ onClose, planData }: PlanFormProps) {
           onChange={(e) => handleInputChange('expiresIn', e.target.value)}
           error={!!errors.expiresIn}
           hint={errors.expiresIn}
+        />
+
+        <Checkbox
+          label="Системный план"
+          checked={formData.isSystemPlan}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('isSystemPlan', e.target.checked)}
         />
       </div>
 

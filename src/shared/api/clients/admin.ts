@@ -211,7 +211,15 @@ export const adminClient = {
    */
   async getEventsAdmin(filters?: EventAdminFilters): Promise<EventAdminPaginatedResponse> {
     const validatedFilters = EventAdminFiltersSchema.parse(filters || {});
-    const queryString = createQueryString(validatedFilters);
+
+    // Serialize sort array to string format: "field:order,field:order"
+    const { sort, ...restFilters } = validatedFilters;
+    const serializedFilters: Record<string, unknown> = { ...restFilters };
+    if (sort && sort.length > 0) {
+      serializedFilters.sort = sort.map((s) => `${s.field}:${s.order}`).join(',');
+    }
+
+    const queryString = createQueryString(serializedFilters);
 
     const response = await apiClient.get(`/admin/events${queryString}`);
     return validateResponse(response.data, EventAdminPaginatedResponseSchema);
