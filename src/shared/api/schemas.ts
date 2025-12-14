@@ -263,18 +263,20 @@ export const BookRequestSchema = z.object({
   quantity: z.number().int().min(1),
 });
 
+export const PaymentInfoItemSchema = z.object({
+  method: z.enum(['card', 'pass', 'bonus', 'composite']),
+  amountMinor: z.number().nullable().optional(),
+  paymentId: z.string().nullable().optional(),
+  seasonTicketId: z.string().nullable().optional(),
+});
+
 export const BookingExtendedSchema = BookingSchema.extend({
   user: ClientSchema.optional(),
   guestContact: GuestContactSchema.nullable().optional(),
   session: z.lazy(() => SessionSchema).optional(),
   paymentInfo: z.union([
-    z.object({
-      method: z.enum(['card', 'certificate', 'pass', 'bonus', 'composite']),
-      paymentId: z.string().nullable().optional(),
-      certificateId: z.string().nullable().optional(),
-      seasonTicketId: z.string().nullable().optional(),
-    }),
-    z.array(z.unknown()),
+    PaymentInfoItemSchema,
+    z.array(PaymentInfoItemSchema),
   ]).nullable().optional(),
 });
 

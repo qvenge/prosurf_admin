@@ -4,7 +4,8 @@ import {
   useMarkBookingAsPaid,
   useConfirmBooking,
   useCancelBooking,
-  type BookingExtended
+  type BookingExtended,
+  type PaymentInfoItem
 } from '@/shared/api';
 import styles from './SessionDetails.module.scss';
 
@@ -12,6 +13,10 @@ export interface BookingDetailsProps {
   booking: BookingExtended;
   onBack: () => void;
 }
+
+const formatPrice = (amountMinor: number): string => {
+  return `${(amountMinor / 100).toLocaleString('ru-RU')} ₽`;
+};
 
 export function BookingDetails({ booking, onBack }: BookingDetailsProps) {
   const { mutate: markAsPaid, isPending: isMarkingPaid } = useMarkBookingAsPaid();
@@ -69,13 +74,38 @@ export function BookingDetails({ booking, onBack }: BookingDetailsProps) {
     }
 
     const paymentInfo = booking.paymentInfo;
-    if (paymentInfo && typeof paymentInfo === 'object' && !Array.isArray(paymentInfo) && 'method' in paymentInfo) {
-      if (paymentInfo.method === 'pass') {
+
+    // Если paymentInfo - массив (composite payment)
+    if (Array.isArray(paymentInfo) && paymentInfo.length > 0) {
+      const payments = paymentInfo as PaymentInfoItem[];
+      const passPayment = payments.find(p => p.method === 'pass');
+      if (passPayment?.seasonTicketId) {
         return 'Абонемент';
+      }
+
+      const bonusPayment = payments.find(p => p.method === 'bonus');
+      const totalPaid = payments.reduce((sum, p) => sum + (p.amountMinor || 0), 0);
+
+      if (bonusPayment?.amountMinor && totalPaid > 0) {
+        return `${formatPrice(totalPaid)} (${formatPrice(bonusPayment.amountMinor)} бонусами)`;
+      }
+      if (totalPaid > 0) {
+        return formatPrice(totalPaid);
       }
     }
 
-    return 'Оплачено';
+    // Если paymentInfo - объект (single payment)
+    if (paymentInfo && typeof paymentInfo === 'object' && !Array.isArray(paymentInfo) && 'method' in paymentInfo) {
+      const payment = paymentInfo as PaymentInfoItem;
+      if (payment.method === 'pass') {
+        return 'Абонемент';
+      }
+      if (payment.amountMinor) {
+        return formatPrice(payment.amountMinor);
+      }
+    }
+
+    return 'Оплачено (офлайн)';
   };
 
   const handleConfirm = () => {
@@ -135,6 +165,12 @@ export function BookingDetails({ booking, onBack }: BookingDetailsProps) {
             <span className={styles.bookingDetailsLabel}>Статус</span>
             <span className={styles.bookingDetailsValue} data-status={booking.status}>
               {getBookingStatusText(booking.status)}
+            </span>
+          </div>
+          <div className={styles.bookingDetailsRow}>
+            <span className={styles.bookingDetailsLabel}>Сумма</span>
+            <span className={styles.bookingDetailsValue}>
+              {formatPrice(booking.totalPrice.amountMinor)}
             </span>
           </div>
           <div className={styles.bookingDetailsRow}>

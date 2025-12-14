@@ -1,4 +1,4 @@
-import type { Client, BookingExtended } from '@/shared/api';
+import type { Client, BookingExtended, PaymentInfoItem } from '@/shared/api';
 import { useBookings } from '@/shared/api';
 import { Icon, Loader } from '@/shared/ui';
 import { BarbellBold, ConfettiBold } from '@/shared/ds/icons';
@@ -9,6 +9,10 @@ import styles from './BookingHistory.module.scss';
 export interface BookingHistoryProps {
   client: Client;
 }
+
+const formatPrice = (amountMinor: number): string => {
+  return `${(amountMinor / 100).toLocaleString('ru-RU')} ₽`;
+};
 
 function getEventTypeInfo(labels?: string[]): { icon: string; label: string } {
   if (labels?.includes('tour')) {
@@ -25,10 +29,41 @@ function getEventTypeInfo(labels?: string[]): { icon: string; label: string } {
 }
 
 function getPaymentLabel(paymentInfo?: BookingExtended['paymentInfo']): string | null {
-  if (!paymentInfo || Array.isArray(paymentInfo)) return null;
+  // Если нет paymentInfo - это офлайн оплата
+  if (!paymentInfo) return 'Оплачено (офлайн)';
 
-  if (paymentInfo.seasonTicketId) {
-    return 'Абонемент';
+  // Если пустой массив - тоже офлайн
+  if (Array.isArray(paymentInfo) && paymentInfo.length === 0) return 'Оплачено (офлайн)';
+
+  // Если paymentInfo - массив (composite payment)
+  if (Array.isArray(paymentInfo) && paymentInfo.length > 0) {
+    const payments = paymentInfo as PaymentInfoItem[];
+    const passPayment = payments.find(p => p.method === 'pass');
+    if (passPayment?.seasonTicketId) {
+      return 'Абонемент';
+    }
+
+    const bonusPayment = payments.find(p => p.method === 'bonus');
+    const totalPaid = payments.reduce((sum, p) => sum + (p.amountMinor || 0), 0);
+
+    if (bonusPayment?.amountMinor && totalPaid > 0) {
+      return `${formatPrice(totalPaid)} (${formatPrice(bonusPayment.amountMinor)} бонусами)`;
+    }
+    if (totalPaid > 0) {
+      return formatPrice(totalPaid);
+    }
+    return null;
+  }
+
+  // Если paymentInfo - объект (single payment)
+  if (typeof paymentInfo === 'object' && 'method' in paymentInfo) {
+    const payment = paymentInfo as PaymentInfoItem;
+    if (payment.seasonTicketId) {
+      return 'Абонемент';
+    }
+    if (payment.amountMinor) {
+      return formatPrice(payment.amountMinor);
+    }
   }
 
   return null;

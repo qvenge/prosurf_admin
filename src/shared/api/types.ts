@@ -38,6 +38,7 @@ export type SessionBulkDeleteResponse = z.infer<typeof schemas.SessionBulkDelete
 export type BookingStatus = z.infer<typeof schemas.BookingStatusSchema>;
 export type Booking = z.infer<typeof schemas.BookingSchema>;
 export type BookRequest = z.infer<typeof schemas.BookRequestSchema>;
+export type PaymentInfoItem = z.infer<typeof schemas.PaymentInfoItemSchema>;
 export type BookingExtended = z.infer<typeof schemas.BookingExtendedSchema>;
 export type BookingCreateDto = z.infer<typeof schemas.BookingCreateDtoSchema>;
 export type BookingUpdateDto = z.infer<typeof schemas.BookingUpdateDtoSchema>;
