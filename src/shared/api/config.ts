@@ -241,13 +241,21 @@ export const withIdempotency = (
 // Utility function to create query string from filters
 export const createQueryString = (filters: Record<string, unknown>): string => {
   const params = new URLSearchParams();
-  
+
   Object.entries(filters).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
-      params.append(key, String(value));
+      if (Array.isArray(value)) {
+        value.forEach((item) => {
+          if (item !== undefined && item !== null && item !== '') {
+            params.append(key, String(item));
+          }
+        });
+      } else {
+        params.append(key, String(value));
+      }
     }
   });
-  
+
   const query = params.toString();
   return query ? `?${query}` : '';
 };

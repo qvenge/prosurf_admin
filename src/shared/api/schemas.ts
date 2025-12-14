@@ -1004,12 +1004,26 @@ export const EventAdminFiltersSchema = z.object({
   sort: z.array(EventAdminSortCriterionSchema).optional(),
 });
 
+export const SessionSortFieldSchema = z.enum([
+  'eventTitle',
+  'status',
+  'startsAt',
+  'remainingSeats',
+  'createdAt',
+]);
+
+export const SessionAdminSortCriterionSchema = z.object({
+  field: SessionSortFieldSchema,
+  order: z.enum(['asc', 'desc']),
+});
+
 export const SessionAdminFiltersSchema = z.object({
   page: z.number().int().min(1).optional(),
   limit: z.number().int().min(1).max(100).optional(),
   eventId: z.string().optional(),
   status: SessionStatusSchema.optional(),
   labels: z.array(z.string()).optional(),
+  sort: z.array(SessionAdminSortCriterionSchema).optional(),
 });
 
 export const SeasonTicketPlanAdminFiltersSchema = z.object({

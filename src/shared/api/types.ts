@@ -250,6 +250,10 @@ export type ClientAdminSortCriterion = z.infer<typeof schemas.ClientAdminSortCri
 export type EventSortField = z.infer<typeof schemas.EventSortFieldSchema>;
 export type EventAdminSortCriterion = z.infer<typeof schemas.EventAdminSortCriterionSchema>;
 
+// Session Admin sort types
+export type SessionSortField = z.infer<typeof schemas.SessionSortFieldSchema>;
+export type SessionAdminSortCriterion = z.infer<typeof schemas.SessionAdminSortCriterionSchema>;
+
 // Admin entity filter types
 export type ClientAdminFilters = z.infer<typeof schemas.ClientAdminFiltersSchema>;
 export type EventAdminFilters = z.infer<typeof schemas.EventAdminFiltersSchema>;

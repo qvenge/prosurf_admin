@@ -1,23 +1,12 @@
-.page {
-  display: flex;
-  padding: 28px 28px;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 16px;
-  flex: 1 0 0;
-  min-width: 0;
-  overflow: auto;
-  align-self: stretch;
-}
-
-.calendar {
-  flex-grow: 1;
-}
-
 .filters {
   display: flex;
+  gap: ds.number('paddings & gaps/M');
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+}
+
+.option {
+  white-space: nowrap;
 }
 
 .filterBadge {

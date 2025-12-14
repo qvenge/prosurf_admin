@@ -25,6 +25,7 @@ interface CalendarDay {
 export interface SessionsCalendarProps {
   eventType?: string;
   eventId?: string | null;
+  status?: 'SCHEDULED' | 'CANCELLED' | 'COMPLETE';
   className?: string;
 }
 
@@ -107,7 +108,7 @@ function getSessionType(session: Session): SessionType {
   return 'training';
 }
 
-export function SessionsCalendar({ eventType, eventId, className }: SessionsCalendarProps) {
+export function SessionsCalendar({ eventType, eventId, status, className }: SessionsCalendarProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
@@ -137,13 +138,18 @@ export function SessionsCalendar({ eventType, eventId, className }: SessionsCale
     limit: 200,
   });
 
-  // Group sessions by date
+  // Group sessions by date (with status filter applied on client)
   const sessionsByDate = useMemo(() => {
     const map = new Map<string, Session[]>();
 
     if (!sessionsData?.items) return map;
 
     for (const session of sessionsData.items) {
+      // Filter by status on client side
+      if (status && session.status !== status) {
+        continue;
+      }
+
       const sessionDate = new Date(session.startsAt);
       const dateKey = formatDateKey(sessionDate);
 
@@ -161,7 +167,7 @@ export function SessionsCalendar({ eventType, eventId, className }: SessionsCale
     }
 
     return map;
-  }, [sessionsData]);
+  }, [sessionsData, status]);
 
   const handlePrevMonth = () => {
     if (currentMonth === 0) {
