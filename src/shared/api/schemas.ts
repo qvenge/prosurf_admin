@@ -268,6 +268,7 @@ export const PaymentInfoItemSchema = z.object({
   amountMinor: z.number().nullable().optional(),
   paymentId: z.string().nullable().optional(),
   seasonTicketId: z.string().nullable().optional(),
+  paidAt: z.string().datetime().nullable().optional(),
 });
 
 export const BookingExtendedSchema = BookingSchema.extend({
@@ -943,6 +944,32 @@ export const ImageFiltersSchema = z.object({
   uploadedAfter: z.string().datetime().optional(),
   uploadedBefore: z.string().datetime().optional(),
   uploadedByAdminId: z.string().optional(),
+});
+
+// Content schemas (universal key-value content storage)
+export const ContentSchema = z.object({
+  id: z.string(),
+  key: z.string(),
+  title: z.string(),
+  content: z.string(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+export const ContentFiltersSchema = z.object({
+  keyPrefix: z.string().optional(),
+  q: z.string().optional(),
+});
+
+export const ContentCreateSchema = z.object({
+  key: z.string(),
+  title: z.string(),
+  content: z.string().optional(),
+});
+
+export const ContentUpdateSchema = z.object({
+  title: z.string().optional(),
+  content: z.string().optional(),
 });
 
 // ========================================

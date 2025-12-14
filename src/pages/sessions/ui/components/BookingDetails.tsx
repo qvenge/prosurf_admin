@@ -7,6 +7,7 @@ import {
   type BookingExtended,
   type PaymentInfoItem
 } from '@/shared/api';
+import { formatDate, formatTime } from '@/shared/lib/format-utils';
 import styles from './SessionDetails.module.scss';
 
 export interface BookingDetailsProps {
@@ -108,6 +109,26 @@ export function BookingDetails({ booking, onBack }: BookingDetailsProps) {
     return 'Оплачено (офлайн)';
   };
 
+  const getPaymentDate = (): string | null => {
+    const paymentInfo = booking.paymentInfo;
+
+    if (Array.isArray(paymentInfo) && paymentInfo.length > 0) {
+      const firstPayment = paymentInfo[0] as PaymentInfoItem;
+      if (firstPayment.paidAt) {
+        return `${formatDate(firstPayment.paidAt)}, ${formatTime(firstPayment.paidAt)}`;
+      }
+    }
+
+    if (paymentInfo && typeof paymentInfo === 'object' && !Array.isArray(paymentInfo) && 'paidAt' in paymentInfo) {
+      const payment = paymentInfo as PaymentInfoItem;
+      if (payment.paidAt) {
+        return `${formatDate(payment.paidAt)}, ${formatTime(payment.paidAt)}`;
+      }
+    }
+
+    return null;
+  };
+
   const handleConfirm = () => {
     confirmBooking(booking.id, {
       onSuccess: onBack
@@ -182,6 +203,14 @@ export function BookingDetails({ booking, onBack }: BookingDetailsProps) {
               {getPaymentStatusText()}
             </span>
           </div>
+          {isPaid && getPaymentDate() && (
+            <div className={styles.bookingDetailsRow}>
+              <span className={styles.bookingDetailsLabel}>Дата оплаты</span>
+              <span className={styles.bookingDetailsValue}>
+                {getPaymentDate()}
+              </span>
+            </div>
+          )}
           <div className={styles.bookingDetailsRow}>
             <span className={styles.bookingDetailsLabel}>Количество</span>
             <span className={styles.bookingDetailsValue}>{booking.quantity}</span>

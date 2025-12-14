@@ -1,7 +1,5 @@
-// import { Icon, Skeleton, SkeletonItem, UploadImageInput } from '@/shared/ui';
-// import { CameraRegular, XBold } from '@/shared/ds/icons';
-// import { useImages, useUploadImages, useDeleteImage } from '@/shared/api';
 import { ImageGallery } from './ImageGallery';
+import { ContentTextManager } from './ContentTextManager';
 import styles from './ContentTab.module.scss';
 
 export function ContentTab() {
@@ -11,6 +9,11 @@ export function ContentTab() {
       <ImageGallery title="Галерея: о нас" tags={['about']} />
       <ImageGallery title="Галерея: тренировки по серфингу" tags={['training:surfing']} />
       <ImageGallery title="Галерея: тренировки по серфскейту" tags={['training:surfskate']} />
+
+      <ContentTextManager title="Тексты: Главная страница" keyPrefix="home." />
+      <ContentTextManager title="Тексты: Согласия" keyPrefix="consent." />
+      <ContentTextManager title="Тексты: Тренировки" keyPrefix="training." />
+      <ContentTextManager title="Тексты: Статьи" keyPrefix="article." />
     </div>
   );
 }

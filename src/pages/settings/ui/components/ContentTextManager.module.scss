@@ -1,0 +1,102 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/S');
+}
+
+.title {
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 28px;
+  color: ds.color('text/primary');
+  margin: 0;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/XS');
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: ds.number('paddings & gaps/M');
+  background: ds.color('background/secondary');
+  border: 1px solid ds.color('border/primary');
+  border-radius: ds.number('radius/M');
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: ds.color('background/tertiary');
+  }
+}
+
+.cardTitle {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+  color: ds.color('text/primary');
+}
+
+.cardPreview {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: ds.color('text/secondary');
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.empty {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+  color: ds.color('text/secondary');
+  margin: 0;
+}
+
+.skeletonCard {
+  height: 80px;
+  border-radius: ds.number('radius/M');
+}
+
+.sideModalContent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: ds.number('paddings & gaps/L');
+}
+
+.sideModalTitle {
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 28px;
+  color: ds.color('text/primary');
+  margin: 0 0 ds.number('paddings & gaps/XS') 0;
+}
+
+.sideModalKey {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: ds.color('text/secondary');
+  margin: 0 0 ds.number('paddings & gaps/M') 0;
+}
+
+.textarea {
+  flex: 1;
+  min-height: 200px;
+}
+
+.sideModalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: ds.number('paddings & gaps/S');
+  margin-top: ds.number('paddings & gaps/M');
+  padding-top: ds.number('paddings & gaps/M');
+  border-top: 1px solid ds.color('border/primary');
+}
