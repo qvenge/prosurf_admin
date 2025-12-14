@@ -20,6 +20,7 @@
   align-items: flex-start;
   gap: 8px;
   align-self: stretch;
+  height: 100%;
 
   border-radius: ds.number('radius/M');
   border: 1px solid ds.color('border/primary');

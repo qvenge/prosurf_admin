@@ -87,3 +87,15 @@ export const useDeleteContent = () => {
     },
   });
 };
+
+// Reorder contents
+export const useReorderContents = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (ids: string[]) => contentClient.reorderContents(ids),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: contentKeys.lists() });
+    },
+  });
+};

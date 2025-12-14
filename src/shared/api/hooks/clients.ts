@@ -8,6 +8,7 @@ import type {
   AdminGrantSeasonTicketDto,
 } from '../types';
 import { seasonTicketsKeys } from './season-tickets';
+import { adminKeys } from './admin';
 
 // Query key factory for clients
 export const clientsKeys = {
@@ -67,6 +68,7 @@ export const useUpdateClient = () => {
 
       // Invalidate client lists to ensure consistency
       queryClient.invalidateQueries({ queryKey: clientsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.clientsAdmin() });
     },
     onError: (error) => {
       console.error('Failed to update client:', error);

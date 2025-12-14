@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { seasonTicketsClient } from '../clients/season-tickets';
+import { adminKeys } from './admin';
 import type {
   SeasonTicketPlan,
   SeasonTicketPlanUpdateDto,
@@ -53,11 +54,12 @@ export const useSeasonTicketPlansInfinite = (filters?: Omit<SeasonTicketPlanFilt
 
 export const useCreateSeasonTicketPlan = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: SeasonTicketPlanCreateDto) => seasonTicketsClient.createSeasonTicketPlan(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: seasonTicketsKeys.plans() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.seasonTicketPlansAdmin() });
     },
   });
 };
@@ -70,6 +72,7 @@ export const useUpdateSeasonTicketPlan = () => {
       seasonTicketsClient.updateSeasonTicketPlan(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: seasonTicketsKeys.plans() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.seasonTicketPlansAdmin() });
     },
   });
 };
@@ -81,6 +84,7 @@ export const useDeleteSeasonTicketPlan = () => {
     mutationFn: (id: string) => seasonTicketsClient.deleteSeasonTicketPlan(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: seasonTicketsKeys.plans() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.seasonTicketPlansAdmin() });
     },
   });
 };

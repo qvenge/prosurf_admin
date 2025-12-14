@@ -87,22 +87,14 @@ export function ContentTextManager({ title, keyPrefix }: ContentTextManagerProps
               className={styles.textarea}
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
-              autoResize
               placeholder="Введите текст (поддерживается markdown)"
               disabled={isSaving}
             />
             <div className={styles.sideModalActions}>
               <Button
-                type="secondary"
-                size="m"
-                onClick={handleClose}
-                disabled={isSaving}
-              >
-                Отмена
-              </Button>
-              <Button
                 type="primary"
-                size="m"
+                size="l"
+                streched
                 onClick={handleSave}
                 loading={isSaving}
                 disabled={isSaving}

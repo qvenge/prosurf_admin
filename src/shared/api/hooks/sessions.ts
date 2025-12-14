@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { sessionsClient } from '../clients/sessions';
 import { eventsKeys } from './events';
+import { adminKeys } from './admin';
 import type {
   Session,
   SessionCompact,
@@ -55,25 +56,26 @@ export const useEventSessionsInfinite = (
 // Create sessions for an event (ADMIN only)
 export const useCreateEventSessions = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ 
-      eventId, 
-      data, 
-      idempotencyKey 
-    }: { 
-      eventId: string; 
+    mutationFn: ({
+      eventId,
+      data,
+      idempotencyKey
+    }: {
+      eventId: string;
       data: SessionCreateDto | SessionCreateDto[];
       idempotencyKey: IdempotencyKey;
     }) => sessionsClient.createEventSessions(eventId, data, idempotencyKey),
     onSuccess: (_, variables) => {
       // Invalidate event sessions queries
-      queryClient.invalidateQueries({ 
-        queryKey: [eventsKeys.detail(variables.eventId)[0], eventsKeys.detail(variables.eventId)[1], eventsKeys.detail(variables.eventId)[2], 'sessions'] 
+      queryClient.invalidateQueries({
+        queryKey: [eventsKeys.detail(variables.eventId)[0], eventsKeys.detail(variables.eventId)[1], eventsKeys.detail(variables.eventId)[2], 'sessions']
       });
-      
+
       // Invalidate general sessions lists
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.sessionsAdmin() });
     },
     onError: (error) => {
       console.error('Failed to create sessions:', error);
@@ -123,6 +125,7 @@ export const useUpdateSession = () => {
 
       // Invalidate sessions lists and event sessions
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.sessionsAdmin() });
       queryClient.invalidateQueries({
         predicate: (query) =>
           query.queryKey.includes('sessions') && query.queryKey.includes(updatedSession.event.id)
@@ -156,6 +159,7 @@ export const useDeleteSession = () => {
 
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.sessionsAdmin() });
       queryClient.invalidateQueries({
         predicate: (query) => query.queryKey.includes('sessions')
       });
@@ -186,6 +190,7 @@ export const useBulkDeleteSessions = () => {
     onSuccess: () => {
       // Invalidate sessions lists
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.sessionsAdmin() });
 
       // Invalidate event sessions for all events that had sessions deleted
       queryClient.invalidateQueries({

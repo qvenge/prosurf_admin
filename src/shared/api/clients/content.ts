@@ -75,4 +75,13 @@ export const contentClient = {
   async deleteContent(id: string): Promise<void> {
     await apiClient.delete(`/content/${encodeURIComponent(id)}`);
   },
+
+  /**
+   * Reorder contents (admin only)
+   * PATCH /content/reorder
+   */
+  async reorderContents(ids: string[]): Promise<Content[]> {
+    const response = await apiClient.patch('/content/reorder', { ids });
+    return validateResponse(response.data, z.array(ContentSchema));
+  },
 };

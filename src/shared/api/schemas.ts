@@ -952,6 +952,7 @@ export const ContentSchema = z.object({
   key: z.string(),
   title: z.string(),
   content: z.string(),
+  order: z.number().int(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
@@ -970,6 +971,11 @@ export const ContentCreateSchema = z.object({
 export const ContentUpdateSchema = z.object({
   title: z.string().optional(),
   content: z.string().optional(),
+  order: z.number().int().optional(),
+});
+
+export const ContentReorderSchema = z.object({
+  ids: z.array(z.string()),
 });
 
 // ========================================

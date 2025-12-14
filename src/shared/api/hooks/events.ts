@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { eventsClient } from '../clients/events';
+import { adminKeys } from './admin';
 import type { Event, EventCreateDto, EventUpdateDto, EventFilters, PaginatedResponse } from '../types';
 
 // Query key factory for events
@@ -54,6 +55,7 @@ export const useCreateEvent = () => {
     onSuccess: (newEvent) => {
       // Invalidate events lists to show the new event
       queryClient.invalidateQueries({ queryKey: eventsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.eventsAdmin() });
 
       // Optionally add to cache
       queryClient.setQueryData(eventsKeys.detail(newEvent.id), newEvent);
@@ -78,6 +80,7 @@ export const useUpdateEvent = () => {
 
       // Invalidate events lists to show updated event
       queryClient.invalidateQueries({ queryKey: eventsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.eventsAdmin() });
     },
     onError: (error) => {
       console.error('Failed to update event:', error);
@@ -98,6 +101,7 @@ export const useDeleteEvent = () => {
       queryClient.removeQueries({ queryKey: eventsKeys.detail(variables.id) });
       // Invalidate events lists
       queryClient.invalidateQueries({ queryKey: eventsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.eventsAdmin() });
     },
     onError: (error) => {
       console.error('Failed to delete event:', error);
