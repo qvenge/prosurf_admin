@@ -1,4 +1,5 @@
 import { apiClient, validateResponse, createQueryString } from '../config';
+import { joinApiUrl } from '../../lib/url-utils';
 import {
   AdminSchema,
   AdminCreateDtoSchema,
@@ -30,6 +31,7 @@ import type {
   JobExecutionResult,
   PaginatedResponse,
   AuditLogFilters,
+  Client,
   ClientAdminFilters,
   ClientAdminPaginatedResponse,
   EventAdminFilters,
@@ -39,6 +41,14 @@ import type {
   SeasonTicketPlanAdminFilters,
   SeasonTicketPlanAdminPaginatedResponse,
 } from '../types';
+
+/**
+ * Transform client photoUrl to full URL
+ */
+const transformClient = (client: Client): Client => ({
+  ...client,
+  photoUrl: joinApiUrl(client.photoUrl) ?? client.photoUrl,
+});
 
 /**
  * Admin API client
@@ -202,7 +212,12 @@ export const adminClient = {
     const queryString = createQueryString(serializedFilters);
 
     const response = await apiClient.get(`/admin/clients${queryString}`);
-    return validateResponse(response.data, ClientAdminPaginatedResponseSchema);
+    const data = validateResponse(response.data, ClientAdminPaginatedResponseSchema);
+
+    return {
+      ...data,
+      items: data.items.map(transformClient),
+    };
   },
 
   /**
