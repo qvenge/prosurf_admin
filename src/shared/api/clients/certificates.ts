@@ -1,4 +1,5 @@
 import { apiClient, validateResponse, createQueryString } from '../config';
+import { joinApiUrl } from '../../lib/url-utils';
 import {
   CertificateSchema,
   CertificateCreateDtoSchema,
@@ -20,7 +21,28 @@ import type {
   CertificateAdminFilters,
   AdminCreateCertificateDto,
   AdminUpdateCertificateDto,
+  ClientInfo,
 } from '../types';
+
+/**
+ * Transform ClientInfo photoUrl to full URL
+ */
+const transformClientInfo = (info: ClientInfo | null | undefined): ClientInfo | null | undefined => {
+  if (!info) return info;
+  return {
+    ...info,
+    photoUrl: joinApiUrl(info.photoUrl) ?? info.photoUrl,
+  };
+};
+
+/**
+ * Transform CertificateAdmin to include full URLs for client photos
+ */
+const transformCertificateAdmin = (cert: CertificateAdmin): CertificateAdmin => ({
+  ...cert,
+  purchasedBy: transformClientInfo(cert.purchasedBy),
+  activatedBy: transformClientInfo(cert.activatedBy),
+});
 
 /**
  * Certificates API client
@@ -70,7 +92,12 @@ export const certificatesClient = {
     const queryString = createQueryString(serializedFilters);
 
     const response = await apiClient.get(`/certificates/admin${queryString}`);
-    return validateResponse(response.data, CertificateAdminPaginatedResponseSchema);
+    const data = validateResponse(response.data, CertificateAdminPaginatedResponseSchema);
+
+    return {
+      ...data,
+      items: data.items.map(transformCertificateAdmin),
+    };
   },
 
   /**
@@ -79,7 +106,7 @@ export const certificatesClient = {
    */
   async getCertificateAdmin(id: string): Promise<CertificateAdmin> {
     const response = await apiClient.get(`/certificates/admin/${id}`);
-    return validateResponse(response.data, CertificateAdminSchema);
+    return transformCertificateAdmin(validateResponse(response.data, CertificateAdminSchema));
   },
 
   /**
@@ -90,7 +117,7 @@ export const certificatesClient = {
     const validatedData = AdminCreateCertificateDtoSchema.parse(data);
 
     const response = await apiClient.post('/certificates/admin', validatedData);
-    return validateResponse(response.data, CertificateAdminSchema);
+    return transformCertificateAdmin(validateResponse(response.data, CertificateAdminSchema));
   },
 
   /**
@@ -101,7 +128,7 @@ export const certificatesClient = {
     const validatedData = AdminUpdateCertificateDtoSchema.parse(data);
 
     const response = await apiClient.patch(`/certificates/admin/${id}`, validatedData);
-    return validateResponse(response.data, CertificateAdminSchema);
+    return transformCertificateAdmin(validateResponse(response.data, CertificateAdminSchema));
   },
 
   /**

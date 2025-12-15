@@ -68,7 +68,7 @@ export const useUpdateClient = () => {
 
       // Invalidate client lists to ensure consistency
       queryClient.invalidateQueries({ queryKey: clientsKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: adminKeys.clientsAdmin() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.clientsAdminBase() });
     },
     onError: (error) => {
       console.error('Failed to update client:', error);

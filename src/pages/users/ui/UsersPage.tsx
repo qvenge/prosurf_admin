@@ -102,7 +102,7 @@ export function UsersPage() {
 
   return (
     <>
-      <Header title="Клиенты" />
+      <Header title="Пользователи" />
       <div className={styles.page}>
         <UsersFilters filters={filters} onFilterChange={handleFilterChange} />
 

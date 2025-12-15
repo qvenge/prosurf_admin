@@ -12,6 +12,7 @@ export { SideModal } from './side-modal';
 export { Select } from './select';
 export { Textarea } from './textarea';
 export { UploadImageInput } from './upload-image-input';
+export { ImageGalleryGrid, type ImageGalleryGridProps, type ImageItem } from './image-gallery-grid';
 export { Skeleton, SkeletonItem, SkeletonText } from './skeleton';
 export { LinkWithParams, type LinkWithParamsProps } from './link-with-params';
 export { VirtualScroll } from './virtual-scroll';

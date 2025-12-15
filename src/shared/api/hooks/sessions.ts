@@ -75,7 +75,7 @@ export const useCreateEventSessions = () => {
 
       // Invalidate general sessions lists
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: adminKeys.sessionsAdmin() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.sessionsAdminBase() });
     },
     onError: (error) => {
       console.error('Failed to create sessions:', error);
@@ -125,7 +125,7 @@ export const useUpdateSession = () => {
 
       // Invalidate sessions lists and event sessions
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: adminKeys.sessionsAdmin() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.sessionsAdminBase() });
       queryClient.invalidateQueries({
         predicate: (query) =>
           query.queryKey.includes('sessions') && query.queryKey.includes(updatedSession.event.id)
@@ -159,7 +159,7 @@ export const useDeleteSession = () => {
 
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: adminKeys.sessionsAdmin() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.sessionsAdminBase() });
       queryClient.invalidateQueries({
         predicate: (query) => query.queryKey.includes('sessions')
       });
@@ -190,7 +190,7 @@ export const useBulkDeleteSessions = () => {
     onSuccess: () => {
       // Invalidate sessions lists
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: adminKeys.sessionsAdmin() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.sessionsAdminBase() });
 
       // Invalidate event sessions for all events that had sessions deleted
       queryClient.invalidateQueries({

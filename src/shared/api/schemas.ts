@@ -63,6 +63,7 @@ export const ClientSchema = z.object({
   telegramChatId: z.string().nullable().optional(),
   username: z.string().nullable().optional(),
   phone: z.string().nullable().optional(),
+  email: z.string().nullable().optional(),
   firstName: z.string().nullable().optional(),
   lastName: z.string().nullable().optional(),
   photoUrl: z.string().nullable().optional(),
@@ -119,6 +120,7 @@ export const EventSchema = z.object({
   title: z.string(),
   description: z.array(EventDescriptionSchema).nullable().optional(),
   location: z.string().nullable().optional(),
+  mapUrl: z.string().nullable().optional(),
   capacity: z.number().int().min(0).nullable().optional(),
   tickets: z.array(EventTicketSchema),
   createdAt: z.string().datetime(),
@@ -132,6 +134,7 @@ export const EventCreateDtoSchema = z.object({
   title: z.string(),
   description: z.array(EventDescriptionSchema).nullable().optional(),
   location: z.string().nullable().optional(),
+  mapUrl: z.string().nullable().optional(),
   capacity: z.number().int().min(0).nullable().optional(),
   tickets: z.array(EventTicketCreateSchema),
   labels: z.array(z.string()).optional(),
@@ -143,6 +146,7 @@ export const EventUpdateDtoSchema = z.object({
   title: z.string().optional(),
   description: z.array(EventDescriptionSchema).nullable().optional(),
   location: z.string().nullable().optional(),
+  mapUrl: z.string().nullable().optional(),
   capacity: z.number().int().min(0).nullable().optional(),
   tickets: z.array(EventTicketCreateSchema).optional(),
   labels: z.array(z.string()).optional(),
@@ -976,6 +980,29 @@ export const ContentUpdateSchema = z.object({
 
 export const ContentReorderSchema = z.object({
   ids: z.array(z.string()),
+});
+
+// Notification Template schemas
+export const NotificationTemplateTypeSchema = z.enum([
+  'BOOKING_CONFIRMATION',
+  'SESSION_REMINDER_24H',
+  'CERTIFICATE_DENOMINATION',
+  'CERTIFICATE_PASSES',
+]);
+
+export const NotificationTemplateSchema = z.object({
+  id: z.string(),
+  type: NotificationTemplateTypeSchema,
+  text: z.string(),
+  imageUrl: z.string().nullable(),
+  availableVariables: z.array(z.string()),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+
+export const NotificationTemplateUpdateSchema = z.object({
+  text: z.string(),
+  imageId: z.string().nullable().optional(),
 });
 
 // ========================================

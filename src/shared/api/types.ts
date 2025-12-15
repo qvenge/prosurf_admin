@@ -189,6 +189,11 @@ export type ContentFilters = z.infer<typeof schemas.ContentFiltersSchema>;
 export type ContentCreate = z.infer<typeof schemas.ContentCreateSchema>;
 export type ContentUpdate = z.infer<typeof schemas.ContentUpdateSchema>;
 
+// Notification Template types
+export type NotificationTemplateType = z.infer<typeof schemas.NotificationTemplateTypeSchema>;
+export type NotificationTemplate = z.infer<typeof schemas.NotificationTemplateSchema>;
+export type NotificationTemplateUpdate = z.infer<typeof schemas.NotificationTemplateUpdateSchema>;
+
 // Common parameter types
 export type CursorParam = z.infer<typeof schemas.CursorParamSchema>;
 export type LimitParam = z.infer<typeof schemas.LimitParamSchema>;

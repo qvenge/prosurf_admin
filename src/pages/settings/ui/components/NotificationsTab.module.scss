@@ -1,0 +1,211 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/M');
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/XS');
+}
+
+.title {
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 28px;
+  color: ds.color('text/primary');
+  margin: 0;
+}
+
+.description {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: ds.color('text/secondary');
+  margin: 0;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/XS');
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: ds.number('paddings & gaps/M');
+  background: ds.color('background/secondary');
+  border: 1px solid ds.color('border/primary');
+  border-radius: ds.number('radius/M');
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: ds.color('background/tertiary');
+  }
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: ds.number('paddings & gaps/S');
+}
+
+.cardTitle {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+  color: ds.color('text/primary');
+}
+
+.cardImageIcon {
+  color: ds.color('text/tertiary');
+  flex-shrink: 0;
+}
+
+.cardDescription {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: ds.color('text/secondary');
+}
+
+.cardPreview {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: ds.color('text/tertiary');
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-top: 4px;
+}
+
+.empty {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+  color: ds.color('text/secondary');
+  margin: 0;
+}
+
+.skeletonCard {
+  height: 100px;
+  border-radius: ds.number('radius/M');
+}
+
+// Side modal styles
+
+.sideModalContent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: ds.number('paddings & gaps/L');
+  gap: ds.number('paddings & gaps/M');
+}
+
+.sideModalTitle {
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 28px;
+  color: ds.color('text/primary');
+  margin: 0;
+}
+
+.sideModalDescription {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: ds.color('text/secondary');
+  margin: 0;
+}
+
+// Variables section
+
+.variablesSection {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/XS');
+}
+
+.variablesTitle {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  color: ds.color('text/secondary');
+  margin: 0;
+}
+
+.variablesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: ds.number('paddings & gaps/XS');
+}
+
+.variableChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: ds.color('background/tertiary');
+  border: 1px solid ds.color('border/primary');
+  border-radius: ds.number('radius/S');
+  font-size: 12px;
+  font-weight: 500;
+  font-family: monospace;
+  color: ds.color('text/primary');
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background: ds.color('background/primary');
+    border-color: ds.color('border/secondary');
+  }
+
+  &:active {
+    background: ds.color('background/tertiary');
+  }
+}
+
+// Text section
+
+.textSection {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/XS');
+  flex: 1;
+}
+
+.sectionLabel {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  color: ds.color('text/secondary');
+  margin: 0;
+}
+
+.textarea {
+  flex: 1;
+  min-height: 150px;
+}
+
+// Image section
+
+.imageSection {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/XS');
+}
+
+// Actions
+
+.sideModalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: ds.number('paddings & gaps/S');
+  margin-top: auto;
+  padding-top: ds.number('paddings & gaps/M');
+}

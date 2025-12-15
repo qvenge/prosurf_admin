@@ -27,71 +27,10 @@
   color: ds.color('text/secondary');
 }
 
-.gallery {
+.skeletonContainer {
   display: flex;
   flex-wrap: wrap;
-  gap: ds.number('paddings & gaps/XXS');
-}
-
-.imageCard {
-  position: relative;
-  width: 140px;
-}
-
-.imageWrapper {
-  width: 100%;
-  height: 96px;
-  border-radius: ds.number('radius/M');
-  overflow: hidden;
-}
-
-.image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.removeButton {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px;
-  background: ds.color('overlay/primary');
-  border: none;
-  border-radius: ds.number('radius/round');
-  cursor: pointer;
-}
-
-.removeIcon {
-  color: ds.color('graphic/brand');
-}
-
-.addButton {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 140px;
-  height: 96px;
-  background: ds.color('background/secondary');
-  border: none;
-  border-radius: ds.number('radius/M');
-  cursor: pointer;
-}
-
-.addIcon {
-  color: ds.color('graphic/accent');
-}
-
-.addText {
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 20px;
-  color: ds.color('text/accent');
+  gap: 8px;
 }
 
 .skeletonImage {

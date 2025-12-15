@@ -9,13 +9,14 @@ import {
   type SeasonTicketAdminFilters,
   type SeasonTicketStatus,
   type SeasonTicketPlan,
+  type SeasonTicketAdmin,
 } from '@/shared/api';
 import { SeasonTicketsTable } from './components/SeasonTicketsTable';
 import { SeasonTicketsFilters } from './components/SeasonTicketsFilters';
-import { SeasonTicketDetails } from './components/SeasonTicketDetails';
 import { PlansTab } from './components/PlansTab';
 import { PlanForm } from './components/PlanForm';
 import { DeletePlanModal } from './components/DeletePlanModal';
+import { CancelTicketModal } from './components/CancelTicketModal';
 import styles from './SeasonTicketsPage.module.scss';
 
 const tabOptions = [
@@ -44,7 +45,9 @@ export function SeasonTicketsPage() {
   const [editingPlan, setEditingPlan] = useState<SeasonTicketPlan | undefined>(undefined);
   const [deletingPlan, setDeletingPlan] = useState<SeasonTicketPlan | undefined>(undefined);
 
-  const ticketId = searchParams.get('ticketId');
+  // Cancel ticket state
+  const [cancellingTicket, setCancellingTicket] = useState<SeasonTicketAdmin | undefined>(undefined);
+
   const planId = searchParams.get('planId');
   const clientId = searchParams.get('clientId');
 
@@ -131,20 +134,13 @@ export function SeasonTicketsPage() {
     [searchParams, setSearchParams]
   );
 
-  const handleView = useCallback(
-    (id: string) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('ticketId', id);
-      setSearchParams(params);
-    },
-    [searchParams, setSearchParams]
-  );
+  const handleCancelTicket = useCallback((ticket: SeasonTicketAdmin) => {
+    setCancellingTicket(ticket);
+  }, []);
 
-  const handleCloseDetails = useCallback(() => {
-    const params = new URLSearchParams(searchParams);
-    params.delete('ticketId');
-    setSearchParams(params);
-  }, [searchParams, setSearchParams]);
+  const handleCloseCancelModal = useCallback(() => {
+    setCancellingTicket(undefined);
+  }, []);
 
   const handlePlanClick = useCallback(
     (planId: string) => {
@@ -230,7 +226,7 @@ export function SeasonTicketsPage() {
               isLoading={isLoading}
               sort={sort}
               onSortChange={handleSortChange}
-              onView={handleView}
+              onCancel={handleCancelTicket}
               onPlanClick={handlePlanClick}
             />
 
@@ -249,13 +245,8 @@ export function SeasonTicketsPage() {
         )}
       </div>
 
-      {ticketId && (
-        <SideModal onClose={handleCloseDetails}>
-          <SeasonTicketDetails
-            ticketId={ticketId}
-            onPlanClick={handlePlanClick}
-          />
-        </SideModal>
+      {cancellingTicket && (
+        <CancelTicketModal ticket={cancellingTicket} onClose={handleCloseCancelModal} />
       )}
 
       {isPlanModalOpen && (

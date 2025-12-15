@@ -9,6 +9,9 @@ export * from './schemas';
 // Configuration and utilities
 export { apiClient, tokenStorage, withIdempotency, createQueryString, validateResponse, config, ValidationError } from './config';
 
+// URL utilities
+export { joinApiUrl, joinApiUrls } from '../lib/url-utils';
+
 // Error handling
 export * from './error-handler';
 
@@ -30,6 +33,7 @@ export { adminClient } from './clients/admin';
 export { webhooksClient } from './clients/webhooks';
 export { imagesClient } from './clients/images';
 export { contentClient } from './clients/content';
+export { notificationTemplatesClient } from './clients/notification-templates';
 
 // Hooks - Auth
 export * from './hooks/auth';
@@ -70,6 +74,9 @@ export * from './hooks/images';
 // Hooks - Content
 export * from './hooks/content';
 
+// Hooks - Notification Templates
+export * from './hooks/notification-templates';
+
 // Providers
 export { ApiProvider } from './providers/ApiProvider';
 
@@ -87,6 +94,7 @@ export { waitlistKeys } from './hooks/waitlist';
 export { adminKeys } from './hooks/admin';
 export { imagesKeys } from './hooks/images';
 export { contentKeys } from './hooks/content';
+export { notificationTemplatesKeys } from './hooks/notification-templates';
 
 // Common utilities and helpers
 export {

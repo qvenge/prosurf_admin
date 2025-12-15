@@ -86,3 +86,8 @@
   @include ds.typo('body/b4/medium');
   color: ds.color('text/primary');
 }
+
+.contactsEmail {
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/secondary');
+}

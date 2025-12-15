@@ -20,6 +20,7 @@ export interface Category {
 export interface FormData {
   title: string;
   location: string;
+  mapUrl: string;
   prepayment: string;
   price: string;
   currency: 'RUB' | 'USD';

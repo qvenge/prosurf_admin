@@ -1,0 +1,62 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: ds.color('background/primary');
+  border-radius: ds.number('radius/L');
+  padding: ds.number('paddings & gaps/XL');
+  max-width: 400px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/L');
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/S');
+}
+
+.title {
+  @include ds.typo('header/h4/semibold');
+  color: ds.color('text/primary');
+  margin: 0;
+}
+
+.description {
+  @include ds.typo('body/b3/medium');
+  color: ds.color('text/secondary');
+  margin: 0;
+}
+
+.info {
+  @include ds.typo('body/b4/regular');
+  color: ds.color('text/tertiary');
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  gap: ds.number('paddings & gaps/M');
+  justify-content: flex-end;
+}
+
+.cancelButton {
+  background: ds.color('background/error') !important;
+  color: ds.color('text/error/primary') !important;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}

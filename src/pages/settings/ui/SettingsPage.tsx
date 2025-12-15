@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Header, SegmentedButtons } from '@/shared/ui';
-import { ContentTab } from './components';
+import { ContentTab, NotificationsTab } from './components';
 import styles from './SettingsPage.module.scss';
 
 const tabOptions = [
   { value: 'content', label: 'Контент' },
-  { value: 'other', label: 'Другое' },
+  { value: 'notifications', label: 'Уведомления' }
 ];
 
 export function SettingsPage() {
@@ -25,6 +25,7 @@ export function SettingsPage() {
       </Header>
       <div className={styles.page}>
         {selectedTab === 'content' && <ContentTab />}
+        {selectedTab === 'notifications' && <NotificationsTab />}
       </div>
     </>
   );

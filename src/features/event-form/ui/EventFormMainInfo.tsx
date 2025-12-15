@@ -41,6 +41,15 @@ export function EventFormMainInfo() {
       />
 
       <TextInput
+        label="Ссылка на Yandex Maps"
+        name="mapUrl"
+        type="text"
+        placeholder="https://yandex.ru/maps/..."
+        value={formData.mapUrl}
+        onChange={(e) => handleInputChangeWithClearError('mapUrl', e.target.value)}
+      />
+
+      <TextInput
         label="Бронь"
         name="prepayment"
         placeholder="7900"

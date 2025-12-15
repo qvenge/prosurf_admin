@@ -59,7 +59,7 @@ export const useCreateSeasonTicketPlan = () => {
     mutationFn: (data: SeasonTicketPlanCreateDto) => seasonTicketsClient.createSeasonTicketPlan(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: seasonTicketsKeys.plans() });
-      queryClient.invalidateQueries({ queryKey: adminKeys.seasonTicketPlansAdmin() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.seasonTicketPlansAdminBase() });
     },
   });
 };
@@ -72,7 +72,7 @@ export const useUpdateSeasonTicketPlan = () => {
       seasonTicketsClient.updateSeasonTicketPlan(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: seasonTicketsKeys.plans() });
-      queryClient.invalidateQueries({ queryKey: adminKeys.seasonTicketPlansAdmin() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.seasonTicketPlansAdminBase() });
     },
   });
 };
@@ -84,7 +84,7 @@ export const useDeleteSeasonTicketPlan = () => {
     mutationFn: (id: string) => seasonTicketsClient.deleteSeasonTicketPlan(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: seasonTicketsKeys.plans() });
-      queryClient.invalidateQueries({ queryKey: adminKeys.seasonTicketPlansAdmin() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.seasonTicketPlansAdminBase() });
     },
   });
 };
@@ -162,6 +162,7 @@ export const useCancelSeasonTicket = () => {
     mutationFn: (ticketId: string) => seasonTicketsClient.cancelSeasonTicket(ticketId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: seasonTicketsKeys.tickets() });
+      queryClient.invalidateQueries({ queryKey: seasonTicketsAdminKeys.all });
       // Also invalidate client-specific queries
       queryClient.invalidateQueries({ queryKey: ['clients'] });
     },

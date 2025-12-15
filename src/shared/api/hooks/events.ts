@@ -55,7 +55,7 @@ export const useCreateEvent = () => {
     onSuccess: (newEvent) => {
       // Invalidate events lists to show the new event
       queryClient.invalidateQueries({ queryKey: eventsKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: adminKeys.eventsAdmin() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.eventsAdminBase() });
 
       // Optionally add to cache
       queryClient.setQueryData(eventsKeys.detail(newEvent.id), newEvent);
@@ -80,7 +80,7 @@ export const useUpdateEvent = () => {
 
       // Invalidate events lists to show updated event
       queryClient.invalidateQueries({ queryKey: eventsKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: adminKeys.eventsAdmin() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.eventsAdminBase() });
     },
     onError: (error) => {
       console.error('Failed to update event:', error);
@@ -101,7 +101,7 @@ export const useDeleteEvent = () => {
       queryClient.removeQueries({ queryKey: eventsKeys.detail(variables.id) });
       // Invalidate events lists
       queryClient.invalidateQueries({ queryKey: eventsKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: adminKeys.eventsAdmin() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.eventsAdminBase() });
     },
     onError: (error) => {
       console.error('Failed to delete event:', error);

@@ -20,6 +20,7 @@ export function convertFormDataToEventCreateDto(formData: FormData, labels: stri
       },
     ],
     location: formData.location,
+    mapUrl: formData.mapUrl || null,
     tickets: [
       {
         name: 'Разовое посещение',
@@ -119,6 +120,7 @@ export function convertEventDataToFormData(
     category,
     title: eventData.title,
     location: eventData.location || '',
+    mapUrl: eventData.mapUrl || '',
     prepayment,
     price,
     currency,

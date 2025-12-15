@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { DataTable, IconButton, type ColumnDef, type SortCriterion } from '@/shared/ui';
-import { CaretRightBold } from '@/shared/ds/icons';
+import { TrashBold } from '@/shared/ds/icons';
 import { formatDate } from '@/shared/lib/format-utils';
 import { OwnerCell } from './OwnerCell';
 import type { SeasonTicketAdmin } from '@/shared/api';
@@ -12,7 +12,7 @@ interface SeasonTicketsTableProps {
   isLoading: boolean;
   sort: SortCriterion[];
   onSortChange: (sort: SortCriterion[]) => void;
-  onView: (id: string) => void;
+  onCancel: (ticket: SeasonTicketAdmin) => void;
   onPlanClick: (planId: string) => void;
 }
 
@@ -28,7 +28,7 @@ export function SeasonTicketsTable({
   isLoading,
   sort,
   onSortChange,
-  onView,
+  onCancel,
   onPlanClick,
 }: SeasonTicketsTableProps) {
   const isExpired = (validUntil: string) => {
@@ -109,16 +109,17 @@ export function SeasonTicketsTable({
         render: (ticket) => (
           <div className={styles.actions}>
             <IconButton
-              src={CaretRightBold}
+              src={TrashBold}
               type="secondary"
               size="s"
-              onClick={() => onView(ticket.id)}
+              onClick={() => onCancel(ticket)}
+              disabled={ticket.status !== 'ACTIVE'}
             />
           </div>
         ),
       },
     ],
-    [onView, onPlanClick]
+    [onCancel, onPlanClick]
   );
 
   return (

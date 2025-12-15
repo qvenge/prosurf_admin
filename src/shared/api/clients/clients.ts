@@ -1,4 +1,5 @@
 import { apiClient, validateResponse, createQueryString } from '../config';
+import { joinApiUrl } from '../../lib/url-utils';
 import {
   ClientSchema,
   ClientUpdateDtoSchema,
@@ -19,6 +20,14 @@ import type {
 } from '../types';
 
 /**
+ * Transform client photoUrl to full URL
+ */
+const transformClient = (client: Client): Client => ({
+  ...client,
+  photoUrl: joinApiUrl(client.photoUrl) ?? client.photoUrl,
+});
+
+/**
  * Clients API client
  *
  * Provides methods for managing Telegram clients (end-users).
@@ -34,7 +43,12 @@ export const clientsClient = {
     const queryString = createQueryString(validatedFilters);
 
     const response = await apiClient.get(`/clients${queryString}`);
-    return validateResponse(response.data, PaginatedResponseSchema(ClientSchema));
+    const data = validateResponse(response.data, PaginatedResponseSchema(ClientSchema));
+
+    return {
+      ...data,
+      items: data.items.map(transformClient),
+    };
   },
 
   /**
@@ -45,7 +59,7 @@ export const clientsClient = {
    */
   async getClientById(id: string): Promise<Client> {
     const response = await apiClient.get(`/clients/${encodeURIComponent(id)}`);
-    return validateResponse(response.data, ClientSchema);
+    return transformClient(validateResponse(response.data, ClientSchema));
   },
 
   /**
@@ -62,7 +76,7 @@ export const clientsClient = {
       `/clients/${encodeURIComponent(id)}`,
       validatedData
     );
-    return validateResponse(response.data, ClientSchema);
+    return transformClient(validateResponse(response.data, ClientSchema));
   },
 
   /**

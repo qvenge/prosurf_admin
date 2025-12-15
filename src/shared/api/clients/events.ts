@@ -43,6 +43,7 @@ export const eventsClient = {
     // Add plain fields
     formData.append('title', validatedData.title);
     if (validatedData.location) formData.append('location', validatedData.location);
+    if (validatedData.mapUrl) formData.append('mapUrl', validatedData.mapUrl);
     if (validatedData.capacity !== undefined && validatedData.capacity !== null) {
       formData.append('capacity', validatedData.capacity.toString());
     }
@@ -98,6 +99,9 @@ export const eventsClient = {
     if (validatedData.title) formData.append('title', validatedData.title);
     if (validatedData.location !== undefined) {
       formData.append('location', validatedData.location || '');
+    }
+    if (validatedData.mapUrl !== undefined) {
+      formData.append('mapUrl', validatedData.mapUrl || '');
     }
     if (validatedData.capacity !== undefined && validatedData.capacity !== null) {
       formData.append('capacity', validatedData.capacity.toString());

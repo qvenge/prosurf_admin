@@ -3,6 +3,8 @@
   flex-direction: column;
   gap: ds.number('paddings & gaps/M');
   padding: ds.number('paddings & gaps/L');
+  overflow: auto;
+  flex-grow: 1;
 }
 
 .filters {

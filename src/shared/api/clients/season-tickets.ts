@@ -1,4 +1,5 @@
 import { apiClient, validateResponse, createQueryString, withIdempotency } from '../config';
+import { joinApiUrl } from '../../lib/url-utils';
 import {
   SeasonTicketPlanSchema,
   SeasonTicketPlanCreateDtoSchema,
@@ -32,6 +33,17 @@ import type {
   SeasonTicketAdminPaginatedResponse,
   SeasonTicketAdminFilters,
 } from '../types';
+
+/**
+ * Transform SeasonTicketAdmin to include full URLs for owner photo
+ */
+const transformSeasonTicketAdmin = (ticket: SeasonTicketAdmin): SeasonTicketAdmin => ({
+  ...ticket,
+  owner: {
+    ...ticket.owner,
+    photoUrl: joinApiUrl(ticket.owner.photoUrl) ?? ticket.owner.photoUrl,
+  },
+});
 
 /**
  * Season Tickets API client
@@ -183,7 +195,12 @@ export const seasonTicketsClient = {
     const queryString = createQueryString(serializedFilters);
 
     const response = await apiClient.get(`/admin/season-tickets${queryString}`);
-    return validateResponse(response.data, SeasonTicketAdminPaginatedResponseSchema);
+    const data = validateResponse(response.data, SeasonTicketAdminPaginatedResponseSchema);
+
+    return {
+      ...data,
+      items: data.items.map(transformSeasonTicketAdmin),
+    };
   },
 
   /**
@@ -192,6 +209,6 @@ export const seasonTicketsClient = {
    */
   async getSeasonTicketAdmin(id: string): Promise<SeasonTicketAdmin> {
     const response = await apiClient.get(`/admin/season-tickets/${encodeURIComponent(id)}`);
-    return validateResponse(response.data, SeasonTicketAdminSchema);
+    return transformSeasonTicketAdmin(validateResponse(response.data, SeasonTicketAdminSchema));
   },
 };

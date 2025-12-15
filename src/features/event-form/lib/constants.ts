@@ -3,6 +3,7 @@ import type { FormData } from './types';
 export const defaultFormData: FormData = {
   title: '',
   location: '',
+  mapUrl: '',
   prepayment: '',
   price: '',
   currency: 'RUB',

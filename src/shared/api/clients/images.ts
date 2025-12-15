@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { apiClient, validateResponse, createQueryString } from '../config';
+import { joinApiUrl } from '../../lib/url-utils';
 import {
   ImageSchema,
   ImageFiltersSchema,
@@ -10,6 +11,14 @@ import type {
   ImageFilters,
   PaginatedResponse,
 } from '../types';
+
+/**
+ * Transform image URL to full URL
+ */
+const transformImageUrl = (image: Image): Image => ({
+  ...image,
+  url: joinApiUrl(image.url) || image.url,
+});
 
 /**
  * Images API client
@@ -24,7 +33,12 @@ export const imagesClient = {
     const queryString = createQueryString(validatedFilters);
 
     const response = await apiClient.get(`/images${queryString}`);
-    return validateResponse(response.data, PaginatedResponseSchema(ImageSchema));
+    const data = validateResponse(response.data, PaginatedResponseSchema(ImageSchema));
+
+    return {
+      ...data,
+      items: data.items.map(transformImageUrl),
+    };
   },
 
   /**
@@ -33,7 +47,7 @@ export const imagesClient = {
    */
   async getImageById(id: string): Promise<Image> {
     const response = await apiClient.get(`/images/${encodeURIComponent(id)}`);
-    return validateResponse(response.data, ImageSchema);
+    return transformImageUrl(validateResponse(response.data, ImageSchema));
   },
 
   /**
@@ -56,7 +70,7 @@ export const imagesClient = {
         'Content-Type': 'multipart/form-data',
       },
     });
-    return validateResponse(response.data, z.array(ImageSchema));
+    return validateResponse(response.data, z.array(ImageSchema)).map(transformImageUrl);
   },
 
   /**

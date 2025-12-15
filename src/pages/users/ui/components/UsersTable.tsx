@@ -13,6 +13,7 @@ type UserRowData = {
   createdDate: string;
   createdTime: string;
   phone?: string | null;
+  email?: string | null;
   dateOfBirth?: string | null;
   photoUrl?: string | null;
   seasonTicketSummary?: ClientSeasonTicketSummary;
@@ -44,6 +45,7 @@ export function UsersTable({
       dateOfBirth: item.dateOfBirth ? formatDate(item.dateOfBirth) : undefined,
       photoUrl: item.photoUrl,
       phone: item.phone,
+      email: item.email,
       createdDate: formatDate(item.createdAt),
       createdTime: formatTime(item.createdAt),
       seasonTicketSummary: item.seasonTicketSummary,
@@ -95,9 +97,9 @@ export function UsersTable({
       sortKey: 'phone',
       render: (item) => (
         <div className={styles.contacts}>
-          {item.phone ? (
-            <div className={styles.contactsPhone}>{item.phone}</div>
-          ) : '—'}
+          {item.phone && <div className={styles.contactsPhone}>{item.phone}</div>}
+          {item.email && <div className={styles.contactsEmail}>{item.email}</div>}
+          {!item.phone && !item.email && '—'}
         </div>
       ),
     },

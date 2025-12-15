@@ -28,11 +28,16 @@ export const adminKeys = {
   // Admin-only operations
   auditLogs: (filters?: AuditLogFilters) => [...adminKeys.all, 'audit-logs', filters] as const,
   jobs: () => [...adminKeys.all, 'jobs'] as const,
+  // Base keys for invalidation (without filters)
+  clientsAdminBase: () => [...adminKeys.all, 'clients-admin'] as const,
+  eventsAdminBase: () => [...adminKeys.all, 'events-admin'] as const,
+  sessionsAdminBase: () => [...adminKeys.all, 'sessions-admin'] as const,
+  seasonTicketPlansAdminBase: () => [...adminKeys.all, 'season-ticket-plans-admin'] as const,
   // Admin entity lists (page-based pagination)
-  clientsAdmin: (filters?: ClientAdminFilters) => [...adminKeys.all, 'clients-admin', filters] as const,
-  eventsAdmin: (filters?: EventAdminFilters) => [...adminKeys.all, 'events-admin', filters] as const,
-  sessionsAdmin: (filters?: SessionAdminFilters) => [...adminKeys.all, 'sessions-admin', filters] as const,
-  seasonTicketPlansAdmin: (filters?: SeasonTicketPlanAdminFilters) => [...adminKeys.all, 'season-ticket-plans-admin', filters] as const,
+  clientsAdmin: (filters?: ClientAdminFilters) => [...adminKeys.clientsAdminBase(), filters] as const,
+  eventsAdmin: (filters?: EventAdminFilters) => [...adminKeys.eventsAdminBase(), filters] as const,
+  sessionsAdmin: (filters?: SessionAdminFilters) => [...adminKeys.sessionsAdminBase(), filters] as const,
+  seasonTicketPlansAdmin: (filters?: SeasonTicketPlanAdminFilters) => [...adminKeys.seasonTicketPlansAdminBase(), filters] as const,
 } as const;
 
 // ============================================

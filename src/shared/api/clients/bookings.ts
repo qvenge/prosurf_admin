@@ -1,4 +1,5 @@
 import { apiClient, validateResponse, createQueryString, withIdempotency } from '../config';
+import { joinApiUrl } from '../../lib/url-utils';
 import {
   BookingSchema,
   BookingExtendedSchema,
@@ -21,6 +22,19 @@ import type {
   CreateBookingPaymentDto,
   Payment
 } from '../types';
+
+/**
+ * Transform BookingExtended to include full URL for user photo
+ */
+const transformBookingExtended = (booking: BookingExtended): BookingExtended => ({
+  ...booking,
+  user: booking.user
+    ? {
+        ...booking.user,
+        photoUrl: joinApiUrl(booking.user.photoUrl) ?? booking.user.photoUrl,
+      }
+    : booking.user,
+});
 
 /**
  * Bookings API client
@@ -82,7 +96,7 @@ export const bookingsClient = {
       config
     );
 
-    const booking = validateResponse(response.data, BookingExtendedSchema);
+    const booking = transformBookingExtended(validateResponse(response.data, BookingExtendedSchema));
     const holdTtlSeconds = response.headers['x-hold-ttl']
       ? parseInt(response.headers['x-hold-ttl'] as string, 10)
       : null;
@@ -113,7 +127,17 @@ export const bookingsClient = {
                              validatedFilters.includeGuestContact;
 
     const schema = hasExtendedFields ? BookingExtendedSchema : BookingSchema;
-    return validateResponse(response.data, PaginatedResponseSchema(schema));
+    const data = validateResponse(response.data, PaginatedResponseSchema(schema));
+
+    // Transform photo URLs if extended fields are requested
+    if (hasExtendedFields) {
+      return {
+        ...data,
+        items: data.items.map((booking) => transformBookingExtended(booking as BookingExtended)),
+      };
+    }
+
+    return data;
   },
 
   /**
@@ -176,7 +200,7 @@ export const bookingsClient = {
       validatedData
     );
 
-    return validateResponse(response.data, BookingExtendedSchema);
+    return transformBookingExtended(validateResponse(response.data, BookingExtendedSchema));
   },
 
   /**
