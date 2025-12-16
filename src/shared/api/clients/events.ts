@@ -67,6 +67,11 @@ export const eventsClient = {
       });
     }
 
+    // Add preview image file
+    if (validatedData.previewImage) {
+      formData.append('previewImage', validatedData.previewImage);
+    }
+
     const response = await apiClient.post('/events', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -133,6 +138,13 @@ export const eventsClient = {
     // This triggers "replace mode" - backend merges new uploads with these URLs
     if (validatedData.existingImages !== undefined) {
       formData.append('images', JSON.stringify(validatedData.existingImages));
+    }
+
+    // Handle preview image
+    if (validatedData.previewImage) {
+      formData.append('previewImage', validatedData.previewImage);
+    } else if (validatedData.removePreviewImage) {
+      formData.append('removePreviewImage', 'true');
     }
 
     const queryParams = force ? '?force=true' : '';

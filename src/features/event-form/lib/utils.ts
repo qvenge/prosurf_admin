@@ -43,6 +43,7 @@ export function convertFormDataToEventCreateDto(formData: FormData, labels: stri
     labels: [...labels, formData.category].filter((label?: string): label is string => label != null && typeof label === 'string'),
     capacity: parseInt(formData.capacity),
     images: formData.images.length > 0 ? formData.images : undefined,
+    previewImage: formData.previewImage || undefined,
   };
 }
 
@@ -54,6 +55,10 @@ export function convertFormDataToEventUpdateDto(formData: FormData, labels?: str
     // When undefined, backend merges new uploads with all existing images
     // When provided (even empty array), backend uses only these URLs + new uploads
     existingImages: formData.existingImages,
+    // Preview image handling
+    previewImage: formData.previewImage || undefined,
+    existingPreviewImage: formData.existingPreviewImage,
+    removePreviewImage: !formData.previewImage && !formData.existingPreviewImage,
   } as EventUpdateDto;
 }
 
@@ -127,6 +132,8 @@ export function convertEventDataToFormData(
     capacity: eventData.capacity?.toString() || '',
     images: [],
     existingImages: eventData.images || [],
+    previewImage: null,
+    existingPreviewImage: eventData.previewImage || null,
     description: descriptionItem?.body || '',
     whatToBring: whatToBringItem?.body || '',
   };

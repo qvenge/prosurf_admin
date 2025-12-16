@@ -37,6 +37,23 @@ export function useEventFormState(initialData: FormData = defaultFormData) {
     }));
   };
 
+  const handlePreviewImageChange = (file: File | null) => {
+    setFormData(prev => ({
+      ...prev,
+      previewImage: file,
+      // Clear existing preview when new file is selected
+      existingPreviewImage: file ? null : prev.existingPreviewImage,
+    }));
+  };
+
+  const handlePreviewImageRemove = () => {
+    setFormData(prev => ({
+      ...prev,
+      previewImage: null,
+      existingPreviewImage: null,
+    }));
+  };
+
   return {
     formData,
     setFormData,
@@ -44,5 +61,7 @@ export function useEventFormState(initialData: FormData = defaultFormData) {
     handleImageAdd,
     handleImageRemove,
     handleExistingImageRemove,
+    handlePreviewImageChange,
+    handlePreviewImageRemove,
   };
 }

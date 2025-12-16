@@ -27,6 +27,8 @@ export interface FormData {
   capacity: string;
   images: File[];
   existingImages: string[];
+  previewImage: File | null;
+  existingPreviewImage: string | null;
   description: string;
   whatToBring: string;
   category?: string;

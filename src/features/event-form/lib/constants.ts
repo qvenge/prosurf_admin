@@ -10,6 +10,8 @@ export const defaultFormData: FormData = {
   capacity: '',
   images: [],
   existingImages: [],
+  previewImage: null,
+  existingPreviewImage: null,
   description: '',
   whatToBring: '',
 };

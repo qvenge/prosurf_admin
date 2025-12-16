@@ -1,12 +1,40 @@
 import { useMemo, useEffect } from 'react';
-import { ImageGalleryGrid, type ImageItem } from '@/shared/ui';
-import { joinApiUrls } from '@/shared/api';
+import { ImageGalleryGrid, UploadImageInput, ButtonContainer, Icon, type ImageItem } from '@/shared/ui';
+import { joinApiUrls, joinApiUrl } from '@/shared/api';
+import { CameraRegular, XBold } from '@/shared/ds/icons';
 import { useEventFormContext } from '../lib/context';
 import { maxImages } from '../lib/constants';
 import styles from './EventForm.module.scss';
 
 export function EventFormImages() {
-  const { formData, handleImageAdd, handleImageRemove, handleExistingImageRemove } = useEventFormContext();
+  const {
+    formData,
+    handleImageAdd,
+    handleImageRemove,
+    handleExistingImageRemove,
+    handlePreviewImageChange,
+    handlePreviewImageRemove,
+  } = useEventFormContext();
+
+  // Preview image URL (existing or new file preview)
+  const previewUrl = useMemo(() => {
+    if (formData.previewImage) {
+      return URL.createObjectURL(formData.previewImage);
+    }
+    if (formData.existingPreviewImage) {
+      return joinApiUrl(formData.existingPreviewImage);
+    }
+    return null;
+  }, [formData.previewImage, formData.existingPreviewImage]);
+
+  // Cleanup preview URL
+  useEffect(() => {
+    return () => {
+      if (formData.previewImage && previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [formData.previewImage, previewUrl]);
 
   // Build full URLs for existing images
   const existingImageUrls = useMemo(() =>
@@ -41,6 +69,14 @@ export function EventFormImages() {
     })),
   ], [existingImageUrls, newImagePreviews]);
 
+  const handlePreviewUpload = (data: { file: File; preview: string }[] | { file: File; preview: string } | null) => {
+    if (!data) return;
+    const file = Array.isArray(data) ? data[0]?.file : data.file;
+    if (file) {
+      handlePreviewImageChange(file);
+    }
+  };
+
   const handleUpload = (data: { file: File; preview: string }[] | { file: File; preview: string } | null) => {
     if (!data) return;
 
@@ -64,8 +100,36 @@ export function EventFormImages() {
 
   return (
     <div className={styles.photosSection}>
+      {/* Preview Image Section */}
+      <div className={styles.previewSection}>
+        <p className={styles.photoHint}>
+          <span className={styles.photoHintLabel}>Превью:</span> основное изображение события
+        </p>
+        {previewUrl ? (
+          <div className={styles.previewImageContainer}>
+            <img src={previewUrl} alt="Preview" className={styles.previewImage} />
+            <ButtonContainer
+              className={styles.previewRemoveButton}
+              onClick={handlePreviewImageRemove}
+            >
+              <Icon src={XBold} width={16} height={16} />
+            </ButtonContainer>
+          </div>
+        ) : (
+          <UploadImageInput
+            className={styles.previewUploadButton}
+            multiple={false}
+            onChange={handlePreviewUpload}
+          >
+            <Icon src={CameraRegular} width={20} height={20} />
+            <span className={styles.previewUploadText}>Добавить</span>
+          </UploadImageInput>
+        )}
+      </div>
+
+      {/* Gallery Section */}
       <p className={styles.photoHint}>
-        <span className={styles.photoHintLabel}>Фотографии:</span> не более {maxImages}
+        <span className={styles.photoHintLabel}>Галерея:</span> не более {maxImages}
       </p>
       <ImageGalleryGrid
         images={images}

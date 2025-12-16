@@ -102,6 +102,65 @@
   gap: ds.number('paddings & gaps/S');
 }
 
+.previewSection {
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/XS');
+  margin-bottom: ds.number('paddings & gaps/S');
+}
+
+.previewImageContainer {
+  position: relative;
+  width: 140px;
+  height: 96px;
+  border-radius: ds.number('radius/M');
+  overflow: hidden;
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.previewRemoveButton {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 2px;
+  background: ds.color('overlay/primary');
+  border-radius: ds.number('radius/round');
+  color: ds.color('graphic/accent');
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.previewUploadButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 140px;
+  height: 96px;
+  background: ds.color('background/secondary');
+  border-radius: ds.number('radius/M');
+  color: ds.color('text/accent');
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background: ds.color('background/tertiary');
+  }
+}
+
+.previewUploadText {
+  @include ds.typo('body/b4/medium');
+}
+
 .photoHint {
   @include ds.typo('body/b4/regular');
   color: ds.color('text/secondary');

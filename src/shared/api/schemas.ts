@@ -128,6 +128,7 @@ export const EventSchema = z.object({
   attributes: z.record(z.string(), AttributeValueSchema).optional(),
   status: EventStatusSchema.optional(),
   images: z.array(z.string()).optional(),
+  previewImage: z.string().nullable().optional(),
 });
 
 export const EventCreateDtoSchema = z.object({
@@ -140,6 +141,7 @@ export const EventCreateDtoSchema = z.object({
   labels: z.array(z.string()).optional(),
   attributes: z.record(z.string(), AttributeValueSchema).optional(),
   images: z.array(z.instanceof(File)).optional(),
+  previewImage: z.instanceof(File).optional(),
 });
 
 export const EventUpdateDtoSchema = z.object({
@@ -153,6 +155,9 @@ export const EventUpdateDtoSchema = z.object({
   attributes: z.record(z.string(), AttributeValueSchema).optional(),
   images: z.array(z.instanceof(File)).optional(),
   existingImages: z.array(z.string()).optional(),
+  previewImage: z.instanceof(File).optional(),
+  existingPreviewImage: z.string().nullable().optional(),
+  removePreviewImage: z.boolean().optional(),
 });
 
 // Session schemas
