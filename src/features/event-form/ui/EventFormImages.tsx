@@ -103,7 +103,7 @@ export function EventFormImages() {
       {/* Preview Image Section */}
       <div className={styles.previewSection}>
         <p className={styles.photoHint}>
-          <span className={styles.photoHintLabel}>Превью:</span> основное изображение события
+          <span className={styles.photoHintLabel}>Превью</span>
         </p>
         {previewUrl ? (
           <div className={styles.previewImageContainer}>
