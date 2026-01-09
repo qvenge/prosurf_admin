@@ -110,3 +110,6 @@ export { default as ArrowCounterClockwiseRegular } from '@/shared/ds/icons/20/ar
 
 export { default as MagnifyingGlassRegular } from '@/shared/ds/icons/20/magnifying-glass_regular.svg';
 export { default as CopyRegular } from '@/shared/ds/icons/20/copy_regular.svg';
+
+export { default as SignOutRegular } from '@/shared/ds/icons/20/sign-out_regular.svg';
+export { default as SignOutBold } from '@/shared/ds/icons/20/sign-out_bold.svg';

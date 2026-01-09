@@ -1,6 +1,5 @@
-import { Button } from '@/shared/ui';
+import { ConfirmModal } from '@/shared/ui';
 import { useCancelSeasonTicket, type SeasonTicketAdmin } from '@/shared/api';
-import styles from './CancelTicketModal.module.scss';
 
 interface CancelTicketModalProps {
   ticket: SeasonTicketAdmin;
@@ -19,44 +18,28 @@ export function CancelTicketModal({ ticket, onClose }: CancelTicketModalProps) {
     }
   };
 
-  const isLoading = cancelMutation.isPending;
-
   const ownerName = [ticket.owner.firstName, ticket.owner.lastName]
     .filter(Boolean)
     .join(' ') || 'Без имени';
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.content}>
-          <h3 className={styles.title}>Отменить абонемент?</h3>
-          <p className={styles.description}>
-            Вы уверены, что хотите отменить абонемент <strong>«{ticket.plan.name}»</strong> пользователя <strong>{ownerName}</strong>?
-          </p>
-          <p className={styles.info}>
-            Осталось посещений: {ticket.remainingPasses} из {ticket.totalPasses}
-          </p>
-        </div>
-        <div className={styles.actions}>
-          <Button
-            type="secondary"
-            size="l"
-            onClick={onClose}
-            disabled={isLoading}
-          >
-            Назад
-          </Button>
-          <Button
-            type="primary"
-            size="l"
-            onClick={handleCancel}
-            disabled={isLoading}
-            className={styles.cancelButton}
-          >
-            {isLoading ? 'Отмена...' : 'Отменить'}
-          </Button>
-        </div>
-      </div>
-    </div>
+    <ConfirmModal
+      open={true}
+      onClose={onClose}
+      onConfirm={handleCancel}
+      title="Отменить абонемент?"
+      description={
+        <>
+          Вы уверены, что хотите отменить абонемент <strong>{ticket.plan.name}</strong>{' '}
+          пользователя <strong>{ownerName}</strong>?
+        </>
+      }
+      info={`Осталось посещений: ${ticket.remainingPasses} из ${ticket.totalPasses}`}
+      variant="danger"
+      cancelText="Назад"
+      confirmText="Отменить"
+      confirmLoadingText="Отмена..."
+      isLoading={cancelMutation.isPending}
+    />
   );
 }

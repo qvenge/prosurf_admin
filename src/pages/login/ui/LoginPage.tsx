@@ -1,7 +1,7 @@
 
 import { LoginForm } from './LoginForm';
 import { Logotype } from '@/shared/ui';
-import { useLoginWithCredentials } from '@/shared/api';
+import { useLoginWithCredentials, ApiErrorClass } from '@/shared/api';
 import { useNavigate } from 'react-router';
 
 import styles from './LoginPage.module.scss';
@@ -28,6 +28,14 @@ export function LoginPage() {
     } catch (error: unknown) {
       console.error('Login failed:', error);
 
+      // Handle ApiErrorClass from our API layer
+      if (error instanceof ApiErrorClass) {
+        return {
+          message: error.error.message || 'Ошибка авторизации'
+        };
+      }
+
+      // Fallback for other error types (Axios, Zod, etc.)
       const axiosError = error as { response?: { data?: { errors?: Record<string, string[]>; message?: string } } };
       if (axiosError?.response?.data?.errors) {
         return {

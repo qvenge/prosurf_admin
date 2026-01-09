@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Modal, Button, DataTable, IconButton, type ColumnDef, type SortCriterion } from '@/shared/ui';
+import { ConfirmModal, DataTable, IconButton, type ColumnDef, type SortCriterion } from '@/shared/ui';
 import { PencilSimpleBold, TrashBold } from '@/shared/ds/icons';
 import { formatDate, formatPrice } from '@/shared/lib/format-utils';
 import { ClientCell } from './ClientCell';
@@ -142,30 +142,22 @@ export function CertificatesTable({
         onSortChange={onSortChange}
       />
 
-      {deleteId && certificateToDelete && (
-        <Modal onClose={() => setDeleteId(null)}>
-          <div className={styles.deleteModal}>
-            <h3>Удалить сертификат?</h3>
-            <p>
-              Код: <strong>{certificateToDelete.code}</strong>
-            </p>
-            <p>Это действие нельзя отменить.</p>
-            <div className={styles.deleteModalActions}>
-              <Button type="secondary" size="m" onClick={() => setDeleteId(null)}>
-                Отмена
-              </Button>
-              <Button
-                type="primary"
-                size="m"
-                onClick={handleDelete}
-                disabled={deleteMutation.isPending}
-              >
-                {deleteMutation.isPending ? 'Удаление...' : 'Удалить'}
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
+      <ConfirmModal
+        open={!!deleteId && !!certificateToDelete}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        title="Удалить сертификат?"
+        description={
+          <>
+            Код: <strong>{certificateToDelete?.code}</strong>
+          </>
+        }
+        info="Это действие нельзя отменить."
+        variant="danger"
+        confirmText="Удалить"
+        confirmLoadingText="Удаление..."
+        isLoading={deleteMutation.isPending}
+      />
     </>
   );
 }

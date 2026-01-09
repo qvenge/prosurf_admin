@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Link } from 'react-router';
 import { useEventsAdmin } from '@/shared/api/hooks/admin';
 import { useDeleteEvent } from '@/shared/api/hooks/events';
-import { DataTable, Pagination, Modal, Button, IconButton, type ColumnDef } from '@/shared/ui';
+import { DataTable, Pagination, ConfirmModal, IconButton, type ColumnDef } from '@/shared/ui';
 import { PencilSimpleBold, TrashBold } from '@/shared/ds/icons';
 import { formatPrice } from '@/shared/lib/format-utils';
 import type { Event } from '@/shared/api';
@@ -175,22 +175,16 @@ export function EventsTable({ className, eventType, handleEdit }: EventsTablePro
           />
         )}
       </div>
-      {eventToDelete && (
-        <Modal onClose={cancelDelete}>
-          <div className={styles.deleteModal}>
-            <h3>Удалить мероприятие?</h3>
-            <p>Вы уверены, что хотите удалить "{eventToDeleteData?.title}"?</p>
-            <div className={styles.deleteModalActions}>
-              <Button type="secondary" size="m" onClick={cancelDelete}>
-                Отмена
-              </Button>
-              <Button type="primary" size="m" onClick={confirmDelete}>
-                Удалить
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
+      <ConfirmModal
+        open={!!eventToDelete}
+        onClose={cancelDelete}
+        onConfirm={confirmDelete}
+        title="Удалить мероприятие?"
+        description={`Вы уверены, что хотите удалить "${eventToDeleteData?.title}"?`}
+        variant="danger"
+        confirmText="Удалить"
+        isLoading={deleteEventMutation.isPending}
+      />
     </>
   );
 }

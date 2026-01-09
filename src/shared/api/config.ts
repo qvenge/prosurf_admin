@@ -149,7 +149,7 @@ const createApiClient = (): AxiosInstance => {
         if (!refreshToken) {
           processQueue(error, null);
           tokenStorage.clearTokens();
-          // window.location.href = '/login';
+          isRefreshing = false;
           return Promise.reject(error);
         }
 

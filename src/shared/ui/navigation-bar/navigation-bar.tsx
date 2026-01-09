@@ -1,13 +1,15 @@
 'use client';
 
+import { Suspense } from 'react';
 import { NavLink } from 'react-router';
 import clsx from 'clsx';
 
+import { useLogout } from '@/shared/api';
+import { SignOutRegular } from '@/shared/ds/icons';
 import { Logotype } from '@/shared/ui/logotype';
 import { Icon } from '@/shared/ui';
 
 import styles from './navigation-bar.module.scss';
-import { Suspense } from 'react';
 
 interface NavItem {
   id: string;
@@ -23,6 +25,12 @@ export interface NavigationBarProps {
 }
 
 export function NavigationBar({items, className}: NavigationBarProps) {
+  const { mutate: logout } = useLogout();
+
+  const handleLogout = () => {
+    logout();
+  };
+
   return (
     <aside className={clsx(className, styles.root)}>
       <Logotype className={styles.logo} />
@@ -55,6 +63,12 @@ export function NavigationBar({items, className}: NavigationBarProps) {
           ))}
         </ul>
       </nav>
+      <footer className={styles.footer}>
+        <button className={styles.logoutButton} onClick={handleLogout}>
+          <Icon src={SignOutRegular} className={styles.logoutButtonIcon} />
+          <span>Выйти</span>
+        </button>
+      </footer>
     </aside>
   );
 }

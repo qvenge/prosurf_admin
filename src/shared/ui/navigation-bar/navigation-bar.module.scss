@@ -1,5 +1,8 @@
 .root {
   padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 
   --text-primary: #191F2E;
   --text-accent: #2584F9;
@@ -50,4 +53,34 @@
 .navItemActive {
   background: ds.color('background/alternative');
   color: ds.color('text/brand/primary');
+}
+
+.footer {
+  margin-top: auto;
+}
+
+.logoutButton {
+  @include ds.typo('body/b3/medium');
+  width: 100%;
+  margin: 0;
+  padding: 8px 16px 8px 8px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+
+  color: ds.color('text/primary');
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-S, 8px);
+
+  &:hover {
+    background: ds.color('background/secondary');
+  }
+}
+
+.logoutButtonIcon {
+  width: 20px;
+  height: 20px;
 }

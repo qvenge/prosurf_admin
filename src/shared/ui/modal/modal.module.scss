@@ -27,13 +27,39 @@
 .content {
   position: relative;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/L');
+  background: ds.color('background/primary');
+  border-radius: ds.number('radius/L');
+  padding: ds.number('paddings & gaps/XL');
+  width: 90%;
+}
+
+// Size variants
+.contentSizeSm {
+  max-width: 320px;
+}
+
+.contentSizeMd {
+  max-width: 400px;
+}
+
+.contentSizeLg {
+  max-width: 560px;
+}
+
+.contentSizeAuto {
+  max-width: none;
+  width: auto;
 }
 
 .closeButton {
- position: absolute;
- top: 20px;
- right: 20px;
- padding: 4px;
+  position: absolute;
+  top: ds.number('paddings & gaps/M');
+  right: ds.number('paddings & gaps/M');
+  padding: 4px;
+  z-index: 1;
 }
 
 .closeIcon {

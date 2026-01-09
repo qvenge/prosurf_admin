@@ -28,29 +28,3 @@
   justify-content: flex-end;
 }
 
-.deleteModal {
-  display: flex;
-  flex-direction: column;
-  gap: ds.number('paddings & gaps/M');
-  padding: ds.number('paddings & gaps/L');
-  min-width: 320px;
-
-  h3 {
-    @include ds.typo('header/h4/semibold');
-    color: ds.color('text/primary');
-    margin: 0;
-  }
-
-  p {
-    @include ds.typo('body/b4/regular');
-    color: ds.color('text/secondary');
-    margin: 0;
-  }
-}
-
-.deleteModalActions {
-  display: flex;
-  gap: ds.number('paddings & gaps/M');
-  justify-content: flex-end;
-  margin-top: ds.number('paddings & gaps/M');
-}
