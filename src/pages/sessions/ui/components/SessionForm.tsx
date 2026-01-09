@@ -18,11 +18,14 @@ interface SessionFormProps {
 }
 
 function createInitialSession(): SessionFormType {
+  const today = new Date().toISOString().split('T')[0];
+  const defaultTime = '10:00';
+
   return {
     id: generateSessionId(),
-    date: '',
+    date: today,
     endDate: '',
-    timeSlots: [{ id: generateTimeSlotId(), startTime: '' }],
+    timeSlots: [{ id: generateTimeSlotId(), startTime: defaultTime }],
     duration: '1.5',
   };
 }
@@ -71,9 +74,10 @@ export function SessionForm({ onClose, onSuccess }: SessionFormProps) {
 
   // TimeSlot handlers
   const addTimeSlot = useCallback((sessionId: string) => {
+    const defaultTime = '10:00';
     setSessions(prev => prev.map(s =>
       s.id === sessionId
-        ? { ...s, timeSlots: [...s.timeSlots, { id: generateTimeSlotId(), startTime: '' }] }
+        ? { ...s, timeSlots: [...s.timeSlots, { id: generateTimeSlotId(), startTime: defaultTime }] }
         : s
     ));
   }, []);
@@ -100,6 +104,7 @@ export function SessionForm({ onClose, onSuccess }: SessionFormProps) {
   }, []);
 
   const handleSubmit = async () => {
+    console.log('Submitting sessions:', sessions);
     if (!eventId || sessions.length === 0) {
       return;
     }
