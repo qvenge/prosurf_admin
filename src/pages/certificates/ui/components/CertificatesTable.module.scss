@@ -1,25 +1,5 @@
-.type {
-  @include ds.typo('body/b5/medium');
-  padding: 4px 8px;
-  border-radius: 4px;
-  background: ds.color('background/secondary');
-  color: ds.color('text/secondary');
-
-  &.typedenomination {
-    background: ds.color('background/success');
-    color: ds.color('text/success');
-  }
-
-  &.typepasses {
-    background: ds.color('background/secondary');
-    color: ds.color('text/accent');
-  }
-}
-
-.status {
-  &.statusEXPIRED {
-    color: ds.color('text/error/primary');
-  }
+.expired {
+  color: ds.color('text/error/primary');
 }
 
 .actions {

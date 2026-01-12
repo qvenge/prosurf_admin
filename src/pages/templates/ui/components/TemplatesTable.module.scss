@@ -20,19 +20,3 @@
   justify-content: flex-end;
 }
 
-// Status badge styles
-.statusACTIVE {
-  @include ds.typo('body/b4/medium');
-  padding: 4px 8px;
-  border-radius: 4px;
-  background: ds.color('background/success');
-  color: ds.color('text/success');
-}
-
-.statusCANCELLED {
-  @include ds.typo('body/b4/medium');
-  padding: 4px 8px;
-  border-radius: 4px;
-  background: ds.color('background/error');
-  color: ds.color('text/error/primary');
-}

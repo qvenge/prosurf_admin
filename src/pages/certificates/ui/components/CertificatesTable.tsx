@@ -1,8 +1,7 @@
 import { useState, useMemo } from 'react';
-import { ConfirmModal, DataTable, IconButton, type ColumnDef, type SortCriterion } from '@/shared/ui';
+import { Badge, ConfirmModal, DataTable, IconButton, UserCell, type ColumnDef, type SortCriterion } from '@/shared/ui';
 import { PencilSimpleBold, TrashBold } from '@/shared/ds/icons';
 import { formatDate, formatPrice } from '@/shared/lib/format-utils';
-import { ClientCell } from './ClientCell';
 import { useDeleteCertificateAdmin, type CertificateAdmin } from '@/shared/api';
 import styles from './CertificatesTable.module.scss';
 
@@ -54,14 +53,14 @@ export function CertificatesTable({
       label: 'Покупатель',
       sortable: true,
       sortKey: 'purchasedByName',
-      render: (cert) => <ClientCell client={cert.purchasedBy} />,
+      render: (cert) => <UserCell user={cert.purchasedBy} secondaryText={cert.purchasedBy?.phone} />,
     },
     {
       id: 'activatedBy',
       label: 'Активатор',
       sortable: true,
       sortKey: 'activatedByName',
-      render: (cert) => <ClientCell client={cert.activatedBy} />,
+      render: (cert) => <UserCell user={cert.activatedBy} secondaryText={cert.activatedBy?.phone} />,
     },
     {
       id: 'type',
@@ -69,9 +68,9 @@ export function CertificatesTable({
       sortable: true,
       sortKey: 'type',
       render: (cert) => (
-        <span className={`${styles.type} ${styles[`type${cert.type}`]}`}>
+        <Badge variant={cert.type === 'denomination' ? 'success' : 'accent'}>
           {TYPE_LABELS[cert.type] || cert.type}
-        </span>
+        </Badge>
       ),
     },
     {
@@ -99,9 +98,11 @@ export function CertificatesTable({
       sortable: true,
       sortKey: 'expiresAt',
       render: (cert) => (
-        <span className={`${styles.status} ${styles[`status${cert.status}`]}`}>
-          {cert.expiresAt ? formatDate(cert.expiresAt) : '—'}
-        </span>
+        cert.expiresAt ? (
+          <span className={cert.status === 'EXPIRED' ? styles.expired : undefined}>
+            {formatDate(cert.expiresAt)}
+          </span>
+        ) : '—'
       ),
     },
     {

@@ -1,9 +1,18 @@
 import { useMemo, useState } from 'react';
 import { CaretRightBold, TrashBold } from '@/shared/ds/icons';
-import { DataTable, IconButton, Modal, Button, type ColumnDef, type SortCriterion } from '@/shared/ui';
+import { Badge, DataTable, IconButton, Modal, Button, type ColumnDef, type SortCriterion } from '@/shared/ui';
 import { useDeleteSession, type Session } from '@/shared/api';
 import { formatDate, formatTime, formatPrice } from '@/shared/lib/format-utils';
 import styles from './SessionsTable.module.scss';
+
+const getSessionStatusVariant = (status: string) => {
+  switch (status) {
+    case 'SCHEDULED': return 'success' as const;
+    case 'CANCELLED': return 'error' as const;
+    case 'COMPLETE': return 'secondary' as const;
+    default: return 'secondary' as const;
+  }
+};
 
 type SessionRowData = {
   id: string;
@@ -105,7 +114,7 @@ export function SessionsTable({
           COMPLETE: 'Завершено',
         };
         return item.status ? (
-          <span className={styles[`status${item.status}`]}>{labels[item.status] ?? item.status}</span>
+          <Badge variant={getSessionStatusVariant(item.status)}>{labels[item.status] ?? item.status}</Badge>
         ) : null;
       },
     },

@@ -27,3 +27,5 @@ export { ClientSearchInput, type ClientSearchInputProps } from './client-search-
 export { DataTable, type ColumnDef, type DataTableProps, type SortCriterion } from './data-table';
 export { Pagination, type PaginationProps } from './pagination';
 export { Checkbox, type CheckboxProps } from './checkbox';
+export { UserCell } from './user-cell';
+export { Badge } from './badge';

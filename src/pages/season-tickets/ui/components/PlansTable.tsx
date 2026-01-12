@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { PencilSimpleBold, TrashBold } from '@/shared/ds/icons';
-import { DataTable, Pagination, IconButton, type ColumnDef } from '@/shared/ui';
+import { Badge, DataTable, Pagination, IconButton, type ColumnDef } from '@/shared/ui';
 import { useSeasonTicketPlansAdmin } from '@/shared/api/hooks/admin';
 import type { SeasonTicketPlan } from '@/shared/api';
 import { pluralize } from '@/shared/lib/string';
@@ -70,9 +70,9 @@ export function PlansTable({ className, handleEdit, handleDelete }: PlansTablePr
       id: 'type',
       label: 'Тип',
       render: (item) => (
-        <span className={item.isSystemPlan ? styles.systemBadge : styles.publicBadge}>
+        <Badge variant={item.isSystemPlan ? 'warning' : 'success'}>
           {item.isSystemPlan ? 'Системный' : 'Публичный'}
-        </span>
+        </Badge>
       ),
     },
     {

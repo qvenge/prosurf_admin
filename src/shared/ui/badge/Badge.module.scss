@@ -1,0 +1,31 @@
+.badge {
+  @include ds.typo('body/b5/medium');
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.success {
+  background: ds.color('background/success');
+  color: ds.color('text/success');
+}
+
+.error {
+  background: ds.color('background/error');
+  color: ds.color('text/error/primary');
+}
+
+.warning {
+  background: ds.color('background/warning');
+  color: ds.color('text/warning');
+}
+
+.secondary {
+  background: ds.color('background/secondary');
+  color: ds.color('text/secondary');
+}
+
+.accent {
+  background: ds.color('background/secondary');
+  color: ds.color('text/accent');
+}

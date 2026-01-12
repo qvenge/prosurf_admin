@@ -24,28 +24,6 @@
   color: ds.color('text/error/primary');
 }
 
-.status {
-  @include ds.typo('body/b5/medium');
-  padding: 4px 8px;
-  border-radius: 4px;
-  background: ds.color('background/secondary');
-  color: ds.color('text/secondary');
-
-  &.statusACTIVE {
-    background: ds.color('background/success');
-    color: ds.color('text/success');
-  }
-
-  &.statusEXPIRED {
-    background: ds.color('background/warning');
-    color: ds.color('text/warning');
-  }
-
-  &.statusCANCELLED {
-    background: ds.color('background/error');
-    color: ds.color('text/error/primary');
-  }
-}
 
 .actions {
   display: flex;

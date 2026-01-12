@@ -1,10 +1,18 @@
 import { useMemo } from 'react';
-import { DataTable, IconButton, type ColumnDef, type SortCriterion } from '@/shared/ui';
+import { Badge, DataTable, IconButton, UserCell, type ColumnDef, type SortCriterion } from '@/shared/ui';
 import { TrashBold } from '@/shared/ds/icons';
 import { formatDate } from '@/shared/lib/format-utils';
-import { OwnerCell } from './OwnerCell';
 import type { SeasonTicketAdmin } from '@/shared/api';
 import styles from './SeasonTicketsTable.module.scss';
+
+const getTicketStatusVariant = (status: string) => {
+  switch (status) {
+    case 'ACTIVE': return 'success' as const;
+    case 'EXPIRED': return 'warning' as const;
+    case 'CANCELLED': return 'error' as const;
+    default: return 'secondary' as const;
+  }
+};
 
 interface SeasonTicketsTableProps {
   className?: string;
@@ -42,7 +50,7 @@ export function SeasonTicketsTable({
         label: 'Владелец',
         sortable: true,
         sortKey: 'ownerName',
-        render: (ticket) => <OwnerCell owner={ticket.owner} />,
+        render: (ticket) => <UserCell user={ticket.owner} secondaryText={ticket.owner?.phone} />,
       },
       {
         id: 'status',
@@ -50,9 +58,9 @@ export function SeasonTicketsTable({
         sortable: true,
         sortKey: 'status',
         render: (ticket) => (
-          <span className={`${styles.status} ${styles[`status${ticket.status}`]}`}>
+          <Badge variant={getTicketStatusVariant(ticket.status)}>
             {STATUS_LABELS[ticket.status] || ticket.status}
-          </span>
+          </Badge>
         ),
       },
       {

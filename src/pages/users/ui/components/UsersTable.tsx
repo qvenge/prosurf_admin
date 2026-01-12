@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router';
 import { CaretRightBold } from '@/shared/ds/icons';
-import { DataTable, IconButton, type ColumnDef, type SortCriterion } from '@/shared/ui';
+import { DataTable, IconButton, UserCell, type ColumnDef, type SortCriterion } from '@/shared/ui';
 import type { Client, ClientSeasonTicketSummary } from '@/shared/api';
 import { formatDate, formatTime } from '@/shared/lib/format-utils';
 import styles from './UsersTable.module.scss';
@@ -9,7 +9,8 @@ import styles from './UsersTable.module.scss';
 type UserRowData = {
   id: string;
   username?: string | null;
-  name: string;
+  firstName?: string | null;
+  lastName?: string | null;
   createdDate: string;
   createdTime: string;
   phone?: string | null;
@@ -41,7 +42,8 @@ export function UsersTable({
     return data.map((item: Client) => ({
       id: item.id,
       username: item.username,
-      name: [item.lastName, item.firstName].filter(Boolean).join(' ') || item.username || 'Без имени',
+      firstName: item.firstName,
+      lastName: item.lastName,
       dateOfBirth: item.dateOfBirth ? formatDate(item.dateOfBirth) : undefined,
       photoUrl: item.photoUrl,
       phone: item.phone,
@@ -59,19 +61,11 @@ export function UsersTable({
       sortable: true,
       sortKey: 'firstName',
       render: (item) => (
-        <div className={styles.personalInfoContainer}>
-          {item.photoUrl ? (
-            <img src={item.photoUrl} alt="User Avatar" className={styles.avatar} />
-          ) : (
-            <div className={styles.avatarPlaceholder} />
-          )}
-          <div className={styles.personalInfo}>
-            <div className={styles.name}>{item.name}</div>
-            {item.dateOfBirth && (
-              <div className={styles.dateOfBirth}>{item.dateOfBirth}</div>
-            )}
-          </div>
-        </div>
+        <UserCell
+          user={{ firstName: item.firstName, lastName: item.lastName, photoUrl: item.photoUrl }}
+          secondaryText={item.dateOfBirth}
+          fallbackName={item.username || undefined}
+        />
       ),
     },
     {

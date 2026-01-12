@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router';
 import { useDeleteEvent } from '@/shared/api/hooks/events';
-import { DataTable, ConfirmModal, IconButton, type ColumnDef, type SortCriterion } from '@/shared/ui';
+import { Badge, DataTable, ConfirmModal, IconButton, type ColumnDef, type SortCriterion } from '@/shared/ui';
 import { PencilSimpleBold, TrashBold } from '@/shared/ds/icons';
 import { formatPrice } from '@/shared/lib/format-utils';
 import type { Event } from '@/shared/api';
@@ -90,7 +90,7 @@ export function TemplatesTable({ data, isLoading, sort, onSortChange, onEdit }: 
       sortKey: 'status',
       render: (item) => {
         const label = item.status === 'ACTIVE' ? 'Активно' : 'Отменено';
-        return <span className={styles[`status${item.status}`]}>{label}</span>;
+        return <Badge variant={item.status === 'ACTIVE' ? 'success' : 'error'}>{label}</Badge>;
       },
     },
     {

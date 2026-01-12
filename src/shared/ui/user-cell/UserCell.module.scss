@@ -1,7 +1,7 @@
-.clientCell {
+.userCell {
   display: flex;
   align-items: center;
-  gap: ds.number('paddings & gaps/S');
+  gap: ds.number('paddings & gaps/XS');
 }
 
 .avatar {
@@ -28,7 +28,6 @@
 .info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
   min-width: 0;
 }
 
@@ -40,8 +39,8 @@
   text-overflow: ellipsis;
 }
 
-.phone {
-  @include ds.typo('body/b5/regular');
+.secondary {
+  @include ds.typo('body/b4/medium');
   color: ds.color('text/secondary');
 }
 
