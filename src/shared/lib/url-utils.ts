@@ -1,16 +1,12 @@
 /**
- * URL utility functions for handling API URLs and paths
- */
-
-/**
- * Joins API base URL with a relative path
- * - Only transforms relative URLs (not starting with http:// or https://)
- * - Handles null/undefined gracefully
- * - Properly handles leading/trailing slashes
+ * Объединяет базовый URL API с относительным путём.
+ * - Преобразует только относительные URL (не начинающиеся с http:// или https://)
+ * - Корректно обрабатывает null/undefined
+ * - Правильно работает с начальными/конечными слэшами
  *
- * @param path - The path to join with API base URL (can be null/undefined)
- * @param baseUrl - Optional base URL override (defaults to VITE_API_URL)
- * @returns Full URL or null if input is null/undefined
+ * @param path - Путь для объединения с базовым URL API (может быть null/undefined)
+ * @param baseUrl - Опциональное переопределение базового URL (по умолчанию VITE_API_URL)
+ * @returns Полный URL или null если входное значение null/undefined
  *
  * @example
  * joinApiUrl('/uploads/image.jpg') // => 'http://localhost:3000/uploads/image.jpg'
@@ -22,29 +18,23 @@ export function joinApiUrl(path: string | null | undefined, baseUrl?: string): s
     return null;
   }
 
-  // If already an absolute URL, return as-is
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
 
-  // Get base URL from environment or parameter
   const base = baseUrl || import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-  // Remove trailing slash from base
   const normalizedBase = base.replace(/\/$/, '');
-
-  // Ensure path starts with /
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
 
   return `${normalizedBase}${normalizedPath}`;
 }
 
 /**
- * Transforms an array of URL paths to full URLs
+ * Преобразует массив путей в полные URL.
  *
- * @param paths - Array of paths (can be null/undefined)
- * @param baseUrl - Optional base URL override
- * @returns Array of full URLs (null items are filtered out)
+ * @param paths - Массив путей (может быть null/undefined)
+ * @param baseUrl - Опциональное переопределение базового URL
+ * @returns Массив полных URL (null-элементы отфильтровываются)
  */
 export function joinApiUrls(
   paths: (string | null | undefined)[] | null | undefined,

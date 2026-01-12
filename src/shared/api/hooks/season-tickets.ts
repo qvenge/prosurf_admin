@@ -137,24 +137,19 @@ export const useSeasonTicketsInfinite = (filters?: Omit<SeasonTicketFilters, 'cu
   });
 };
 
-// Hook for filtering season tickets by clientId (uses GET /season-tickets with filter)
 export const useSeasonTicketsByClient = (clientId: string | null) => {
   return useQuery({
     queryKey: seasonTicketsKeys.ticketsList({ clientId: clientId! }),
     queryFn: () => seasonTicketsClient.getSeasonTickets({ clientId: clientId! }),
     enabled: Boolean(clientId),
     staleTime: 5 * 60 * 1000,
-    select: (data) => data.items, // Extract items array from PaginatedResponse
+    select: (data) => data.items,
   });
 };
 
-// Legacy alias for backward compatibility
-/**
- * @deprecated Use useSeasonTicketsByClient instead
- */
+/** @deprecated Используйте useSeasonTicketsByClient */
 export const useCurrentUserSeasonTickets = () => useSeasonTicketsByClient(null);
 
-// Cancel season ticket
 export const useCancelSeasonTicket = () => {
   const queryClient = useQueryClient();
 
@@ -163,15 +158,12 @@ export const useCancelSeasonTicket = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: seasonTicketsKeys.tickets() });
       queryClient.invalidateQueries({ queryKey: seasonTicketsAdminKeys.all });
-      // Also invalidate client-specific queries
       queryClient.invalidateQueries({ queryKey: ['clients'] });
     },
   });
 };
 
-// ========================================
-// Admin hooks
-// ========================================
+// Админские хуки
 
 export const seasonTicketsAdminKeys = {
   all: ['season-tickets-admin'] as const,

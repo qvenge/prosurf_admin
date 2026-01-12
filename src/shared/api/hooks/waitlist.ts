@@ -16,10 +16,7 @@ export const useJoinWaitlist = () => {
     mutationFn: ({ sessionId, idempotencyKey }: { sessionId: string; idempotencyKey: IdempotencyKey }) => 
       waitlistClient.joinWaitlist(sessionId, idempotencyKey),
     onSuccess: (_, variables) => {
-      // Update session to reflect waitlist status
       queryClient.invalidateQueries({ queryKey: sessionsKeys.detail(variables.sessionId) });
-      
-      // Invalidate user's waitlist
       queryClient.invalidateQueries({ queryKey: waitlistKeys.all });
     },
   });

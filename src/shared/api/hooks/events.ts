@@ -3,7 +3,6 @@ import { eventsClient } from '../clients/events';
 import { adminKeys } from './admin';
 import type { Event, EventCreateDto, EventUpdateDto, EventFilters, PaginatedResponse } from '../types';
 
-// Query key factory for events
 export const eventsKeys = {
   all: ['events'] as const,
   lists: () => [...eventsKeys.all, 'list'] as const,
@@ -12,20 +11,14 @@ export const eventsKeys = {
   detail: (id: string) => [...eventsKeys.details(), id] as const,
 } as const;
 
-/**
- * Events hooks
- */
-
-// Get events catalog
 export const useEvents = (filters?: EventFilters) => {
   return useQuery({
     queryKey: eventsKeys.list(filters),
     queryFn: () => eventsClient.getEvents(filters),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 };
 
-// Infinite query for events catalog
 export const useEventsInfinite = (filters?: Omit<EventFilters, 'cursor'>) => {
   return useInfiniteQuery({
     queryKey: eventsKeys.list(filters),
@@ -36,28 +29,23 @@ export const useEventsInfinite = (filters?: Omit<EventFilters, 'cursor'>) => {
   });
 };
 
-// Get event by ID
 export function useEvent(id?: string, enabled?: boolean) {
   return useQuery({
     queryKey: eventsKeys.detail(id ?? ''),
     queryFn: () => eventsClient.getEventById(id ?? ''),
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 10 * 60 * 1000,
     enabled
   });
-};
+}
 
-// Create event mutation (ADMIN only)
 export const useCreateEvent = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: EventCreateDto) => eventsClient.createEvent(data),
     onSuccess: (newEvent) => {
-      // Invalidate events lists to show the new event
       queryClient.invalidateQueries({ queryKey: eventsKeys.lists() });
       queryClient.invalidateQueries({ queryKey: adminKeys.eventsAdminBase() });
-
-      // Optionally add to cache
       queryClient.setQueryData(eventsKeys.detail(newEvent.id), newEvent);
     },
     onError: (error) => {
@@ -66,8 +54,6 @@ export const useCreateEvent = () => {
   });
 };
 
-// Update event mutation (ADMIN only)
-// force=true allows updating even if event has sessions with active bookings
 export const useUpdateEvent = () => {
   const queryClient = useQueryClient();
 
@@ -75,10 +61,7 @@ export const useUpdateEvent = () => {
     mutationFn: ({ id, data, force }: { id: string; data: EventUpdateDto; force?: boolean }) =>
       eventsClient.updateEvent(id, data, force),
     onSuccess: (updatedEvent, variables) => {
-      // Update the specific event in cache
       queryClient.setQueryData(eventsKeys.detail(variables.id), updatedEvent);
-
-      // Invalidate events lists to show updated event
       queryClient.invalidateQueries({ queryKey: eventsKeys.lists() });
       queryClient.invalidateQueries({ queryKey: adminKeys.eventsAdminBase() });
     },
@@ -88,8 +71,6 @@ export const useUpdateEvent = () => {
   });
 };
 
-// Delete event mutation (ADMIN only)
-// force=true allows deleting even if event has sessions with active bookings
 export const useDeleteEvent = () => {
   const queryClient = useQueryClient();
 
@@ -97,9 +78,7 @@ export const useDeleteEvent = () => {
     mutationFn: ({ id, force }: { id: string; force?: boolean }) =>
       eventsClient.deleteEvent(id, force),
     onSuccess: (_, variables) => {
-      // Remove from cache
       queryClient.removeQueries({ queryKey: eventsKeys.detail(variables.id) });
-      // Invalidate events lists
       queryClient.invalidateQueries({ queryKey: eventsKeys.lists() });
       queryClient.invalidateQueries({ queryKey: adminKeys.eventsAdminBase() });
     },
@@ -109,7 +88,6 @@ export const useDeleteEvent = () => {
   });
 };
 
-// Hook for searching events
 export const useEventSearch = (searchQuery: string, additionalFilters?: Omit<EventFilters, 'q'>) => {
   const filters: EventFilters = {
     q: searchQuery,
@@ -120,11 +98,10 @@ export const useEventSearch = (searchQuery: string, additionalFilters?: Omit<Eve
     queryKey: eventsKeys.list(filters),
     queryFn: () => eventsClient.getEvents(filters),
     enabled: searchQuery.length > 0,
-    staleTime: 2 * 60 * 1000, // 2 minutes for search results
+    staleTime: 2 * 60 * 1000,
   });
 };
 
-// Hook for upcoming events
 export const useUpcomingEvents = (limit: number = 20) => {
   const filters: EventFilters = {
     startsAfter: new Date().toISOString(),
@@ -134,6 +111,6 @@ export const useUpcomingEvents = (limit: number = 20) => {
   return useQuery({
     queryKey: eventsKeys.list(filters),
     queryFn: () => eventsClient.getEvents(filters),
-    staleTime: 3 * 60 * 1000, // 3 minutes
+    staleTime: 3 * 60 * 1000,
   });
 };

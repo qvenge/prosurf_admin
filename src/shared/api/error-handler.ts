@@ -1,7 +1,6 @@
 import { ApiErrorClass, ValidationError } from './config';
 import type { ApiError } from './types';
 
-// Type guards for different error types
 export const isApiError = (error: unknown): error is ApiErrorClass => {
   return error instanceof ApiErrorClass;
 };
@@ -38,7 +37,6 @@ export const isValidationResponseError = (error: unknown): boolean => {
   return error instanceof ValidationError;
 };
 
-// Specific business error type guards
 export const isHoldExpiredError = (error: unknown): boolean => {
   return isApiError(error) && error.error.code === 'HOLD_EXPIRED';
 };
@@ -75,7 +73,6 @@ export const isInvalidEmailError = (error: unknown): boolean => {
   return isApiError(error) && error.error.code === 'INVALID_EMAIL';
 };
 
-// Error message extraction
 export const getErrorMessage = (error: unknown): string => {
   if (isApiError(error)) {
     return error.error.message;
@@ -104,7 +101,6 @@ export const getErrorDetails = (error: unknown): unknown => {
   return null;
 };
 
-// User-friendly error messages
 const ERROR_MESSAGES: Record<ApiError['code'], string> = {
   HOLD_EXPIRED: 'Время бронирования истекло. Пожалуйста, забронируйте снова.',
   NO_SEATS: 'К сожалению, места закончились.',
@@ -139,7 +135,6 @@ export const getUserFriendlyErrorMessage = (error: unknown): string => {
   return getErrorMessage(error);
 };
 
-// Error logging utility
 export const logError = (error: unknown, context?: string): void => {
   const message = getErrorMessage(error);
   const code = getErrorCode(error);
@@ -158,27 +153,30 @@ export const logError = (error: unknown, context?: string): void => {
   });
 };
 
-// Retry utilities
+/**
+ * Определяет, стоит ли повторять запрос при ошибке.
+ * Ошибки валидации не повторяем - это несоответствие схемы.
+ */
 export const shouldRetry = (error: unknown): boolean => {
-  // Never retry validation errors - these indicate schema mismatch and won't resolve with retry
   if (isValidationResponseError(error)) {
     return false;
   }
 
   if (isApiError(error)) {
-    // Retry on server errors and specific provider unavailable errors
     return isServerError(error) || isProviderUnavailableError(error);
   }
 
   return isNetworkError(error);
 };
 
+/**
+ * Вычисляет задержку перед повторным запросом.
+ * Использует экспоненциальный backoff: 1с, 2с, 4с, 8с, 16с (макс).
+ */
 export const getRetryDelay = (attemptNumber: number): number => {
-  // Exponential backoff: 1s, 2s, 4s, 8s, 16s (max)
   return Math.min(1000 * Math.pow(2, attemptNumber), 16000);
 };
 
-// Error boundary helpers
 export interface ErrorInfo {
   message: string;
   code?: string;
@@ -194,7 +192,7 @@ export const getErrorInfo = (error: unknown): ErrorInfo => {
       code: error.error.code,
       status: error.status,
       canRetry: shouldRetry(error),
-      shouldShowToUser: !isAuthError(error), // Don't show auth errors to user
+      shouldShowToUser: !isAuthError(error), // Ошибки авторизации не показываем пользователю
     };
   }
 
@@ -213,31 +211,29 @@ export const getErrorInfo = (error: unknown): ErrorInfo => {
   };
 };
 
-// React error boundary component data
 export const createErrorBoundaryProps = (error: unknown) => ({
   error: getErrorInfo(error),
   onRetry: shouldRetry(error) ? () => window.location.reload() : undefined,
   showContactSupport: isServerError(error),
 });
 
-// Hook for handling errors in components
+/**
+ * Хук для обработки ошибок в компонентах.
+ */
 export const useErrorHandler = () => {
   const handleError = (error: unknown, context?: string) => {
     logError(error, context);
-    
+
     const errorInfo = getErrorInfo(error);
-    
-    // Handle specific error types
+
     if (isAuthError(error)) {
-      // Auth errors are already handled by axios interceptor
       return;
     }
-    
+
     if (errorInfo.shouldShowToUser) {
-      // In a real app, this would be connected to a toast/notification system
       console.warn('Error to show to user:', errorInfo.message);
     }
-    
+
     return errorInfo;
   };
   

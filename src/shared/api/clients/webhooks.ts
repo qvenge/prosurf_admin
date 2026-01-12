@@ -7,23 +7,16 @@ import type {
 } from '../types';
 
 /**
- * Webhooks API client
- * 
- * Handles webhook endpoints for payment providers and Telegram bot.
- * Note: These endpoints are typically called by external services, not by the client app.
- * They are included here for completeness and testing purposes.
+ * API-клиент вебхуков.
+ * Обрабатывает вебхуки платёжных провайдеров и Telegram-бота.
+ * Эти эндпоинты обычно вызываются внешними сервисами, а не клиентским приложением.
  */
 export const webhooksClient = {
   /**
-   * Handle payment provider webhook
+   * Обработка вебхука платёжного провайдера.
    * POST /webhooks/payments/provider
-   * 
-   * Processes webhook notifications from payment providers (Stripe, YooKassa, CloudPayments, etc.).
-   * Requires signature validation via X-Signature header.
-   * 
-   * @param data - Provider-specific webhook payload
-   * @param signature - Webhook signature for validation
-   * @returns Promise that resolves when webhook is processed
+   *
+   * @param signature - Подпись вебхука для валидации
    */
   async handlePaymentProviderWebhook(data: unknown, signature: string): Promise<void> {
     await apiClient.post('/webhooks/payments/provider', data, {
@@ -34,20 +27,18 @@ export const webhooksClient = {
   },
 
   /**
-   * Handle Telegram bot webhook
+   * Обработка вебхука Telegram-бота.
    * POST /webhooks/telegram/bot
-   * 
-   * Processes Telegram Bot API updates for payments.
-   * - On pre_checkout_query: verify booking hold & amount, answer within 10 seconds
-   * - On successful_payment: set Payment=SUCCEEDED and Booking=CONFIRMED
-   * 
-   * @param data - Telegram update payload
-   * @param secretToken - Secret token for Telegram webhook validation
-   * @returns Promise that resolves when webhook is processed
+   *
+   * Обрабатывает обновления Telegram Bot API для платежей:
+   * - pre_checkout_query: проверка холда и суммы, ответ в течение 10 секунд
+   * - successful_payment: статус Payment=SUCCEEDED и Booking=CONFIRMED
+   *
+   * @param secretToken - Секретный токен для валидации вебхука Telegram
    */
   async handleTelegramBotWebhook(data: TelegramUpdate, secretToken: string): Promise<void> {
     const validatedData = TelegramUpdateSchema.parse(data);
-    
+
     await apiClient.post('/webhooks/telegram/bot', validatedData, {
       headers: {
         'X-Telegram-Bot-Api-Secret-Token': secretToken,
@@ -56,16 +47,8 @@ export const webhooksClient = {
   },
 
   /**
-   * Verify webhook signature (utility function)
-   * 
-   * Helper function to verify webhook signatures from payment providers.
-   * Implementation depends on the specific provider's signature algorithm.
-   * 
-   * @param payload - Raw webhook payload
-   * @param signature - Signature to verify
-   * @param secret - Webhook secret key
-   * @param algorithm - Signature algorithm (e.g., 'sha256', 'sha512')
-   * @returns Boolean indicating if signature is valid
+   * Проверка подписи вебхука (утилита).
+   * Реализация зависит от алгоритма подписи конкретного провайдера.
    */
   verifyWebhookSignature(
     payload: string | Buffer,
@@ -74,11 +57,7 @@ export const webhooksClient = {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _algorithm: 'sha256' | 'sha512' = 'sha256'
   ): boolean {
-    // This would typically use crypto libraries to verify the signature
-    // Implementation depends on the payment provider's requirements
-    // For example, Stripe uses HMAC-SHA256
-    
-    // Placeholder implementation - should be replaced with actual verification
+    // Placeholder — должна быть заменена реальной верификацией
     console.warn('Webhook signature verification not yet implemented');
     console.warn('Payload:', payload, 'Signature:', signature, 'Secret:', secret);
     return true;

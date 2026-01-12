@@ -17,18 +17,13 @@ import type {
 } from '../types';
 
 /**
- * Authentication API client
- *
- * Provides methods for admin authentication.
- * Admin panel uses email/password login via /auth/admin/login
+ * API-клиент аутентификации.
+ * Админ-панель использует вход по email/паролю через /auth/admin/login.
  */
 export const authClient = {
   /**
-   * Login with Telegram init data (for clients, not admins)
+   * Вход через Telegram initData (для клиентов, не админов).
    * POST /auth/client/telegram
-   *
-   * @param request - Telegram login request with initData
-   * @returns Promise resolving to auth response with tokens and client data
    */
   async loginWithTelegram(request: TelegramLoginDto): Promise<ClientAuthResponse> {
     const validatedRequest = TelegramLoginDtoSchema.parse(request);
@@ -37,19 +32,8 @@ export const authClient = {
   },
 
   /**
-   * Login with email and password (admin login)
+   * Вход по email и паролю (для админов).
    * POST /auth/admin/login
-   *
-   * @param request - Login request with email and password
-   * @returns Promise resolving to auth response with tokens and admin data
-   * @example
-   * ```ts
-   * const response = await authClient.loginWithCredentials({
-   *   email: 'admin@example.com',
-   *   password: 'password123'
-   * });
-   * console.log(response.admin.id);
-   * ```
    */
   async loginWithCredentials(request: AdminLoginDto): Promise<AdminAuthResponse> {
     const validatedRequest = AdminLoginDtoSchema.parse(request);
@@ -58,19 +42,15 @@ export const authClient = {
   },
 
   /**
-   * Legacy login method for backward compatibility
-   * @deprecated Use loginWithTelegram instead
+   * @deprecated Используйте loginWithTelegram
    */
   async login(request: TelegramLoginDto): Promise<ClientAuthResponse> {
     return this.loginWithTelegram(request);
   },
 
   /**
-   * Refresh access token using refresh token
+   * Обновление access-токена по refresh-токену.
    * POST /auth/refresh
-   *
-   * @param request - Refresh request with current refresh token
-   * @returns Promise resolving to new access and refresh tokens
    */
   async refresh(request: RefreshRequest): Promise<RefreshResponse> {
     const validatedRequest = RefreshRequestSchema.parse(request);
@@ -79,13 +59,8 @@ export const authClient = {
   },
 
   /**
-   * Logout and invalidate refresh token
+   * Выход и инвалидация refresh-токена.
    * POST /auth/logout
-   *
-   * Invalidates the current refresh token on the server.
-   * Client should clear local tokens after this call.
-   *
-   * @returns Promise that resolves when logout is complete
    */
   async logout(): Promise<void> {
     await apiClient.post('/auth/logout');

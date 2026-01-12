@@ -13,32 +13,25 @@ import type {
   SessionBulkDeleteDto
 } from '../types';
 
-// Query key factory for sessions
 export const sessionsKeys = {
   all: ['sessions'] as const,
   lists: () => [...sessionsKeys.all, 'list'] as const,
   list: (filters?: SessionFilters) => [...sessionsKeys.lists(), filters] as const,
   details: () => [...sessionsKeys.all, 'detail'] as const,
   detail: (id: string) => [...sessionsKeys.details(), id] as const,
-  eventSessions: (eventId: string, filters?: SessionFilters) => 
+  eventSessions: (eventId: string, filters?: SessionFilters) =>
     [...eventsKeys.detail(eventId), 'sessions', filters] as const,
 } as const;
 
-/**
- * Sessions hooks
- */
-
-// Get sessions for an event
 export const useEventSessions = (eventId?: string, filters?: SessionFilters, enabled?: boolean) => {
   return useQuery({
     queryKey: sessionsKeys.eventSessions(eventId ?? '', filters),
     queryFn: () => sessionsClient.getEventSessions(eventId ?? '', filters),
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 2 * 60 * 1000,
     enabled
   });
 };
 
-// Infinite query for event sessions
 export const useEventSessionsInfinite = (
   eventId: string,
   filters?: Omit<SessionFilters, 'cursor'>
@@ -53,7 +46,6 @@ export const useEventSessionsInfinite = (
   });
 };
 
-// Create sessions for an event (ADMIN only)
 export const useCreateEventSessions = () => {
   const queryClient = useQueryClient();
 
@@ -68,12 +60,9 @@ export const useCreateEventSessions = () => {
       idempotencyKey: IdempotencyKey;
     }) => sessionsClient.createEventSessions(eventId, data, idempotencyKey),
     onSuccess: (_, variables) => {
-      // Invalidate event sessions queries
       queryClient.invalidateQueries({
         queryKey: [eventsKeys.detail(variables.eventId)[0], eventsKeys.detail(variables.eventId)[1], eventsKeys.detail(variables.eventId)[2], 'sessions']
       });
-
-      // Invalidate general sessions lists
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
       queryClient.invalidateQueries({ queryKey: adminKeys.sessionsAdminBase() });
     },
@@ -83,7 +72,6 @@ export const useCreateEventSessions = () => {
   });
 };
 
-// Search sessions across all events
 export const useSessions = (filters?: SessionFilters) => {
   return useQuery({
     queryKey: sessionsKeys.list(filters),
@@ -92,7 +80,6 @@ export const useSessions = (filters?: SessionFilters) => {
   });
 };
 
-// Infinite query for sessions search
 export const useSessionsInfinite = (filters?: Omit<SessionFilters, 'cursor'>) => {
   return useInfiniteQuery({
     queryKey: sessionsKeys.list(filters),
@@ -103,16 +90,14 @@ export const useSessionsInfinite = (filters?: Omit<SessionFilters, 'cursor'>) =>
   });
 };
 
-// Get session by ID
 export const useSession = (id: string) => {
   return useQuery({
     queryKey: sessionsKeys.detail(id),
     queryFn: () => sessionsClient.getSessionById(id),
-    staleTime: 1 * 60 * 1000, // 1 minute (session data changes frequently)
+    staleTime: 1 * 60 * 1000,
   });
 };
 
-// Update session mutation (ADMIN only)
 export const useUpdateSession = () => {
   const queryClient = useQueryClient();
 
@@ -120,10 +105,7 @@ export const useUpdateSession = () => {
     mutationFn: ({ id, data, force }: { id: string; data: SessionUpdateDto; force?: boolean }) =>
       sessionsClient.updateSession(id, data, force),
     onSuccess: (updatedSession, variables) => {
-      // Update the specific session in cache
       queryClient.setQueryData(sessionsKeys.detail(variables.id), updatedSession);
-
-      // Invalidate sessions lists and event sessions
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
       queryClient.invalidateQueries({ queryKey: adminKeys.sessionsAdminBase() });
       queryClient.invalidateQueries({
@@ -137,10 +119,12 @@ export const useUpdateSession = () => {
   });
 };
 
-// Delete session mutation (ADMIN only)
-// - No bookings: Hard delete (returns null)
-// - Has bookings + force: Soft cancel (returns Session with status CANCELLED)
-// - Has bookings + no force: Throws 409 Conflict error
+/**
+ * Поведение зависит от наличия бронирований:
+ * - Нет бронирований: полное удаление (возвращает null)
+ * - Есть бронирования + force: мягкая отмена (возвращает Session со статусом CANCELLED)
+ * - Есть бронирования без force: ошибка 409 Conflict
+ */
 export const useDeleteSession = () => {
   const queryClient = useQueryClient();
 
@@ -148,16 +132,11 @@ export const useDeleteSession = () => {
     mutationFn: ({ id, force }: { id: string; force?: boolean }) =>
       sessionsClient.deleteSession(id, force),
     onSuccess: (result, variables) => {
-      // Remove or update the specific session in cache
       if (result) {
-        // Soft cancel - update cache with cancelled session
         queryClient.setQueryData(sessionsKeys.detail(variables.id), result);
       } else {
-        // Hard delete - remove from cache
         queryClient.removeQueries({ queryKey: sessionsKeys.detail(variables.id) });
       }
-
-      // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
       queryClient.invalidateQueries({ queryKey: adminKeys.sessionsAdminBase() });
       queryClient.invalidateQueries({
@@ -170,12 +149,9 @@ export const useDeleteSession = () => {
   });
 };
 
-/**
- * @deprecated Use useDeleteSession instead
- */
+/** @deprecated Используйте useDeleteSession */
 export const useCancelSession = useDeleteSession;
 
-// Bulk delete sessions mutation (ADMIN only)
 export const useBulkDeleteSessions = () => {
   const queryClient = useQueryClient();
 
@@ -188,11 +164,8 @@ export const useBulkDeleteSessions = () => {
       idempotencyKey: IdempotencyKey;
     }) => sessionsClient.bulkDeleteSessions(data, idempotencyKey),
     onSuccess: () => {
-      // Invalidate sessions lists
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
       queryClient.invalidateQueries({ queryKey: adminKeys.sessionsAdminBase() });
-
-      // Invalidate event sessions for all events that had sessions deleted
       queryClient.invalidateQueries({
         predicate: (query) => query.queryKey.includes('sessions')
       });
@@ -203,7 +176,6 @@ export const useBulkDeleteSessions = () => {
   });
 };
 
-// Hook for upcoming sessions
 export const useUpcomingSessions = (limit: number = 20) => {
   const filters: SessionFilters = {
     startsAfter: new Date().toISOString(),
@@ -213,11 +185,10 @@ export const useUpcomingSessions = (limit: number = 20) => {
   return useQuery({
     queryKey: sessionsKeys.list(filters),
     queryFn: () => sessionsClient.getSessions(filters),
-    staleTime: 3 * 60 * 1000, // 3 minutes
+    staleTime: 3 * 60 * 1000,
   });
 };
 
-// Hook for available sessions (with seats)
 export const useAvailableSessions = (filters?: Omit<SessionFilters, 'cursor'>) => {
   return useQuery({
     queryKey: sessionsKeys.list({ ...filters, startsAfter: new Date().toISOString() }),
@@ -226,6 +197,6 @@ export const useAvailableSessions = (filters?: Omit<SessionFilters, 'cursor'>) =
       ...data,
       items: data.items.filter(session => session.remainingSeats > 0),
     }),
-    staleTime: 1 * 60 * 1000, // 1 minute
+    staleTime: 1 * 60 * 1000,
   });
 };

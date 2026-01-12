@@ -20,7 +20,7 @@ import type {
 } from '../types';
 
 /**
- * Transform client photoUrl to full URL
+ * Трансформация photoUrl клиента в полный URL.
  */
 const transformClient = (client: Client): Client => ({
   ...client,
@@ -28,14 +28,11 @@ const transformClient = (client: Client): Client => ({
 });
 
 /**
- * Clients API client
- *
- * Provides methods for managing Telegram clients (end-users).
- * These endpoints are typically admin-only.
+ * API-клиент управления клиентами (пользователями Telegram).
  */
 export const clientsClient = {
   /**
-   * Get list of clients (ADMIN only)
+   * Получение списка клиентов (только ADMIN).
    * GET /clients
    */
   async getClients(filters?: ClientFilters): Promise<PaginatedResponse<Client>> {
@@ -52,10 +49,10 @@ export const clientsClient = {
   },
 
   /**
-   * Get client by ID (ADMIN only)
+   * Получение клиента по ID (только ADMIN).
    * GET /clients/{id}
    *
-   * @param id - Client's telegramId
+   * @param id - telegramId клиента
    */
   async getClientById(id: string): Promise<Client> {
     const response = await apiClient.get(`/clients/${encodeURIComponent(id)}`);
@@ -63,11 +60,10 @@ export const clientsClient = {
   },
 
   /**
-   * Update client (ADMIN only)
+   * Обновление клиента (только ADMIN).
    * PATCH /clients/{id}
    *
-   * @param id - Client's telegramId
-   * @param data - Update data
+   * @param id - telegramId клиента
    */
   async updateClient(id: string, data: ClientUpdateDto): Promise<Client> {
     const validatedData = ClientUpdateDtoSchema.parse(data);
@@ -80,10 +76,10 @@ export const clientsClient = {
   },
 
   /**
-   * Get client's season tickets (ADMIN only)
+   * Получение абонементов клиента (только ADMIN).
    * GET /clients/{id}/season-tickets
    *
-   * @param id - Client's telegramId
+   * @param id - telegramId клиента
    */
   async getClientSeasonTickets(id: string): Promise<PaginatedResponse<SeasonTicket>> {
     const response = await apiClient.get(
@@ -93,10 +89,10 @@ export const clientsClient = {
   },
 
   /**
-   * Get client's bonus wallet (ADMIN only)
+   * Получение бонусного кошелька клиента (только ADMIN).
    * GET /users/{id}/bonus
    *
-   * @param id - Client's UUID (not telegramId)
+   * @param id - UUID клиента (не telegramId)
    */
   async getClientBonus(id: string): Promise<BonusWallet> {
     const response = await apiClient.get(
@@ -106,11 +102,10 @@ export const clientsClient = {
   },
 
   /**
-   * Grant season ticket to client (ADMIN only)
+   * Выдача абонемента клиенту (только ADMIN).
    * POST /clients/{id}/season-tickets
    *
-   * @param id - Client's telegramId
-   * @param data - Grant data with planId and optional expiresIn
+   * @param id - telegramId клиента
    */
   async grantSeasonTicket(id: string, data: AdminGrantSeasonTicketDto): Promise<SeasonTicket> {
     const validatedData = AdminGrantSeasonTicketDtoSchema.parse(data);

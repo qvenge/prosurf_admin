@@ -8,14 +8,12 @@ import axios, {
 import { ErrorSchema } from './schemas';
 import type { ApiError, RefreshResponse } from './types';
 
-// Storage keys
 export const STORAGE_KEYS = {
   ACCESS_TOKEN: 'surf_access_token',
   REFRESH_TOKEN: 'surf_refresh_token',
   USER: 'surf_user',
 } as const;
 
-// Token management
 export const tokenStorage = {
   getAccessToken: (): string | null => {
     if (typeof window === 'undefined') return null;
@@ -45,7 +43,6 @@ export const tokenStorage = {
   },
 };
 
-// Custom error class for API errors
 export class ApiErrorClass extends Error {
   public error: ApiError;
   public status: number;
@@ -64,7 +61,6 @@ export class ApiErrorClass extends Error {
   }
 }
 
-// Custom error class for validation errors
 export class ValidationError extends Error {
   public readonly isValidationError = true;
 
@@ -74,7 +70,6 @@ export class ValidationError extends Error {
   }
 }
 
-// Create axios instance
 const createApiClient = (): AxiosInstance => {
   const client = axios.create({
     baseURL: import.meta.env.MODE === 'development' ? '/api' : (import.meta.env.VITE_API_URL || 'http://localhost:3000'),
@@ -84,14 +79,13 @@ const createApiClient = (): AxiosInstance => {
     },
   });
 
-  // Flag to prevent infinite loops during token refresh
+  // Флаг для предотвращения бесконечного цикла при обновлении токена
   let isRefreshing = false;
   let failedQueue: Array<{
     resolve: (value: string) => void;
     reject: (error: unknown) => void;
   }> = [];
 
-  // Process failed queue after token refresh
   const processQueue = (error: unknown, token: string | null = null) => {
     failedQueue.forEach(({ resolve, reject }) => {
       if (error) {
@@ -104,7 +98,6 @@ const createApiClient = (): AxiosInstance => {
     failedQueue = [];
   };
 
-  // Request interceptor - Add auth token
   client.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
       const token = tokenStorage.getAccessToken();
@@ -118,7 +111,6 @@ const createApiClient = (): AxiosInstance => {
     }
   );
 
-  // Response interceptor - Handle token refresh
   client.interceptors.response.use(
     (response: AxiosResponse) => response,
     async (error: AxiosError) => {
@@ -126,10 +118,8 @@ const createApiClient = (): AxiosInstance => {
         _retry?: boolean 
       };
 
-      // If error is 401 and we haven't already tried to refresh
       if (error.response?.status === 401 && !originalRequest._retry) {
         if (isRefreshing) {
-          // If already refreshing, queue this request
           return new Promise((resolve, reject) => {
             failedQueue.push({ resolve, reject });
           }).then(token => {
@@ -182,7 +172,6 @@ const createApiClient = (): AxiosInstance => {
         }
       }
 
-      // Transform error response
       if (error.response?.data) {
         try {
           const parsedError = ErrorSchema.parse(error.response.data);
@@ -193,7 +182,6 @@ const createApiClient = (): AxiosInstance => {
           );
           return Promise.reject(apiError);
         } catch {
-          // If error doesn't match schema, create generic error
           const genericError = new ApiErrorClass(
             {
               code: 'PROVIDER_UNAVAILABLE',
@@ -207,7 +195,6 @@ const createApiClient = (): AxiosInstance => {
         }
       }
 
-      // Network or other errors
       const networkError = new ApiErrorClass(
         {
           code: 'PROVIDER_UNAVAILABLE',
@@ -226,7 +213,9 @@ const createApiClient = (): AxiosInstance => {
 
 export const apiClient = createApiClient();
 
-// Utility function to create request config with idempotency key
+/**
+ * Добавляет ключ идемпотентности к конфигу запроса
+ */
 export const withIdempotency = (
   config: AxiosRequestConfig,
   key: string
@@ -238,7 +227,9 @@ export const withIdempotency = (
   },
 });
 
-// Utility function to create query string from filters
+/**
+ * Создаёт query-строку из объекта фильтров
+ */
 export const createQueryString = (filters: Record<string, unknown>): string => {
   const params = new URLSearchParams();
 
@@ -260,7 +251,9 @@ export const createQueryString = (filters: Record<string, unknown>): string => {
   return query ? `?${query}` : '';
 };
 
-// Utility function to validate response data
+/**
+ * Валидирует данные ответа через Zod-схему.
+ */
 export const validateResponse = <T>(
   data: unknown,
   schema: { parse: (data: unknown) => T }
@@ -268,12 +261,11 @@ export const validateResponse = <T>(
   try {
     return schema.parse(data);
   } catch (error) {
-    console.error('Response validation error:', error);
+    console.error('Ошибка валидации ответа:', error);
     throw new ValidationError('Invalid response format');
   }
 };
 
-// Environment configuration
 export const config = {
   apiUrl: import.meta.env.MODE === 'development' ? '/api' : (import.meta.env.VITE_API_URL || 'http://localhost:3000'),
   isDevelopment: import.meta.env.MODE === 'development',

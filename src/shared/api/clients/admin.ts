@@ -43,7 +43,7 @@ import type {
 } from '../types';
 
 /**
- * Transform client photoUrl to full URL
+ * Трансформация photoUrl клиента в полный URL.
  */
 const transformClient = (client: Client): Client => ({
   ...client,
@@ -51,17 +51,11 @@ const transformClient = (client: Client): Client => ({
 });
 
 /**
- * Admin API client
- *
- * Provides methods for admin management and admin-only operations.
+ * API-клиент администрирования.
  */
 export const adminClient = {
-  // ============================================
-  // Admin Management Endpoints
-  // ============================================
-
   /**
-   * Get list of admins (ADMIN only)
+   * Получение списка админов (только ADMIN).
    * GET /admins
    */
   async getAdmins(filters?: AdminFilters): Promise<PaginatedResponse<Admin>> {
@@ -73,7 +67,7 @@ export const adminClient = {
   },
 
   /**
-   * Create a new admin (ADMIN only)
+   * Создание нового админа (только ADMIN).
    * POST /admins
    */
   async createAdmin(data: AdminCreateDto): Promise<Admin> {
@@ -84,7 +78,7 @@ export const adminClient = {
   },
 
   /**
-   * Get admin by ID (ADMIN only)
+   * Получение админа по ID (только ADMIN).
    * GET /admins/{id}
    */
   async getAdminById(id: string): Promise<Admin> {
@@ -93,7 +87,7 @@ export const adminClient = {
   },
 
   /**
-   * Update admin (ADMIN only)
+   * Обновление админа (только ADMIN).
    * PATCH /admins/{id}
    */
   async updateAdmin(id: string, data: AdminUpdateDto): Promise<Admin> {
@@ -107,19 +101,15 @@ export const adminClient = {
   },
 
   /**
-   * Delete admin (ADMIN only)
+   * Удаление админа (только ADMIN).
    * DELETE /admins/{id}
    */
   async deleteAdmin(id: string): Promise<void> {
     await apiClient.delete(`/admins/${encodeURIComponent(id)}`);
   },
 
-  // ============================================
-  // Current Admin Profile Endpoints
-  // ============================================
-
   /**
-   * Get current admin profile
+   * Получение профиля текущего админа.
    * GET /admins/me
    */
   async getMe(): Promise<Admin> {
@@ -128,7 +118,7 @@ export const adminClient = {
   },
 
   /**
-   * Update current admin profile
+   * Обновление профиля текущего админа.
    * PATCH /admins/me
    */
   async updateMe(data: AdminSelfUpdateDto): Promise<Admin> {
@@ -139,7 +129,7 @@ export const adminClient = {
   },
 
   /**
-   * Change current admin's password
+   * Смена пароля текущего админа.
    * POST /admins/me/password
    */
   async changePassword(data: ChangePasswordDto): Promise<void> {
@@ -148,12 +138,8 @@ export const adminClient = {
     await apiClient.post('/admins/me/password', validatedData);
   },
 
-  // ============================================
-  // Admin-Only Operations
-  // ============================================
-
   /**
-   * Get audit logs (ADMIN only)
+   * Получение журнала аудита (только ADMIN).
    * GET /admin/audit-logs
    */
   async getAuditLogs(filters?: AuditLogFilters): Promise<PaginatedResponse<AuditLog>> {
@@ -165,7 +151,7 @@ export const adminClient = {
   },
 
   /**
-   * Run booking expiry job (ADMIN only)
+   * Запуск джоба истечения бронирований (только ADMIN).
    * POST /admin/jobs/run/booking-expiry
    */
   async runBookingExpiryJob(): Promise<JobExecutionResult> {
@@ -174,7 +160,7 @@ export const adminClient = {
   },
 
   /**
-   * Run certificate expiry job (ADMIN only)
+   * Запуск джоба истечения сертификатов (только ADMIN).
    * POST /admin/jobs/run/certificate-expiry
    */
   async runCertificateExpiryJob(): Promise<JobExecutionResult> {
@@ -183,7 +169,7 @@ export const adminClient = {
   },
 
   /**
-   * Run season ticket expiry job (ADMIN only)
+   * Запуск джоба истечения абонементов (только ADMIN).
    * POST /admin/jobs/run/season-ticket-expiry
    */
   async runSeasonTicketExpiryJob(): Promise<JobExecutionResult> {
@@ -191,18 +177,13 @@ export const adminClient = {
     return validateResponse(response.data, JobExecutionResultSchema);
   },
 
-  // ============================================
-  // Admin Entity List Endpoints (Page-Based Pagination)
-  // ============================================
-
   /**
-   * Get clients list for admin (ADMIN only)
+   * Получение списка клиентов для админа (только ADMIN).
    * GET /admin/clients
    */
   async getClientsAdmin(filters?: ClientAdminFilters): Promise<ClientAdminPaginatedResponse> {
     const validatedFilters = ClientAdminFiltersSchema.parse(filters || {});
 
-    // Serialize sort array to string format: "field:order,field:order"
     const { sort, ...restFilters } = validatedFilters;
     const serializedFilters: Record<string, unknown> = { ...restFilters };
     if (sort && sort.length > 0) {
@@ -221,13 +202,12 @@ export const adminClient = {
   },
 
   /**
-   * Get events list for admin (ADMIN only)
+   * Получение списка мероприятий для админа (только ADMIN).
    * GET /admin/events
    */
   async getEventsAdmin(filters?: EventAdminFilters): Promise<EventAdminPaginatedResponse> {
     const validatedFilters = EventAdminFiltersSchema.parse(filters || {});
 
-    // Serialize sort array to string format: "field:order,field:order"
     const { sort, ...restFilters } = validatedFilters;
     const serializedFilters: Record<string, unknown> = { ...restFilters };
     if (sort && sort.length > 0) {
@@ -241,13 +221,12 @@ export const adminClient = {
   },
 
   /**
-   * Get sessions list for admin (ADMIN only)
+   * Получение списка сессий для админа (только ADMIN).
    * GET /admin/sessions
    */
   async getSessionsAdmin(filters?: SessionAdminFilters): Promise<SessionAdminPaginatedResponse> {
     const validatedFilters = SessionAdminFiltersSchema.parse(filters || {});
 
-    // Serialize sort array to string format: "field:order,field:order"
     const { sort, ...restFilters } = validatedFilters;
     const serializedFilters: Record<string, unknown> = { ...restFilters };
     if (sort && sort.length > 0) {
@@ -261,7 +240,7 @@ export const adminClient = {
   },
 
   /**
-   * Get season ticket plans list for admin (ADMIN only)
+   * Получение списка тарифных планов абонементов для админа (только ADMIN).
    * GET /admin/season-ticket-plans
    */
   async getSeasonTicketPlansAdmin(filters?: SeasonTicketPlanAdminFilters): Promise<SeasonTicketPlanAdminPaginatedResponse> {

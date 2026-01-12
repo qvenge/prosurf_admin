@@ -60,16 +60,17 @@ export function generateIdempotencyKey(): string {
   return `booking-${timestamp}-${random}`;
 }
 
+/**
+ * Форматирует номер телефона: удаляет все нецифровые символы кроме начального +.
+ * Добавляет + для международных номеров (длиннее 10 цифр).
+ */
 export function formatPhoneNumber(phone: string): string {
-  // Remove all non-digit characters except leading +
   let cleaned = phone.replace(/[^\d+]/g, '');
 
-  // If it starts with +, keep it, otherwise remove any + characters
   if (cleaned.startsWith('+')) {
     cleaned = '+' + cleaned.substring(1).replace(/\+/g, '');
   } else {
     cleaned = cleaned.replace(/\+/g, '');
-    // Add + prefix if the number looks international (starts with country code)
     if (cleaned.length > 10) {
       cleaned = '+' + cleaned;
     }

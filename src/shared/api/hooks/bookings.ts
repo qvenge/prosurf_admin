@@ -11,7 +11,6 @@ import type {
   CreateBookingPaymentDto
 } from '../types';
 
-// Query key factory for bookings
 export const bookingsKeys = {
   all: ['bookings'] as const,
   lists: () => [...bookingsKeys.all, 'list'] as const,
@@ -20,35 +19,23 @@ export const bookingsKeys = {
   detail: (id: string) => [...bookingsKeys.details(), id] as const,
 } as const;
 
-/**
- * Bookings hooks
- */
-
-// Book session mutation
 export const useBookSession = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ 
-      sessionId, 
-      data, 
-      idempotencyKey 
-    }: { 
-      sessionId: string; 
+    mutationFn: ({
+      sessionId,
+      data,
+      idempotencyKey
+    }: {
+      sessionId: string;
       data: BookRequest;
       idempotencyKey: IdempotencyKey;
     }) => bookingsClient.bookSession(sessionId, data, idempotencyKey),
     onSuccess: (result, variables) => {
-      // Add new booking to cache
       queryClient.setQueryData(bookingsKeys.detail(result.booking.id), result.booking);
-      
-      // Invalidate bookings lists
       queryClient.invalidateQueries({ queryKey: bookingsKeys.lists() });
-      
-      // Invalidate and update the session to reflect reduced remaining seats
       queryClient.invalidateQueries({ queryKey: sessionsKeys.detail(variables.sessionId) });
-      
-      // Invalidate sessions lists as remainingSeats changed
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
     },
     onError: (error) => {
@@ -57,7 +44,6 @@ export const useBookSession = () => {
   });
 };
 
-// Type helper to determine if extended fields are requested
 type HasExtendedFields<T extends BookingFilters | undefined> = T extends BookingFilters
   ? T['includeUser'] extends true
     ? true
@@ -70,7 +56,6 @@ type HasExtendedFields<T extends BookingFilters | undefined> = T extends Booking
     : false
   : false;
 
-// Get bookings list with proper return typing
 export function useBookings<T extends BookingFilters | undefined = undefined>(
   filters?: T
 ): HasExtendedFields<T> extends true
@@ -79,11 +64,10 @@ export function useBookings<T extends BookingFilters | undefined = undefined>(
   return useQuery({
     queryKey: bookingsKeys.list(filters),
     queryFn: () => bookingsClient.getBookings(filters),
-    staleTime: 1 * 60 * 1000, // 1 minute
+    staleTime: 1 * 60 * 1000,
   }) as any;
 }
 
-// Infinite query for bookings
 export const useBookingsInfinite = (filters?: Omit<BookingFilters, 'cursor'>) => {
   return useInfiniteQuery({
     queryKey: bookingsKeys.list(filters),
@@ -94,29 +78,22 @@ export const useBookingsInfinite = (filters?: Omit<BookingFilters, 'cursor'>) =>
   });
 };
 
-// Get booking by ID
 export const useBooking = (id: string) => {
   return useQuery({
     queryKey: bookingsKeys.detail(id),
     queryFn: () => bookingsClient.getBookingById(id),
-    staleTime: 30 * 1000, // 30 seconds (booking status changes frequently)
+    staleTime: 30 * 1000,
   });
 };
 
-// Cancel booking mutation
 export const useCancelBooking = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id: string) => bookingsClient.cancelBooking(id),
     onSuccess: (cancelledBooking, bookingId) => {
-      // Update the specific booking in cache
       queryClient.setQueryData(bookingsKeys.detail(bookingId), cancelledBooking);
-      
-      // Invalidate bookings lists
       queryClient.invalidateQueries({ queryKey: bookingsKeys.lists() });
-      
-      // Invalidate session data to reflect increased remaining seats
       queryClient.invalidateQueries({ queryKey: sessionsKeys.detail(cancelledBooking.sessionId) });
       queryClient.invalidateQueries({ queryKey: sessionsKeys.lists() });
     },
@@ -126,17 +103,13 @@ export const useCancelBooking = () => {
   });
 };
 
-// Confirm booking mutation (ADMIN only)
 export const useConfirmBooking = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => bookingsClient.confirmBooking(id),
     onSuccess: (confirmedBooking, bookingId) => {
-      // Update the specific booking in cache
       queryClient.setQueryData(bookingsKeys.detail(bookingId), confirmedBooking);
-
-      // Invalidate bookings lists
       queryClient.invalidateQueries({ queryKey: bookingsKeys.lists() });
     },
     onError: (error) => {
@@ -145,17 +118,13 @@ export const useConfirmBooking = () => {
   });
 };
 
-// Mark booking as paid mutation (ADMIN only)
 export const useMarkBookingAsPaid = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => bookingsClient.markBookingAsPaid(id),
     onSuccess: (paidBooking, bookingId) => {
-      // Update the specific booking in cache
       queryClient.setQueryData(bookingsKeys.detail(bookingId), paidBooking);
-
-      // Invalidate bookings lists
       queryClient.invalidateQueries({ queryKey: bookingsKeys.lists() });
     },
     onError: (error) => {
@@ -164,7 +133,6 @@ export const useMarkBookingAsPaid = () => {
   });
 };
 
-// Hook for client's bookings (for admin to view client's bookings)
 export const useClientBookings = (clientId: string | null) => {
   return useQuery({
     queryKey: bookingsKeys.list({ clientId: clientId! }),
@@ -174,7 +142,6 @@ export const useClientBookings = (clientId: string | null) => {
   });
 };
 
-// Hook for client's active bookings (HOLD or CONFIRMED)
 export const useActiveClientBookings = (clientId: string | null) => {
   const { data, ...rest } = useClientBookings(clientId);
 
@@ -189,7 +156,6 @@ export const useActiveClientBookings = (clientId: string | null) => {
   };
 };
 
-// Hook for client's expired bookings
 export const useExpiredClientBookings = (clientId: string | null) => {
   const { data, ...rest } = useClientBookings(clientId);
 
@@ -202,7 +168,6 @@ export const useExpiredClientBookings = (clientId: string | null) => {
   };
 };
 
-// Hook for client's cancelled bookings
 export const useCancelledClientBookings = (clientId: string | null) => {
   const { data, ...rest } = useClientBookings(clientId);
 
@@ -215,31 +180,18 @@ export const useCancelledClientBookings = (clientId: string | null) => {
   };
 };
 
-// Legacy aliases for backward compatibility
-/**
- * @deprecated Use useClientBookings instead
- */
+/** @deprecated Используйте useClientBookings */
 export const useCurrentUserBookings = () => useClientBookings(null);
 
-/**
- * @deprecated Use useActiveClientBookings instead
- */
+/** @deprecated Используйте useActiveClientBookings */
 export const useActiveBookings = () => useActiveClientBookings(null);
 
-/**
- * @deprecated Use useExpiredClientBookings instead
- */
+/** @deprecated Используйте useExpiredClientBookings */
 export const useExpiredBookings = () => useExpiredClientBookings(null);
 
-/**
- * @deprecated Use useCancelledClientBookings instead
- */
+/** @deprecated Используйте useCancelledClientBookings */
 export const useCancelledBookings = () => useCancelledClientBookings(null);
 
-/**
- * Create payment for booking mutation
- * POST /bookings/{id}/payment
- */
 export const useCreateBookingPayment = () => {
   const queryClient = useQueryClient();
 
@@ -254,10 +206,7 @@ export const useCreateBookingPayment = () => {
       idempotencyKey: IdempotencyKey;
     }) => bookingsClient.createPayment(bookingId, data, idempotencyKey),
     onSuccess: (_payment, variables) => {
-      // Invalidate the booking to reflect payment status
       queryClient.invalidateQueries({ queryKey: bookingsKeys.detail(variables.bookingId) });
-
-      // Invalidate bookings lists
       queryClient.invalidateQueries({ queryKey: bookingsKeys.lists() });
     },
     onError: (error) => {

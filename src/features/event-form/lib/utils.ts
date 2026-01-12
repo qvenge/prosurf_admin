@@ -51,24 +51,26 @@ export function convertFormDataToEventUpdateDto(formData: FormData, labels?: str
   const baseDto = convertFormDataToEventCreateDto(formData, labels);
   return {
     ...baseDto,
-    // Include existingImages for the API to know which URLs to keep
-    // When undefined, backend merges new uploads with all existing images
-    // When provided (even empty array), backend uses only these URLs + new uploads
+    // existingImages сообщает API какие URL оставить:
+    // - undefined: бэкенд объединяет новые загрузки со всеми существующими изображениями
+    // - указан (даже пустой массив): бэкенд использует только эти URL + новые загрузки
     existingImages: formData.existingImages,
-    // Preview image handling
     previewImage: formData.previewImage || undefined,
     existingPreviewImage: formData.existingPreviewImage,
     removePreviewImage: !formData.previewImage && !formData.existingPreviewImage,
   } as EventUpdateDto;
 }
 
-// Session-related utilities (kept for separate session management)
+/**
+ * Конвертирует данные сессий формы в DTO для создания сессий.
+ * В режиме диапазона создаёт одну сессию от начальной до конечной даты.
+ * В обычном режиме создаёт сессии на основе временных слотов.
+ */
 export function convertSessionsToSessionCreateDtos(sessions: SessionForm[], rangeMode: boolean = false): SessionCreateDto[] {
   const sessionsData: SessionCreateDto[] = [];
 
   sessions.forEach(session => {
     if (rangeMode && session.endDate) {
-      // For range mode, create a single session spanning from start to end date
       const startDateTime = localInputToUTC(session.date, '00:00');
       const endDateTime = localInputToUTC(session.endDate, '23:59');
 
@@ -77,7 +79,6 @@ export function convertSessionsToSessionCreateDtos(sessions: SessionForm[], rang
         endsAt: endDateTime.toISOString()
       });
     } else {
-      // For normal mode, create sessions based on time slots
       session.timeSlots.forEach(timeSlot => {
         const startDateTime = localInputToUTC(session.date, timeSlot.startTime);
         const durationMs = parseFloat(session.duration) * 60 * 60 * 1000;
@@ -94,16 +95,17 @@ export function convertSessionsToSessionCreateDtos(sessions: SessionForm[], rang
   return sessionsData;
 }
 
+/**
+ * Конвертирует данные события с сервера в формат формы для редактирования.
+ */
 export function convertEventDataToFormData(
   eventData: Event,
   categories?: Category[]
 ): Partial<FormData> {
-  // Map discipline from labels
   const category = categories != null && eventData.labels?.find((label: string) =>
     categories.some(option => option.value === label)
   ) || categories?.[0].value;
 
-  // Get price from first ticket
   const ticketWithPrice = eventData.tickets?.find((ticket) => ticket.full.price.amountMinor > 0);
 
   const prepayment = ticketWithPrice?.prepayment?.price.amountMinor
@@ -116,7 +118,6 @@ export function convertEventDataToFormData(
 
   const currency = (ticketWithPrice?.full.price.currency as 'RUB' | 'USD') || 'RUB';
 
-  // Extract description and whatToBring from description array
   const descriptions = eventData.description || [];
   const descriptionItem = descriptions.find(d => d.heading === 'Описание тренировки' || d.heading === 'Описание');
   const whatToBringItem = descriptions.find(d => d.heading === 'Что с собой?' || d.heading === 'FAQ');

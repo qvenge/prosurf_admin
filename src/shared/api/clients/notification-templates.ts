@@ -9,7 +9,7 @@ import type {
 } from '../types';
 
 /**
- * Transform template imageUrl to full URL
+ * Трансформация imageUrl шаблона в полный URL.
  */
 const transformTemplate = (template: NotificationTemplate): NotificationTemplate => ({
   ...template,
@@ -17,11 +17,11 @@ const transformTemplate = (template: NotificationTemplate): NotificationTemplate
 });
 
 /**
- * Notification Templates API client
+ * API-клиент шаблонов уведомлений.
  */
 export const notificationTemplatesClient = {
   /**
-   * Get all notification templates
+   * Получение всех шаблонов уведомлений.
    * GET /notification-templates
    */
   async getAll(): Promise<NotificationTemplate[]> {
@@ -30,7 +30,7 @@ export const notificationTemplatesClient = {
   },
 
   /**
-   * Get notification template by type
+   * Получение шаблона уведомления по типу.
    * GET /notification-templates/:type
    */
   async getByType(type: NotificationTemplateType): Promise<NotificationTemplate> {
@@ -41,7 +41,7 @@ export const notificationTemplatesClient = {
   },
 
   /**
-   * Update notification template
+   * Обновление шаблона уведомления.
    * PATCH /notification-templates/:type
    */
   async update(

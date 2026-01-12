@@ -28,11 +28,11 @@ import type {
 } from '../types';
 
 /**
- * Sessions API client
+ * API-клиент сессий.
  */
 export const sessionsClient = {
   /**
-   * Get sessions for an event
+   * Получение сессий мероприятия.
    * GET /events/{id}/sessions
    */
   async getEventSessions(eventId: string, filters?: SessionFilters): Promise<PaginatedResponse<SessionCompact>> {
@@ -44,12 +44,12 @@ export const sessionsClient = {
   },
 
   /**
-   * Create sessions for an event (ADMIN only)
+   * Создание сессий для мероприятия (только ADMIN).
    * POST /events/{id}/sessions
    */
   async createEventSessions(
-    eventId: string, 
-    data: SessionCreateDto | SessionCreateDto[], 
+    eventId: string,
+    data: SessionCreateDto | SessionCreateDto[],
     idempotencyKey: IdempotencyKey
   ): Promise<SessionCreationResponse> {
     let validatedData;
@@ -58,10 +58,10 @@ export const sessionsClient = {
     } else {
       validatedData = SessionCreateDtoSchema.parse(data);
     }
-    
+
     const config = withIdempotency({}, idempotencyKey);
     const response = await apiClient.post(
-      `/events/${encodeURIComponent(eventId)}/sessions`, 
+      `/events/${encodeURIComponent(eventId)}/sessions`,
       validatedData,
       config
     );
@@ -69,19 +69,19 @@ export const sessionsClient = {
   },
 
   /**
-   * Search sessions across all events
+   * Поиск сессий по всем мероприятиям.
    * GET /sessions
    */
   async getSessions(filters?: SessionFilters): Promise<PaginatedResponse<Session>> {
     const validatedFilters = SessionFiltersSchema.parse(filters || {});
     const queryString = createQueryString(validatedFilters);
-    
+
     const response = await apiClient.get(`/sessions${queryString}`);
     return validateResponse(response.data, PaginatedResponseSchema(SessionSchema));
   },
 
   /**
-   * Get session by ID
+   * Получение сессии по ID.
    * GET /sessions/{id}
    */
   async getSessionById(id: string): Promise<Session> {
@@ -90,9 +90,10 @@ export const sessionsClient = {
   },
 
   /**
-   * Update session (ADMIN only)
+   * Обновление сессии (только ADMIN).
    * PATCH /sessions/{id}
-   * @param force - Force update even if session has active bookings
+   *
+   * @param force - Принудительное обновление даже при наличии активных бронирований
    */
   async updateSession(id: string, data: SessionUpdateDto, force?: boolean): Promise<Session> {
     const validatedData = SessionUpdateDtoSchema.parse(data);
@@ -106,17 +107,19 @@ export const sessionsClient = {
   },
 
   /**
-   * Delete session (ADMIN only)
+   * Удаление сессии (только ADMIN).
    * DELETE /sessions/{id}
-   * - No bookings: Hard delete (returns null)
-   * - Has bookings + force: Soft cancel, sets status to CANCELLED (returns Session)
-   * - Has bookings + no force: Throws 409 Conflict error
-   * @param force - Force cancel even if session has active bookings
+   *
+   * Поведение зависит от наличия бронирований:
+   * - Нет бронирований: полное удаление (возвращает null)
+   * - Есть бронирования + force: мягкая отмена, статус CANCELLED (возвращает Session)
+   * - Есть бронирования без force: ошибка 409 Conflict
+   *
+   * @param force - Принудительная отмена даже при наличии активных бронирований
    */
   async deleteSession(id: string, force?: boolean): Promise<Session | null> {
     const queryParams = force ? '?force=true' : '';
     const response = await apiClient.delete(`/sessions/${encodeURIComponent(id)}${queryParams}`);
-    // Hard delete returns empty response, soft cancel returns Session
     if (response.data) {
       return validateResponse(response.data, SessionSchema);
     }
@@ -124,7 +127,7 @@ export const sessionsClient = {
   },
 
   /**
-   * Bulk update sessions (ADMIN only)
+   * Массовое обновление сессий (только ADMIN).
    * PATCH /sessions
    */
   async bulkUpdateSessions(
@@ -139,7 +142,7 @@ export const sessionsClient = {
   },
 
   /**
-   * Bulk delete sessions (ADMIN only)
+   * Массовое удаление сессий (только ADMIN).
    * DELETE /sessions
    */
   async bulkDeleteSessions(

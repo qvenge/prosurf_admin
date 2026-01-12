@@ -14,11 +14,11 @@ const MODAL_CONTAINER_ID = 'modal-container-id';
 export interface ModalProps {
   onClose?: () => void;
   children?: React.ReactNode;
-  /** Modal size variant - controls max-width */
+  /** Размер модального окна (контролирует max-width) */
   size?: 'sm' | 'md' | 'lg' | 'auto';
-  /** Whether to show the close (X) button - defaults to true */
+  /** Показывать ли кнопку закрытия (X) (по умолчанию true) */
   showCloseButton?: boolean;
-  /** Additional className for the content wrapper */
+  /** Дополнительный className для контейнера контента */
   contentClassName?: string;
 }
 

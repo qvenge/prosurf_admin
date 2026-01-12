@@ -14,46 +14,13 @@ import type {
 } from '../types';
 
 /**
- * Payments API client
- *
- * Handles payment creation, retrieval, and refund operations.
- * Supports single payment methods (card, certificate, pass, bonus) and composite payments.
+ * API-клиент платежей.
+ * Поддерживает одиночные методы оплаты (карта, сертификат, абонемент, бонусы) и комбинированные платежи.
  */
 export const paymentsClient = {
   /**
-   * Create payment for booking
+   * Создание платежа для бронирования (бронирование должно быть в статусе HOLD).
    * POST /bookings/{id}/payment
-   *
-   * Creates or continues a payment for the specified booking (booking must be in HOLD state).
-   * The paymentMethods field accepts an array of payment methods, a single method, or a composite object.
-   *
-   * @param bookingId - The ID of the booking to pay for
-   * @param data - Payment methods wrapped in paymentMethods field
-   * @param idempotencyKey - Unique key for request idempotency (8-128 chars)
-   * @returns Promise resolving to payment with status and next action
-   *
-   * @example
-   * ```ts
-   * // Single payment method (array format)
-   * const payment = await paymentsClient.createPayment(
-   *   'booking-123',
-   *   { paymentMethods: [{ method: 'card', provider: 'telegram' }] },
-   *   'idempotency-key-123'
-   * );
-   *
-   * // Multiple payment methods
-   * const compositePayment = await paymentsClient.createPayment(
-   *   'booking-123',
-   *   {
-   *     paymentMethods: [
-   *       { method: 'certificate', certificateId: 'cert-123' },
-   *       { method: 'bonus', amount: 1500 },
-   *       { method: 'card', provider: 'telegram' }
-   *     ]
-   *   },
-   *   'idempotency-key-456'
-   * );
-   * ```
    */
   async createPayment(
     bookingId: string,
@@ -72,7 +39,7 @@ export const paymentsClient = {
   },
 
   /**
-   * Get payment by ID
+   * Получение платежа по ID.
    * GET /payments/{id}
    */
   async getPaymentById(id: string): Promise<Payment> {
@@ -81,19 +48,19 @@ export const paymentsClient = {
   },
 
   /**
-   * Create refund for payment
+   * Создание возврата для платежа.
    * POST /payments/{id}/refunds
    */
   async createRefund(
-    paymentId: string, 
+    paymentId: string,
     idempotencyKey: IdempotencyKey,
     data?: RefundRequest
   ): Promise<Refund> {
     const validatedData = data ? RefundRequestSchema.parse(data) : {};
-    
+
     const config = withIdempotency({}, idempotencyKey);
     const response = await apiClient.post(
-      `/payments/${encodeURIComponent(paymentId)}/refunds`, 
+      `/payments/${encodeURIComponent(paymentId)}/refunds`,
       validatedData,
       config
     );

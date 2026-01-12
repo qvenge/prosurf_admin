@@ -14,11 +14,11 @@ import type {
 } from '../types';
 
 /**
- * Content API client
+ * API-клиент контента.
  */
 export const contentClient = {
   /**
-   * Get all content with filtering and pagination
+   * Получение контента с фильтрацией и пагинацией.
    * GET /content
    */
   async getContents(filters?: ContentFilters): Promise<PaginatedResponse<Content>> {
@@ -30,7 +30,7 @@ export const contentClient = {
   },
 
   /**
-   * Get content by unique key
+   * Получение контента по уникальному ключу.
    * GET /content/key/:key
    */
   async getContentByKey(key: string): Promise<Content> {
@@ -39,7 +39,7 @@ export const contentClient = {
   },
 
   /**
-   * Get multiple contents by keys (batch)
+   * Получение нескольких контентов по ключам (батч-запрос).
    * GET /content/keys?keys[]=...
    */
   async getContentsByKeys(keys: string[]): Promise<Content[]> {
@@ -51,7 +51,7 @@ export const contentClient = {
   },
 
   /**
-   * Create new content (admin only)
+   * Создание контента (только ADMIN).
    * POST /content
    */
   async createContent(data: ContentCreate): Promise<Content> {
@@ -60,7 +60,7 @@ export const contentClient = {
   },
 
   /**
-   * Update existing content (admin only)
+   * Обновление контента (только ADMIN).
    * PATCH /content/:id
    */
   async updateContent(id: string, data: ContentUpdate): Promise<Content> {
@@ -69,7 +69,7 @@ export const contentClient = {
   },
 
   /**
-   * Delete content (admin only)
+   * Удаление контента (только ADMIN).
    * DELETE /content/:id
    */
   async deleteContent(id: string): Promise<void> {
@@ -77,7 +77,7 @@ export const contentClient = {
   },
 
   /**
-   * Reorder contents (admin only)
+   * Изменение порядка контентов (только ADMIN).
    * PATCH /content/reorder
    */
   async reorderContents(ids: string[]): Promise<Content[]> {

@@ -45,7 +45,6 @@ export const useCreateCertificate = () => {
   });
 };
 
-// Hook for client's certificates (for admin to view client's certificates)
 export const useClientCertificates = (clientId: string | null) => {
   return useQuery({
     queryKey: certificatesKeys.list({ clientId: clientId! }),
@@ -55,15 +54,10 @@ export const useClientCertificates = (clientId: string | null) => {
   });
 };
 
-// Legacy alias for backward compatibility
-/**
- * @deprecated Use useClientCertificates instead
- */
+/** @deprecated Используйте useClientCertificates */
 export const useCurrentUserCertificates = () => useClientCertificates(null);
 
-// ========================================
-// Admin hooks
-// ========================================
+// Админские хуки
 
 export const certificatesAdminKeys = {
   all: ['certificates-admin'] as const,
@@ -73,20 +67,14 @@ export const certificatesAdminKeys = {
   detail: (id: string) => [...certificatesAdminKeys.details(), id] as const,
 } as const;
 
-/**
- * Get certificates for admin with page-based pagination
- */
 export const useCertificatesAdmin = (filters?: CertificateAdminFilters) => {
   return useQuery({
     queryKey: certificatesAdminKeys.list(filters),
     queryFn: () => certificatesClient.getCertificatesAdmin(filters),
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 30 * 1000,
   });
 };
 
-/**
- * Get single certificate by ID for admin
- */
 export const useCertificateAdmin = (id: string | null) => {
   return useQuery({
     queryKey: certificatesAdminKeys.detail(id!),
@@ -96,9 +84,6 @@ export const useCertificateAdmin = (id: string | null) => {
   });
 };
 
-/**
- * Create certificate as admin
- */
 export const useCreateCertificateAdmin = () => {
   const queryClient = useQueryClient();
 
@@ -110,9 +95,6 @@ export const useCreateCertificateAdmin = () => {
   });
 };
 
-/**
- * Update certificate as admin
- */
 export const useUpdateCertificateAdmin = () => {
   const queryClient = useQueryClient();
 
@@ -126,9 +108,6 @@ export const useUpdateCertificateAdmin = () => {
   });
 };
 
-/**
- * Delete certificate as admin
- */
 export const useDeleteCertificateAdmin = () => {
   const queryClient = useQueryClient();
 

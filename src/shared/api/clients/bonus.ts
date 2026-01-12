@@ -12,11 +12,11 @@ import type {
 } from '../types';
 
 /**
- * Bonus API client
+ * API-клиент бонусной системы.
  */
 export const bonusClient = {
   /**
-   * Get bonus rules (read-only)
+   * Получение правил бонусной системы (только чтение).
    * GET /bonus/rules
    */
   async getBonusRules(): Promise<BonusRules> {
@@ -25,7 +25,7 @@ export const bonusClient = {
   },
 
   /**
-   * Get current client's bonus wallet
+   * Получение бонусного кошелька текущего клиента.
    * GET /clients/me/bonus
    */
   async getMyClientBonus(): Promise<BonusWallet> {
@@ -34,13 +34,11 @@ export const bonusClient = {
   },
 
   /**
-   * Adjust client's bonus (admin only) - can be positive or negative
+   * Корректировка бонусов клиента (только ADMIN). Может быть положительной или отрицательной.
    * POST /bonus/adjust
    */
   async adjustBonus(dto: AdminAdjustBonusDto): Promise<BonusOperationDto> {
     const response = await apiClient.post('/bonus/adjust', dto);
     return validateResponse(response.data, BonusOperationDtoSchema);
   },
-
-  // Note: User bonus wallet is also accessed through usersClient.getUserBonus()
 };

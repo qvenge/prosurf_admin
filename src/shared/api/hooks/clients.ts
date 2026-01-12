@@ -10,7 +10,6 @@ import type {
 import { seasonTicketsKeys } from './season-tickets';
 import { adminKeys } from './admin';
 
-// Query key factory for clients
 export const clientsKeys = {
   all: ['clients'] as const,
   lists: () => [...clientsKeys.all, 'list'] as const,
@@ -21,20 +20,14 @@ export const clientsKeys = {
   bonus: (id: string) => [...clientsKeys.detail(id), 'bonus'] as const,
 } as const;
 
-/**
- * Clients hooks - for managing Telegram clients (end-users)
- */
-
-// Get list of clients (ADMIN only)
 export const useClients = (filters?: ClientFilters) => {
   return useQuery({
     queryKey: clientsKeys.list(filters),
     queryFn: () => clientsClient.getClients(filters),
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 2 * 60 * 1000,
   });
 };
 
-// Infinite query for clients list (ADMIN only)
 export const useClientsInfinite = (filters?: Omit<ClientFilters, 'cursor'>) => {
   return useInfiniteQuery({
     queryKey: clientsKeys.list(filters),
@@ -45,17 +38,15 @@ export const useClientsInfinite = (filters?: Omit<ClientFilters, 'cursor'>) => {
   });
 };
 
-// Get client by ID (ADMIN only)
 export const useClient = (id: string) => {
   return useQuery({
     queryKey: clientsKeys.detail(id),
     queryFn: () => clientsClient.getClientById(id),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
     enabled: !!id,
   });
 };
 
-// Update client mutation (ADMIN only)
 export const useUpdateClient = () => {
   const queryClient = useQueryClient();
 
@@ -63,10 +54,7 @@ export const useUpdateClient = () => {
     mutationFn: ({ id, data }: { id: string; data: ClientUpdateDto }) =>
       clientsClient.updateClient(id, data),
     onSuccess: (updatedClient, variables) => {
-      // Update the specific client in cache
       queryClient.setQueryData(clientsKeys.detail(variables.id), updatedClient);
-
-      // Invalidate client lists to ensure consistency
       queryClient.invalidateQueries({ queryKey: clientsKeys.lists() });
       queryClient.invalidateQueries({ queryKey: adminKeys.clientsAdminBase() });
     },
@@ -76,25 +64,22 @@ export const useUpdateClient = () => {
   });
 };
 
-// Get client's season tickets (ADMIN only)
 export const useClientSeasonTickets = (clientId: string) => {
   return useQuery({
     queryKey: clientsKeys.seasonTickets(clientId),
     queryFn: () => clientsClient.getClientSeasonTickets(clientId),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 };
 
-// Get client's bonus wallet (ADMIN only)
 export const useClientBonus = (clientId: string) => {
   return useQuery({
     queryKey: clientsKeys.bonus(clientId),
     queryFn: () => clientsClient.getClientBonus(clientId),
-    staleTime: 1 * 60 * 1000, // 1 minute (financial data should be fresh)
+    staleTime: 1 * 60 * 1000,
   });
 };
 
-// Grant season ticket to client (ADMIN only)
 export const useGrantSeasonTicket = () => {
   const queryClient = useQueryClient();
 
@@ -102,9 +87,7 @@ export const useGrantSeasonTicket = () => {
     mutationFn: ({ clientId, data }: { clientId: string; data: AdminGrantSeasonTicketDto }) =>
       clientsClient.grantSeasonTicket(clientId, data),
     onSuccess: (_, variables) => {
-      // Invalidate client's season tickets
       queryClient.invalidateQueries({ queryKey: clientsKeys.seasonTickets(variables.clientId) });
-      // Also invalidate the general season tickets list
       queryClient.invalidateQueries({ queryKey: seasonTicketsKeys.tickets() });
     },
     onError: (error) => {

@@ -35,7 +35,7 @@ import type {
 } from '../types';
 
 /**
- * Transform SeasonTicketAdmin to include full URLs for owner photo
+ * Трансформация SeasonTicketAdmin с полным URL фото владельца.
  */
 const transformSeasonTicketAdmin = (ticket: SeasonTicketAdmin): SeasonTicketAdmin => ({
   ...ticket,
@@ -46,11 +46,11 @@ const transformSeasonTicketAdmin = (ticket: SeasonTicketAdmin): SeasonTicketAdmi
 });
 
 /**
- * Season Tickets API client
+ * API-клиент абонементов.
  */
 export const seasonTicketsClient = {
   /**
-   * Get season ticket plans catalog
+   * Получение каталога тарифных планов абонементов.
    * GET /season-ticket-plans
    */
   async getSeasonTicketPlans(filters?: SeasonTicketPlanFilters): Promise<PaginatedResponse<SeasonTicketPlan>> {
@@ -62,7 +62,7 @@ export const seasonTicketsClient = {
   },
 
   /**
-   * Get single season ticket plan
+   * Получение тарифного плана абонемента.
    * GET /season-ticket-plans/{id}
    */
   async getSeasonTicketPlan(id: string): Promise<SeasonTicketPlan> {
@@ -71,18 +71,18 @@ export const seasonTicketsClient = {
   },
 
   /**
-   * Create season ticket plan (ADMIN only)
+   * Создание тарифного плана абонемента (только ADMIN).
    * POST /season-ticket-plans
    */
   async createSeasonTicketPlan(data: SeasonTicketPlanCreateDto): Promise<SeasonTicketPlan> {
     const validatedData = SeasonTicketPlanCreateDtoSchema.parse(data);
-    
+
     const response = await apiClient.post('/season-ticket-plans', validatedData);
     return validateResponse(response.data, SeasonTicketPlanSchema);
   },
 
   /**
-   * Update season ticket plan (ADMIN only)
+   * Обновление тарифного плана абонемента (только ADMIN).
    * PATCH /season-ticket-plans/{id}
    */
   async updateSeasonTicketPlan(id: string, data: SeasonTicketPlanUpdateDto): Promise<SeasonTicketPlan> {
@@ -96,7 +96,7 @@ export const seasonTicketsClient = {
   },
 
   /**
-   * Delete season ticket plan (ADMIN only)
+   * Удаление тарифного плана абонемента (только ADMIN).
    * DELETE /season-ticket-plans/{id}
    */
   async deleteSeasonTicketPlan(id: string): Promise<void> {
@@ -104,7 +104,7 @@ export const seasonTicketsClient = {
   },
 
   /**
-   * Get events applicable to a season ticket plan
+   * Получение мероприятий, применимых к тарифному плану абонемента.
    * GET /season-ticket-plans/{id}/applicable-events
    */
   async getSeasonTicketPlanApplicableEvents(
@@ -120,22 +120,8 @@ export const seasonTicketsClient = {
   },
 
   /**
-   * Purchase season ticket (userId from token)
+   * Покупка абонемента (userId из токена).
    * POST /season-ticket-plans/{id}/purchase
-   *
-   * @param planId - The ID of the season ticket plan to purchase
-   * @param data - Payment methods wrapped in paymentMethods field
-   * @param idempotencyKey - Unique key for request idempotency (8-128 chars)
-   * @returns Promise resolving to payment with status and next action
-   *
-   * @example
-   * ```ts
-   * const payment = await seasonTicketsClient.purchaseSeasonTicket(
-   *   'plan-123',
-   *   { paymentMethods: [{ method: 'card', provider: 'yookassa' }] },
-   *   'purchase-idempotency-key'
-   * );
-   * ```
    */
   async purchaseSeasonTicket(
     planId: string,
@@ -154,7 +140,7 @@ export const seasonTicketsClient = {
   },
 
   /**
-   * Get season tickets (user's own or filtered by userId for ADMIN)
+   * Получение абонементов (свои или по userId для ADMIN).
    * GET /season-tickets
    */
   async getSeasonTickets(filters?: SeasonTicketFilters): Promise<PaginatedResponse<SeasonTicket>> {
@@ -166,7 +152,7 @@ export const seasonTicketsClient = {
   },
 
   /**
-   * Cancel season ticket (proportional refund)
+   * Отмена абонемента (пропорциональный возврат).
    * POST /season-tickets/{id}/cancel
    */
   async cancelSeasonTicket(id: string): Promise<SeasonTicket> {
@@ -174,18 +160,13 @@ export const seasonTicketsClient = {
     return validateResponse(response.data, SeasonTicketSchema);
   },
 
-  // ========================================
-  // Admin endpoints
-  // ========================================
-
   /**
-   * Get all season tickets for admin with page-based pagination
+   * Получение всех абонементов для админа с постраничной пагинацией.
    * GET /admin/season-tickets
    */
   async getSeasonTicketsAdmin(filters?: SeasonTicketAdminFilters): Promise<SeasonTicketAdminPaginatedResponse> {
     const validatedFilters = SeasonTicketAdminFiltersSchema.parse(filters || {});
 
-    // Serialize sort array to string format: "field:order,field:order"
     const { sort, ...restFilters } = validatedFilters;
     const serializedFilters: Record<string, unknown> = { ...restFilters };
     if (sort && sort.length > 0) {
@@ -204,7 +185,7 @@ export const seasonTicketsClient = {
   },
 
   /**
-   * Get single season ticket by ID for admin
+   * Получение абонемента по ID для админа.
    * GET /admin/season-tickets/:id
    */
   async getSeasonTicketAdmin(id: string): Promise<SeasonTicketAdmin> {

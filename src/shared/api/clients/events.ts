@@ -15,32 +15,30 @@ import type {
 } from '../types';
 
 /**
- * Events API client
+ * API-клиент мероприятий.
  */
 export const eventsClient = {
   /**
-   * Get events catalog with filtering and pagination
+   * Получение каталога мероприятий с фильтрацией и пагинацией.
    * GET /events
    */
   async getEvents(filters?: EventFilters): Promise<PaginatedResponse<Event>> {
     const validatedFilters = EventFiltersSchema.parse(filters || {});
     const queryString = createQueryString(validatedFilters);
-    
+
     const response = await apiClient.get(`/events${queryString}`);
     return validateResponse(response.data, PaginatedResponseSchema(EventSchema));
   },
 
   /**
-   * Create new event (ADMIN only)
+   * Создание мероприятия (только ADMIN).
    * POST /events
    */
   async createEvent(data: EventCreateDto): Promise<Event> {
     const validatedData = EventCreateDtoSchema.parse(data);
 
-    // Construct FormData for multipart/form-data
     const formData = new FormData();
 
-    // Add plain fields
     formData.append('title', validatedData.title);
     if (validatedData.location) formData.append('location', validatedData.location);
     if (validatedData.mapUrl) formData.append('mapUrl', validatedData.mapUrl);
@@ -48,7 +46,6 @@ export const eventsClient = {
       formData.append('capacity', validatedData.capacity.toString());
     }
 
-    // Add complex fields as JSON strings
     if (validatedData.description) {
       formData.append('description', JSON.stringify(validatedData.description));
     }
@@ -60,14 +57,12 @@ export const eventsClient = {
       formData.append('attributes', JSON.stringify(validatedData.attributes));
     }
 
-    // Add image files
     if (validatedData.images && validatedData.images.length > 0) {
       validatedData.images.forEach((file) => {
         formData.append('images', file);
       });
     }
 
-    // Add preview image file
     if (validatedData.previewImage) {
       formData.append('previewImage', validatedData.previewImage);
     }
@@ -81,7 +76,7 @@ export const eventsClient = {
   },
 
   /**
-   * Get event by ID
+   * Получение мероприятия по ID.
    * GET /events/{id}
    */
   async getEventById(id: string): Promise<Event> {
@@ -90,17 +85,16 @@ export const eventsClient = {
   },
 
   /**
-   * Update event (ADMIN only)
+   * Обновление мероприятия (только ADMIN).
    * PATCH /events/{id}
-   * @param force - Force update even if event has sessions with active bookings
+   *
+   * @param force - Принудительное обновление даже при наличии активных бронирований
    */
   async updateEvent(id: string, data: EventUpdateDto, force?: boolean): Promise<Event> {
     const validatedData = EventUpdateDtoSchema.parse(data);
 
-    // Construct FormData for multipart/form-data
     const formData = new FormData();
 
-    // Add plain fields (only if provided)
     if (validatedData.title) formData.append('title', validatedData.title);
     if (validatedData.location !== undefined) {
       formData.append('location', validatedData.location || '');
@@ -112,7 +106,6 @@ export const eventsClient = {
       formData.append('capacity', validatedData.capacity.toString());
     }
 
-    // Add complex fields as JSON strings (only if provided)
     if (validatedData.description !== undefined) {
       formData.append('description', JSON.stringify(validatedData.description));
     }
@@ -126,21 +119,17 @@ export const eventsClient = {
       formData.append('attributes', JSON.stringify(validatedData.attributes));
     }
 
-    // Add new image files
     if (validatedData.images && validatedData.images.length > 0) {
       validatedData.images.forEach((file) => {
         formData.append('images', file);
       });
     }
 
-    // Send existing images to keep as JSON string
-    // Backend's @Transform decorator parses this to string[]
-    // This triggers "replace mode" - backend merges new uploads with these URLs
+    // existingImages передаются как JSON — бэкенд объединяет новые загрузки с этими URL
     if (validatedData.existingImages !== undefined) {
       formData.append('images', JSON.stringify(validatedData.existingImages));
     }
 
-    // Handle preview image
     if (validatedData.previewImage) {
       formData.append('previewImage', validatedData.previewImage);
     } else if (validatedData.removePreviewImage) {
@@ -161,7 +150,7 @@ export const eventsClient = {
   },
 
   /**
-   * Delete event (ADMIN only)
+   * Удаление мероприятия (только ADMIN).
    * DELETE /events/{id}
    */
   async deleteEvent(id: string, force?: boolean): Promise<void> {

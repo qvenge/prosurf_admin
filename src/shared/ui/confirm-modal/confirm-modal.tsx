@@ -4,29 +4,29 @@ import { Button } from '@/shared/ui/button';
 import styles from './confirm-modal.module.scss';
 
 export interface ConfirmModalProps {
-  /** Modal visibility state */
+  /** Состояние видимости модального окна */
   open: boolean;
-  /** Callback when modal should close */
+  /** Колбэк при закрытии модального окна */
   onClose: () => void;
-  /** Callback when primary action is confirmed */
+  /** Колбэк при подтверждении основного действия */
   onConfirm: () => void;
-  /** Modal title text */
+  /** Заголовок модального окна */
   title: string;
-  /** Main description/question text */
+  /** Основной текст описания/вопроса */
   description?: React.ReactNode;
-  /** Additional info text (smaller, tertiary color) */
+  /** Дополнительная информация (мелким шрифтом, третичный цвет) */
   info?: React.ReactNode;
-  /** Visual variant affecting the confirm button styling */
+  /** Визуальный вариант, влияющий на стилизацию кнопки подтверждения */
   variant?: 'default' | 'danger';
-  /** Text for the cancel button - defaults to "Отмена" */
+  /** Текст кнопки отмены (по умолчанию "Отмена") */
   cancelText?: string;
-  /** Text for the confirm button - defaults to "Подтвердить" */
+  /** Текст кнопки подтверждения (по умолчанию "Подтвердить") */
   confirmText?: string;
-  /** Loading text for the confirm button when action is pending */
+  /** Текст кнопки подтверждения во время загрузки */
   confirmLoadingText?: string;
-  /** Whether the confirm action is currently in progress */
+  /** Выполняется ли сейчас действие подтверждения */
   isLoading?: boolean;
-  /** Disable confirm button (e.g., for validation) */
+  /** Отключить кнопку подтверждения (например, для валидации) */
   confirmDisabled?: boolean;
 }
 

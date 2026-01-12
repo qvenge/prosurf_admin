@@ -24,7 +24,7 @@ import type {
 } from '../types';
 
 /**
- * Transform BookingExtended to include full URL for user photo
+ * Трансформация BookingExtended: добавление полного URL фото пользователя
  */
 const transformBookingExtended = (booking: BookingExtended): BookingExtended => ({
   ...booking,
@@ -37,50 +37,19 @@ const transformBookingExtended = (booking: BookingExtended): BookingExtended => 
 });
 
 /**
- * Bookings API client
- * 
- * Manages session bookings including creation, retrieval, cancellation, and confirmation.
- * Bookings start in HOLD status and must be paid within the hold TTL period.
+ * API-клиент бронирований.
+ * Управляет бронированиями сессий: создание, получение, отмена, подтверждение.
+ * Бронирования начинаются в статусе HOLD и должны быть оплачены в течение TTL периода.
  */
 export const bookingsClient = {
   /**
-   * Book seats in a session
+   * Бронирование мест на сессию.
    * POST /sessions/{id}/book
    *
-   * Creates a booking for the specified session. Supports both regular user bookings
-   * and admin-created bookings with guest contact information.
-   *
-   * @param sessionId - The ID of the session to book
-   * @param data - Booking creation data
-   * @param idempotencyKey - Unique key for request idempotency (8-128 chars)
-   * @returns Promise resolving to booking data with hold TTL information
-   *
-   * @example
-   * ```ts
-   * // Regular user booking
-   * const result = await bookingsClient.bookSession(
-   *   'session-123',
-   *   { quantity: 2 },
-   *   'booking-idempotency-key'
-   * );
-   *
-   * // Admin booking for guest
-   * const adminResult = await bookingsClient.bookSession(
-   *   'session-123',
-   *   {
-   *     quantity: 1,
-   *     guestContact: {
-   *       phone: '+1234567890',
-   *       firstName: 'John',
-   *       lastName: 'Doe',
-   *       email: 'john@example.com'
-   *     },
-   *     status: 'CONFIRMED',
-   *     notes: 'VIP guest booking'
-   *   },
-   *   'admin-booking-key'
-   * );
-   * ```
+   * @param sessionId - ID сессии
+   * @param data - Данные бронирования
+   * @param idempotencyKey - Ключ идемпотентности (8-128 символов)
+   * @returns Бронирование с информацией о TTL холда
    */
   async bookSession(
     sessionId: string,
@@ -108,11 +77,11 @@ export const bookingsClient = {
   },
 
   /**
-   * Get list of bookings (self or ADMIN with extended filtering)
+   * Получение списка бронирований.
    * GET /bookings
    *
-   * @param filters - Filtering options including session, status, booking type, and inclusion flags
-   * @returns Promise resolving to paginated list of bookings (extended if admin flags are used)
+   * @param filters - Фильтры (сессия, статус, тип, флаги включения расширенных полей)
+   * @returns Пагинированный список бронирований
    */
   async getBookings(filters?: BookingFilters): Promise<PaginatedResponse<Booking | BookingExtended>> {
     const validatedFilters = BookingFiltersSchema.parse(filters || {});
@@ -120,7 +89,6 @@ export const bookingsClient = {
 
     const response = await apiClient.get(`/bookings${queryString}`);
 
-    // Determine response schema based on whether extended fields are requested
     const hasExtendedFields = validatedFilters.includeUser ||
                              validatedFilters.includeSession ||
                              validatedFilters.includePaymentInfo ||
@@ -129,7 +97,6 @@ export const bookingsClient = {
     const schema = hasExtendedFields ? BookingExtendedSchema : BookingSchema;
     const data = validateResponse(response.data, PaginatedResponseSchema(schema));
 
-    // Transform photo URLs if extended fields are requested
     if (hasExtendedFields) {
       return {
         ...data,
@@ -141,7 +108,7 @@ export const bookingsClient = {
   },
 
   /**
-   * Get booking by ID
+   * Получение бронирования по ID.
    * GET /bookings/{id}
    */
   async getBookingById(id: string): Promise<Booking> {
@@ -150,7 +117,7 @@ export const bookingsClient = {
   },
 
   /**
-   * Cancel booking (self for HOLD/CONFIRMED within policy, or ADMIN)
+   * Отмена бронирования.
    * POST /bookings/{id}/cancel
    */
   async cancelBooking(id: string): Promise<Booking> {
@@ -159,7 +126,7 @@ export const bookingsClient = {
   },
 
   /**
-   * Confirm booking (offline payment, ADMIN only)
+   * Подтверждение бронирования (оффлайн-оплата, только ADMIN).
    * POST /bookings/{id}/confirm
    */
   async confirmBooking(id: string): Promise<Booking> {
@@ -168,29 +135,12 @@ export const bookingsClient = {
   },
 
   /**
-   * Update booking (ADMIN only)
+   * Обновление бронирования (только ADMIN).
    * PATCH /bookings/{id}
    *
-   * Allows administrators to update booking details including quantity,
-   * guest contact information, and notes.
-   *
-   * @param id - Booking ID to update
-   * @param data - Update data
-   * @returns Promise resolving to updated booking with extended information
-   *
-   * @example
-   * ```ts
-   * const updatedBooking = await bookingsClient.updateBooking('booking-123', {
-   *   quantity: 3,
-   *   guestContact: {
-   *     phone: '+1234567890',
-   *     firstName: 'Jane',
-   *     lastName: 'Smith',
-   *     email: 'jane@example.com'
-   *   },
-   *   notes: 'Updated guest information'
-   * });
-   * ```
+   * @param id - ID бронирования
+   * @param data - Данные для обновления
+   * @returns Обновлённое бронирование с расширенной информацией
    */
   async updateBooking(id: string, data: BookingUpdateDto): Promise<BookingExtended> {
     const validatedData = BookingUpdateDtoSchema.parse(data);
@@ -204,33 +154,13 @@ export const bookingsClient = {
   },
 
   /**
-   * Create payment for booking
+   * Создание платежа для бронирования.
    * POST /bookings/{id}/payment
    *
-   * Initiates payment for a booking that is in HOLD status.
-   * Supports multiple payment methods including card, certificate, season ticket pass, and bonus.
-   *
-   * @param bookingId - The ID of the booking to pay for
-   * @param data - Payment methods to use
-   * @param idempotencyKey - Unique key for request idempotency (8-128 chars)
-   * @returns Promise resolving to payment information with next action
-   *
-   * @example
-   * ```ts
-   * // Pay with card
-   * const payment = await bookingsClient.createPayment(
-   *   'booking-123',
-   *   { paymentMethods: [{ method: 'card', provider: 'yookassa' }] },
-   *   'payment-idempotency-key'
-   * );
-   *
-   * // Pay with certificate
-   * const certPayment = await bookingsClient.createPayment(
-   *   'booking-123',
-   *   { paymentMethods: [{ method: 'certificate', certificateId: 'cert-456' }] },
-   *   'cert-payment-key'
-   * );
-   * ```
+   * @param bookingId - ID бронирования
+   * @param data - Методы оплаты
+   * @param idempotencyKey - Ключ идемпотентности (8-128 символов)
+   * @returns Информация о платеже
    */
   async createPayment(
     bookingId: string,
@@ -250,14 +180,13 @@ export const bookingsClient = {
   },
 
   /**
-   * Mark booking as paid (ADMIN only)
+   * Отметка бронирования как оплаченного (только ADMIN).
    * POST /bookings/{id}/mark-paid
    *
-   * Marks a booking with deferred payment (isPaid=false) as paid.
-   * Only works for CONFIRMED bookings that haven't been paid yet.
+   * Работает только для CONFIRMED бронирований с isPaid=false.
    *
-   * @param id - Booking ID to mark as paid
-   * @returns Promise resolving to updated booking
+   * @param id - ID бронирования
+   * @returns Обновлённое бронирование
    */
   async markBookingAsPaid(id: string): Promise<Booking> {
     const response = await apiClient.post(`/bookings/${encodeURIComponent(id)}/mark-paid`);

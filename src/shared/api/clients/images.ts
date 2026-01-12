@@ -13,7 +13,7 @@ import type {
 } from '../types';
 
 /**
- * Transform image URL to full URL
+ * Трансформация URL изображения в полный URL.
  */
 const transformImageUrl = (image: Image): Image => ({
   ...image,
@@ -21,11 +21,11 @@ const transformImageUrl = (image: Image): Image => ({
 });
 
 /**
- * Images API client
+ * API-клиент изображений.
  */
 export const imagesClient = {
   /**
-   * Get images with filtering and pagination
+   * Получение изображений с фильтрацией и пагинацией.
    * GET /images
    */
   async getImages(filters?: ImageFilters): Promise<PaginatedResponse<Image>> {
@@ -42,7 +42,7 @@ export const imagesClient = {
   },
 
   /**
-   * Get image by ID
+   * Получение изображения по ID.
    * GET /images/{id}
    */
   async getImageById(id: string): Promise<Image> {
@@ -51,7 +51,7 @@ export const imagesClient = {
   },
 
   /**
-   * Upload images with optional tags
+   * Загрузка изображений с опциональными тегами.
    * POST /images
    */
   async uploadImages(files: File[], tags?: string[]): Promise<Image[]> {
@@ -74,7 +74,7 @@ export const imagesClient = {
   },
 
   /**
-   * Delete image by ID
+   * Удаление изображения по ID.
    * DELETE /images/{id}
    */
   async deleteImage(id: string): Promise<void> {
