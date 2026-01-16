@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { bookingsClient } from '../clients/bookings';
 import { sessionsKeys } from './sessions';
+import { REFRESH_INTERVALS } from '../config/refresh-intervals';
 import type {
   Booking,
   BookingExtended,
@@ -64,7 +65,9 @@ export function useBookings<T extends BookingFilters | undefined = undefined>(
   return useQuery({
     queryKey: bookingsKeys.list(filters),
     queryFn: () => bookingsClient.getBookings(filters),
-    staleTime: 1 * 60 * 1000,
+    staleTime: 10 * 1000,
+    refetchInterval: REFRESH_INTERVALS.BOOKINGS,
+    refetchIntervalInBackground: false,
   }) as any;
 }
 
@@ -74,7 +77,9 @@ export const useBookingsInfinite = (filters?: Omit<BookingFilters, 'cursor'>) =>
     queryFn: ({ pageParam }) => bookingsClient.getBookings({ ...filters, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage: PaginatedResponse<Booking>) => lastPage.next,
-    staleTime: 1 * 60 * 1000,
+    staleTime: 10 * 1000,
+    refetchInterval: REFRESH_INTERVALS.BOOKINGS,
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -82,7 +87,9 @@ export const useBooking = (id: string) => {
   return useQuery({
     queryKey: bookingsKeys.detail(id),
     queryFn: () => bookingsClient.getBookingById(id),
-    staleTime: 30 * 1000,
+    staleTime: 10 * 1000,
+    refetchInterval: REFRESH_INTERVALS.BOOKINGS,
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -138,7 +145,9 @@ export const useClientBookings = (clientId: string | null) => {
     queryKey: bookingsKeys.list({ clientId: clientId! }),
     queryFn: () => bookingsClient.getBookings({ clientId: clientId! }),
     enabled: Boolean(clientId),
-    staleTime: 1 * 60 * 1000,
+    staleTime: 10 * 1000,
+    refetchInterval: REFRESH_INTERVALS.BOOKINGS,
+    refetchIntervalInBackground: false,
   });
 };
 

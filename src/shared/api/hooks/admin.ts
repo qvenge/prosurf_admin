@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { adminClient } from '../clients/admin';
+import { REFRESH_INTERVALS } from '../config/refresh-intervals';
 import type {
   Admin,
   AdminCreateDto,
@@ -178,7 +179,9 @@ export const useClientsAdmin = (filters?: ClientAdminFilters) => {
   return useQuery({
     queryKey: adminKeys.clientsAdmin(filters),
     queryFn: () => adminClient.getClientsAdmin(filters),
-    staleTime: 30 * 1000,
+    staleTime: 10 * 1000,
+    refetchInterval: REFRESH_INTERVALS.ADMIN_VIEWS,
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -186,7 +189,9 @@ export const useEventsAdmin = (filters?: EventAdminFilters) => {
   return useQuery({
     queryKey: adminKeys.eventsAdmin(filters),
     queryFn: () => adminClient.getEventsAdmin(filters),
-    staleTime: 30 * 1000,
+    staleTime: 10 * 1000,
+    refetchInterval: REFRESH_INTERVALS.ADMIN_VIEWS,
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -194,7 +199,9 @@ export const useSessionsAdmin = (filters?: SessionAdminFilters, enabled = true) 
   return useQuery({
     queryKey: adminKeys.sessionsAdmin(filters),
     queryFn: () => adminClient.getSessionsAdmin(filters),
-    staleTime: 30 * 1000,
+    staleTime: 10 * 1000,
+    refetchInterval: REFRESH_INTERVALS.ADMIN_VIEWS,
+    refetchIntervalInBackground: false,
     enabled,
   });
 };
@@ -203,6 +210,8 @@ export const useSeasonTicketPlansAdmin = (filters?: SeasonTicketPlanAdminFilters
   return useQuery({
     queryKey: adminKeys.seasonTicketPlansAdmin(filters),
     queryFn: () => adminClient.getSeasonTicketPlansAdmin(filters),
-    staleTime: 30 * 1000,
+    staleTime: 10 * 1000,
+    refetchInterval: REFRESH_INTERVALS.ADMIN_VIEWS,
+    refetchIntervalInBackground: false,
   });
 };

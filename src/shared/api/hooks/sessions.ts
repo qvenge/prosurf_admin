@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tansta
 import { sessionsClient } from '../clients/sessions';
 import { eventsKeys } from './events';
 import { adminKeys } from './admin';
+import { REFRESH_INTERVALS } from '../config/refresh-intervals';
 import type {
   Session,
   SessionCompact,
@@ -27,7 +28,9 @@ export const useEventSessions = (eventId?: string, filters?: SessionFilters, ena
   return useQuery({
     queryKey: sessionsKeys.eventSessions(eventId ?? '', filters),
     queryFn: () => sessionsClient.getEventSessions(eventId ?? '', filters),
-    staleTime: 2 * 60 * 1000,
+    staleTime: 10 * 1000,
+    refetchInterval: REFRESH_INTERVALS.SESSIONS,
+    refetchIntervalInBackground: false,
     enabled
   });
 };
@@ -42,7 +45,9 @@ export const useEventSessionsInfinite = (
       sessionsClient.getEventSessions(eventId, { ...filters, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage: PaginatedResponse<SessionCompact>) => lastPage.next,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 10 * 1000,
+    refetchInterval: REFRESH_INTERVALS.SESSIONS,
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -76,7 +81,9 @@ export const useSessions = (filters?: SessionFilters) => {
   return useQuery({
     queryKey: sessionsKeys.list(filters),
     queryFn: () => sessionsClient.getSessions(filters),
-    staleTime: 2 * 60 * 1000,
+    staleTime: 10 * 1000,
+    refetchInterval: REFRESH_INTERVALS.SESSIONS,
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -86,7 +93,9 @@ export const useSessionsInfinite = (filters?: Omit<SessionFilters, 'cursor'>) =>
     queryFn: ({ pageParam }) => sessionsClient.getSessions({ ...filters, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage: PaginatedResponse<Session>) => lastPage.next,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 10 * 1000,
+    refetchInterval: REFRESH_INTERVALS.SESSIONS,
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -94,7 +103,9 @@ export const useSession = (id: string) => {
   return useQuery({
     queryKey: sessionsKeys.detail(id),
     queryFn: () => sessionsClient.getSessionById(id),
-    staleTime: 1 * 60 * 1000,
+    staleTime: 10 * 1000,
+    refetchInterval: REFRESH_INTERVALS.SESSIONS,
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -185,7 +196,9 @@ export const useUpcomingSessions = (limit: number = 20) => {
   return useQuery({
     queryKey: sessionsKeys.list(filters),
     queryFn: () => sessionsClient.getSessions(filters),
-    staleTime: 3 * 60 * 1000,
+    staleTime: 10 * 1000,
+    refetchInterval: REFRESH_INTERVALS.SESSIONS,
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -197,6 +210,8 @@ export const useAvailableSessions = (filters?: Omit<SessionFilters, 'cursor'>) =
       ...data,
       items: data.items.filter(session => session.remainingSeats > 0),
     }),
-    staleTime: 1 * 60 * 1000,
+    staleTime: 10 * 1000,
+    refetchInterval: REFRESH_INTERVALS.SESSIONS,
+    refetchIntervalInBackground: false,
   });
 };
