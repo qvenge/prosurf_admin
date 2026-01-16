@@ -91,11 +91,12 @@ export function ClientSearchInput({
   return (
     <div className={styles.root} ref={inputRef}>
       <TextInput
+        key={selectedClient?.id || 'manual'}
         type="tel"
         name="phone"
         label={label}
         placeholder={placeholder}
-        value={phoneValue}
+        defaultValue={phoneValue}
         onChange={handleInputChange}
         onFocus={handleFocus}
         onBlur={handleBlur}

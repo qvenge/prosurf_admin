@@ -235,50 +235,61 @@ export function AddBookingForm({ sessionId, onBack, onSuccess }: AddBookingFormP
           </div>
         )}
 
-        {FIELDS_CONFIG.map(({ name, type, label, placeholder }) => (
-          <div
-            key={name}
-            ref={(el) => { fieldRefs.current[name] = el; }}
-            className={styles.searchableField}
-          >
-            <TextInput
-              type={type}
-              name={name}
-              label={label}
-              placeholder={placeholder}
-              value={formValues[name]}
-              onChange={(e) => handleFieldChange(name, e.target.value)}
-              onFocus={() => handleFieldFocus(name)}
-              onBlur={handleFieldBlur}
-              error={Boolean(state?.errors?.[name])}
-              hint={name === 'phone' ? (selectedHint || state?.errors?.phone?.[0]) : state?.errors?.[name]?.[0]}
-              disabled={pending}
-              required={name !== 'phone' && !selectedClient}
+        {FIELDS_CONFIG.map(({ name, type, label, placeholder }) => {
+          // Phone field needs to be uncontrolled due to IMask conflict with React controlled inputs
+          const isPhoneField = name === 'phone';
+
+          return (
+            <div
+              key={name}
+              ref={(el) => { fieldRefs.current[name] = el; }}
+              className={styles.searchableField}
             >
-              {name === 'phone' && selectedClient && (
-                <button
-                  type="button"
-                  className={styles.clearButton}
-                  onClick={handleClearSelection}
-                  aria-label="Очистить выбор"
-                >
-                  ×
-                </button>
+              <TextInput
+                // Key changes when client is selected/cleared to remount with new defaultValue
+                key={isPhoneField ? `phone-${selectedClient?.id || 'manual'}` : name}
+                type={type}
+                name={name}
+                label={label}
+                placeholder={placeholder}
+                // Phone uses defaultValue (uncontrolled) to work with IMask, others use value (controlled)
+                {...(isPhoneField
+                  ? { defaultValue: formValues.phone }
+                  : { value: formValues[name] }
+                )}
+                onChange={(e) => handleFieldChange(name, e.target.value)}
+                onFocus={() => handleFieldFocus(name)}
+                onBlur={handleFieldBlur}
+                error={Boolean(state?.errors?.[name])}
+                hint={isPhoneField ? (selectedHint || state?.errors?.phone?.[0]) : state?.errors?.[name]?.[0]}
+                disabled={pending}
+                required={!isPhoneField && !selectedClient}
+              >
+                {isPhoneField && selectedClient && (
+                  <button
+                    type="button"
+                    className={styles.clearButton}
+                    onClick={handleClearSelection}
+                    aria-label="Очистить выбор"
+                  >
+                    ×
+                  </button>
+                )}
+              </TextInput>
+              {activeField === name && (
+                <ClientSearchDropdown
+                  isOpen={showDropdown}
+                  clients={clients}
+                  isLoading={isLoading || isFetching}
+                  searchQuery={debouncedQuery}
+                  onSelectClient={handleSelectClient}
+                  onClose={() => setIsDropdownOpen(false)}
+                  anchorRef={{ current: fieldRefs.current[name] }}
+                />
               )}
-            </TextInput>
-            {activeField === name && (
-              <ClientSearchDropdown
-                isOpen={showDropdown}
-                clients={clients}
-                isLoading={isLoading || isFetching}
-                searchQuery={debouncedQuery}
-                onSelectClient={handleSelectClient}
-                onClose={() => setIsDropdownOpen(false)}
-                anchorRef={{ current: fieldRefs.current[name] }}
-              />
-            )}
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </form>
       <Button type="primary" size='l' htmlType='submit' form="addBookingForm" disabled={pending || bookSession.isPending} loading={pending || bookSession.isPending}>
         Записать

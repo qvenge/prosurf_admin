@@ -219,8 +219,10 @@ export function Profile({ client }: ProfileProps) {
           onChange={handleChange('lastName')}
         />
         <TextInput
+          key={client.id}
+          type="tel"
           label="Телефон"
-          value={form.phone}
+          defaultValue={form.phone}
           onChange={handleChange('phone')}
           error={!isPhoneValid}
           hint={!isPhoneValid ? 'Неверный формат телефона' : undefined}
