@@ -53,15 +53,15 @@ export function SessionsPage() {
       sort: sort as SessionAdminFilters['sort'],
       eventId: eventId || undefined,
       status: (searchParams.get('status') || undefined) as SessionStatus | undefined,
-      labels: searchParams.get('labels')
-        ? [searchParams.get('labels') as string]
+      'labels.any': searchParams.get('labels.any')
+        ? [searchParams.get('labels.any') as string]
         : undefined,
     }),
     [searchParams, sort, eventId]
   );
 
-  // Fetch sessions for table view
-  const { data, isLoading } = useSessionsAdmin(filters);
+  // Fetch sessions for table view (only when list view is active)
+  const { data, isLoading } = useSessionsAdmin(filters, selectedView === 'list');
 
   const handleFilterChange = useCallback(
     (newFilters: Partial<SessionAdminFilters>) => {
@@ -77,11 +77,11 @@ export function SessionsPage() {
           } else {
             params.delete('sort');
           }
-        } else if (key === 'labels' && Array.isArray(value)) {
+        } else if (key === 'labels.any' && Array.isArray(value)) {
           if (value.length > 0) {
-            params.set('labels', value[0] as string);
+            params.set('labels.any', value[0] as string);
           } else {
-            params.delete('labels');
+            params.delete('labels.any');
           }
         } else {
           params.set(key, String(value));
@@ -169,7 +169,7 @@ export function SessionsPage() {
         />
         {selectedView === 'calendar' ? (
           <SessionsCalendar
-            eventType={filters.labels?.[0]}
+            eventType={filters['labels.any']?.[0]}
             eventId={eventId}
             status={filters.status}
             className={styles.calendar}

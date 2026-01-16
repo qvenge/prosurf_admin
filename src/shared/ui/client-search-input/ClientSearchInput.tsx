@@ -40,7 +40,8 @@ export function ClientSearchInput({
   const shouldSearch = debouncedQuery.length >= 2 && !selectedClient;
 
   const { data, isLoading, isFetching } = useClientsInfinite(
-    shouldSearch ? { q: debouncedQuery, limit: 10 } : undefined,
+    shouldSearch ? { q: debouncedQuery, limit: 10 } : { limit: 10 },
+    { enabled: shouldSearch }
   );
 
   const clients = data?.pages.flatMap(page => page.items) ?? [];

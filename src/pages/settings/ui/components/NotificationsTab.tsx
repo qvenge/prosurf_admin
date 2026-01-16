@@ -15,6 +15,7 @@ const TEMPLATE_LABELS: Record<NotificationTemplateType, string> = {
   SESSION_REMINDER_24H: 'Напоминание за 24 часа',
   CERTIFICATE_DENOMINATION: 'Сертификат (номинал)',
   CERTIFICATE_PASSES: 'Сертификат (занятие)',
+  WAITLIST_SPOT_AVAILABLE: 'Освободилось место',
 };
 
 // Descriptions for each template type
@@ -23,6 +24,7 @@ const TEMPLATE_DESCRIPTIONS: Record<NotificationTemplateType, string> = {
   SESSION_REMINDER_24H: 'Отправляется клиенту за 24 часа до начала сеанса',
   CERTIFICATE_DENOMINATION: 'Отправляется после покупки сертификата на сумму',
   CERTIFICATE_PASSES: 'Отправляется после покупки сертификата на разовое занятие',
+  WAITLIST_SPOT_AVAILABLE: 'Отправляется клиенту из листа ожидания, когда освобождается место',
 };
 
 export function NotificationsTab() {

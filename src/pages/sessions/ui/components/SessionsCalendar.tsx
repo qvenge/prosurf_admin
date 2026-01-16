@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router';
 import clsx from 'clsx';
 import { CaretLeftBold, CaretRightBold } from '@/shared/ds/icons';
 import { IconButton } from '@/shared/ui';
-import { useSessions, type Session } from '@/shared/api';
+import { useSessionsAdmin, type Session } from '@/shared/api';
 import { formatTime } from '@/shared/lib/format-utils';
 import styles from './SessionsCalendar.module.scss';
 
@@ -130,13 +130,20 @@ export function SessionsCalendar({ eventType, eventId, status, className }: Sess
   const endsBefore = new Date(lastVisibleDate);
   endsBefore.setHours(23, 59, 59, 999);
 
-  const { data: sessionsData, isLoading } = useSessions({
+  const filters = {
     startsAfter: startsAfter.toISOString(),
     endsBefore: endsBefore.toISOString(),
     'labels.any': eventType ? [eventType] : undefined,
     eventId: eventId || undefined,
     limit: 200,
-  });
+  };
+
+  const { data: sessionsData, isLoading, error } = useSessionsAdmin(filters);
+
+  // Debug logging
+  if (error) {
+    console.error('SessionsCalendar query error:', error);
+  }
 
   // Group sessions by date (with status filter applied on client)
   const sessionsByDate = useMemo(() => {

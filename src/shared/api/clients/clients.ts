@@ -76,6 +76,63 @@ export const clientsClient = {
   },
 
   /**
+   * Обновление клиента с возможностью загрузки/удаления фото (только ADMIN).
+   * PATCH /clients/{id}
+   *
+   * @param id - telegramId клиента
+   * @param data - данные для обновления
+   * @param photo - файл фото для загрузки (опционально)
+   * @param deletePhoto - флаг удаления текущего фото (опционально)
+   */
+  async updateClientWithPhoto(
+    id: string,
+    data: ClientUpdateDto,
+    photo?: File | null,
+    deletePhoto?: boolean
+  ): Promise<Client> {
+    const validatedData = ClientUpdateDtoSchema.parse(data);
+    const formData = new FormData();
+
+    // Добавляем только заполненные поля
+    if (validatedData.firstName !== undefined) {
+      formData.append('firstName', validatedData.firstName ?? '');
+    }
+    if (validatedData.lastName !== undefined) {
+      formData.append('lastName', validatedData.lastName ?? '');
+    }
+    if (validatedData.phone !== undefined) {
+      formData.append('phone', validatedData.phone ?? '');
+    }
+    if (validatedData.email !== undefined) {
+      formData.append('email', validatedData.email ?? '');
+    }
+    if (validatedData.dateOfBirth !== undefined) {
+      formData.append('dateOfBirth', validatedData.dateOfBirth ?? '');
+    }
+
+    // Добавляем фото, если есть
+    if (photo) {
+      formData.append('photo', photo);
+    }
+
+    // Флаг удаления фото
+    if (deletePhoto) {
+      formData.append('deletePhoto', 'true');
+    }
+
+    const response = await apiClient.patch(
+      `/clients/${encodeURIComponent(id)}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return transformClient(validateResponse(response.data, ClientSchema));
+  },
+
+  /**
    * Получение абонементов клиента (только ADMIN).
    * GET /clients/{id}/season-tickets
    *

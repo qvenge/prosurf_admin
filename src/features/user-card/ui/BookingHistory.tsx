@@ -28,6 +28,29 @@ function getEventTypeInfo(labels?: string[]): { icon: string; label: string } {
   return { icon: BarbellBold, label: 'Серфинг' };
 }
 
+type BookingStatusType = 'HOLD' | 'CONFIRMED' | 'CANCELLED' | 'EXPIRED';
+
+interface StatusInfo {
+  label: string;
+  styleKey: 'hold' | 'confirmed' | 'cancelled' | 'expired';
+  showPayment: boolean;
+}
+
+function getStatusInfo(status: BookingStatusType): StatusInfo {
+  switch (status) {
+    case 'HOLD':
+      return { label: 'Ожидает оплаты', styleKey: 'hold', showPayment: false };
+    case 'CONFIRMED':
+      return { label: 'Подтверждено', styleKey: 'confirmed', showPayment: true };
+    case 'CANCELLED':
+      return { label: 'Отменено', styleKey: 'cancelled', showPayment: false };
+    case 'EXPIRED':
+      return { label: 'Истекло', styleKey: 'expired', showPayment: false };
+    default:
+      return { label: status, styleKey: 'hold', showPayment: false };
+  }
+}
+
 function getPaymentLabel(paymentInfo?: BookingExtended['paymentInfo']): string | null {
   // Если нет paymentInfo - это офлайн оплата
   if (!paymentInfo) return 'Оплачено (офлайн)';
@@ -74,7 +97,6 @@ export function BookingHistory({ client }: BookingHistoryProps) {
     clientId: client.id,
     includeSession: true,
     includePaymentInfo: true,
-    status: 'CONFIRMED',
   });
 
   if (isLoading) {
@@ -104,8 +126,11 @@ export function BookingHistory({ client }: BookingHistoryProps) {
         const { icon, label } = getEventTypeInfo(labels);
         const paymentLabel = getPaymentLabel(booking.paymentInfo);
 
+        const statusInfo = getStatusInfo(booking.status as BookingStatusType);
+        const isInactive = booking.status === 'CANCELLED' || booking.status === 'EXPIRED';
+
         return (
-          <div key={booking.id} className={styles.card}>
+          <div key={booking.id} className={`${styles.card} ${isInactive ? styles.inactive : ''}`}>
             <div className={styles.info}>
               <div className={styles.badge}>
                 <Icon src={icon} width={20} height={20} />
@@ -125,8 +150,10 @@ export function BookingHistory({ client }: BookingHistoryProps) {
                   <span className={styles.time}>{formatTime(session.startsAt)}</span>
                 </>
               )}
-              {paymentLabel && (
+              {statusInfo.showPayment && paymentLabel ? (
                 <span className={styles.paymentLabel}>{paymentLabel}</span>
+              ) : (
+                <span className={styles[`statusLabel_${statusInfo.styleKey}`]}>{statusInfo.label}</span>
               )}
             </div>
           </div>

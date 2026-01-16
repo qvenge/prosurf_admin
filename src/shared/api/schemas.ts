@@ -621,6 +621,7 @@ export const AdminSchema = z.object({
 // Client update DTO
 export const ClientUpdateDtoSchema = z.object({
   phone: z.string().regex(/^\+?[0-9]{7,15}$/).nullable().optional(),
+  email: z.string().email().nullable().optional(),
   firstName: z.string().max(128).nullable().optional(),
   lastName: z.string().max(128).nullable().optional(),
   dateOfBirth: z.string().datetime().nullable().optional(),
@@ -993,6 +994,7 @@ export const NotificationTemplateTypeSchema = z.enum([
   'SESSION_REMINDER_24H',
   'CERTIFICATE_DENOMINATION',
   'CERTIFICATE_PASSES',
+  'WAITLIST_SPOT_AVAILABLE',
 ]);
 
 export const NotificationTemplateSchema = z.object({
@@ -1067,7 +1069,9 @@ export const EventAdminFiltersSchema = z.object({
   limit: z.number().int().min(1).max(100).optional(),
   search: z.string().optional(),
   status: EventStatusSchema.optional(),
-  labels: z.array(z.string()).optional(),
+  'labels.any': z.array(z.string()).optional(),
+  'labels.all': z.array(z.string()).optional(),
+  'labels.none': z.array(z.string()).optional(),
   sort: z.array(EventAdminSortCriterionSchema).optional(),
 });
 
@@ -1086,10 +1090,14 @@ export const SessionAdminSortCriterionSchema = z.object({
 
 export const SessionAdminFiltersSchema = z.object({
   page: z.number().int().min(1).optional(),
-  limit: z.number().int().min(1).max(100).optional(),
+  limit: z.number().int().min(1).max(200).optional(),
   eventId: z.string().optional(),
   status: SessionStatusSchema.optional(),
-  labels: z.array(z.string()).optional(),
+  startsAfter: z.string().optional(),
+  endsBefore: z.string().optional(),
+  'labels.any': z.array(z.string()).optional(),
+  'labels.all': z.array(z.string()).optional(),
+  'labels.none': z.array(z.string()).optional(),
   sort: z.array(SessionAdminSortCriterionSchema).optional(),
 });
 

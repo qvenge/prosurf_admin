@@ -28,13 +28,17 @@ export const useClients = (filters?: ClientFilters) => {
   });
 };
 
-export const useClientsInfinite = (filters?: Omit<ClientFilters, 'cursor'>) => {
+export const useClientsInfinite = (
+  filters?: Omit<ClientFilters, 'cursor'>,
+  options?: { enabled?: boolean }
+) => {
   return useInfiniteQuery({
     queryKey: clientsKeys.list(filters),
     queryFn: ({ pageParam }) => clientsClient.getClients({ ...filters, cursor: pageParam }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage: PaginatedResponse<Client>) => lastPage.next,
     staleTime: 2 * 60 * 1000,
+    enabled: options?.enabled ?? true,
   });
 };
 
@@ -51,8 +55,23 @@ export const useUpdateClient = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: ClientUpdateDto }) =>
-      clientsClient.updateClient(id, data),
+    mutationFn: ({
+      id,
+      data,
+      photo,
+      deletePhoto,
+    }: {
+      id: string;
+      data: ClientUpdateDto;
+      photo?: File | null;
+      deletePhoto?: boolean;
+    }) => {
+      // Если есть фото или флаг удаления фото, используем multipart метод
+      if (photo || deletePhoto) {
+        return clientsClient.updateClientWithPhoto(id, data, photo, deletePhoto);
+      }
+      return clientsClient.updateClient(id, data);
+    },
     onSuccess: (updatedClient, variables) => {
       queryClient.setQueryData(clientsKeys.detail(variables.id), updatedClient);
       queryClient.invalidateQueries({ queryKey: clientsKeys.lists() });

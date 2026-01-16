@@ -18,13 +18,18 @@ interface SessionFormProps {
 }
 
 function createInitialSession(): SessionFormType {
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const todayStr = today.toISOString().split('T')[0];
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
   const defaultTime = '10:00';
 
   return {
     id: generateSessionId(),
-    date: today,
-    endDate: '',
+    date: todayStr,
+    endDate: tomorrowStr,
     timeSlots: [{ id: generateTimeSlotId(), startTime: defaultTime }],
     duration: '1.5',
   };

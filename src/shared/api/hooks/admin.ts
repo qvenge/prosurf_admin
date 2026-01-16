@@ -190,11 +190,12 @@ export const useEventsAdmin = (filters?: EventAdminFilters) => {
   });
 };
 
-export const useSessionsAdmin = (filters?: SessionAdminFilters) => {
+export const useSessionsAdmin = (filters?: SessionAdminFilters, enabled = true) => {
   return useQuery({
     queryKey: adminKeys.sessionsAdmin(filters),
     queryFn: () => adminClient.getSessionsAdmin(filters),
     staleTime: 30 * 1000,
+    enabled,
   });
 };
 

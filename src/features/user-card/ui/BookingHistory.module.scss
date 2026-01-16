@@ -86,6 +86,30 @@
   color: ds.color('text/success');
 }
 
+.inactive {
+  opacity: 0.6;
+}
+
+.statusLabel_hold {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/warning');
+}
+
+.statusLabel_confirmed {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/success');
+}
+
+.statusLabel_cancelled {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/error/primary');
+}
+
+.statusLabel_expired {
+  @include ds.typo('body/b4/medium');
+  color: ds.color('text/secondary');
+}
+
 .loading {
   display: flex;
   justify-content: center;

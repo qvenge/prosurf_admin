@@ -32,6 +32,22 @@
   @include ds.typo('body/b3/medium');
 }
 
+.avatarButton {
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  border-radius: 50%;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.hiddenInput {
+  display: none;
+}
+
 .deletePhotoButton {
   @include ds.typo('body/b4/medium');
   color: ds.color('text/error/primary');

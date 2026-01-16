@@ -1,8 +1,9 @@
-import { useActionState, useState, useEffect } from 'react';
-import { Button, TextButton, TextInput, Icon, ClientSearchInput } from '@/shared/ui';
+import { useActionState, useState, useRef, useCallback } from 'react';
+import { Button, TextButton, TextInput, Icon, ClientSearchDropdown } from '@/shared/ui';
 import { CaretLeftBold } from '@/shared/ds/icons';
 import { useBookSession, type BookingCreateDto, type GuestContact, type Client, isApiError, getErrorMessage } from '@/shared/api';
 import { generateIdempotencyKey, formatPhoneNumber } from '@/shared/lib/string';
+import { useClientSearch } from '@/shared/lib/hooks/useClientSearch';
 import styles from './SessionDetails.module.scss';
 
 export type FormState =
@@ -23,24 +24,106 @@ export interface AddBookingFormProps {
   onSuccess?: () => void;
 }
 
+type SearchableField = 'phone' | 'email' | 'firstName' | 'lastName';
+
+interface FormValues {
+  phone: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface FieldConfig {
+  name: SearchableField;
+  type: 'tel' | 'email' | 'text';
+  label: string;
+  placeholder: string;
+}
+
+const FIELDS_CONFIG: FieldConfig[] = [
+  { name: 'phone', type: 'tel', label: 'Телефон', placeholder: '+7 (900) 123-45-67' },
+  { name: 'email', type: 'email', label: 'Почта', placeholder: 'Введите почту' },
+  { name: 'firstName', type: 'text', label: 'Имя', placeholder: 'Введите имя' },
+  { name: 'lastName', type: 'text', label: 'Фамилия', placeholder: 'Введите фамилию' },
+];
+
+const INITIAL_FORM_VALUES: FormValues = {
+  phone: '', email: '', firstName: '', lastName: ''
+};
+
 export function AddBookingForm({ sessionId, onBack, onSuccess }: AddBookingFormProps) {
   const bookSession = useBookSession();
 
   // State for client selection
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-  const [phoneValue, setPhoneValue] = useState('');
 
-  // State for form fields (controlled when client is selected)
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  // Unified state for form fields
+  const [formValues, setFormValues] = useState<FormValues>(INITIAL_FORM_VALUES);
 
-  // Update form fields when client is selected
-  useEffect(() => {
+  // State for search dropdown
+  const [activeField, setActiveField] = useState<SearchableField | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Unified refs for dropdown positioning
+  const fieldRefs = useRef<Record<SearchableField, HTMLDivElement | null>>({
+    phone: null, email: null, firstName: null, lastName: null
+  });
+
+  // Get current search value based on active field
+  const currentSearchValue = activeField ? formValues[activeField] : '';
+
+  // Client search
+  const { clients, isLoading, isFetching, debouncedQuery } = useClientSearch({
+    query: currentSearchValue,
+    enabled: !selectedClient && activeField !== null && isDropdownOpen,
+  });
+
+  // Handle field change
+  const handleFieldChange = useCallback((field: SearchableField, value: string) => {
+    setFormValues(prev => ({ ...prev, [field]: value }));
+
+    // Clear selected client when user starts typing
     if (selectedClient) {
-      setFirstName(selectedClient.firstName || '');
-      setLastName(selectedClient.lastName || '');
+      setSelectedClient(null);
+    }
+
+    setIsDropdownOpen(true);
+  }, [selectedClient]);
+
+  // Handle field focus
+  const handleFieldFocus = useCallback((field: SearchableField) => {
+    setActiveField(field);
+    if (!selectedClient) {
+      setIsDropdownOpen(true);
     }
   }, [selectedClient]);
+
+  // Handle field blur
+  const handleFieldBlur = useCallback(() => {
+    // Delay to allow click on dropdown item
+    setTimeout(() => {
+      setIsDropdownOpen(false);
+    }, 200);
+  }, []);
+
+  // Handle client selection
+  const handleSelectClient = useCallback((client: Client) => {
+    setSelectedClient(client);
+    setFormValues({
+      phone: client.phone || '',
+      email: client.email || '',
+      firstName: client.firstName || '',
+      lastName: client.lastName || '',
+    });
+    setIsDropdownOpen(false);
+    setActiveField(null);
+  }, []);
+
+  // Handle clear selection
+  const handleClearSelection = useCallback(() => {
+    setSelectedClient(null);
+    setFormValues(INITIAL_FORM_VALUES);
+  }, []);
 
   const handleSubmit = async (_state: FormState, data: FormData) => {
     try {
@@ -127,15 +210,11 @@ export function AddBookingForm({ sessionId, onBack, onSuccess }: AddBookingFormP
 
   const [state, action, pending] = useActionState(handleSubmit, undefined);
 
-  // Handler for clearing client selection
-  const handleSelectClient = (client: Client | null) => {
-    setSelectedClient(client);
-    if (!client) {
-      // Clear form fields when client is deselected
-      setFirstName('');
-      setLastName('');
-    }
-  };
+  const selectedHint = selectedClient
+    ? `Выбран: ${[selectedClient.firstName, selectedClient.lastName].filter(Boolean).join(' ') || 'Клиент'}`
+    : undefined;
+
+  const showDropdown = isDropdownOpen && !selectedClient && debouncedQuery.length >= 2;
 
   return (
     <div className={styles.container}>
@@ -156,52 +235,50 @@ export function AddBookingForm({ sessionId, onBack, onSuccess }: AddBookingFormP
           </div>
         )}
 
-        <ClientSearchInput
-          label="Телефон"
-          placeholder="+7 (900) 123-45-67"
-          phoneValue={phoneValue}
-          onPhoneChange={setPhoneValue}
-          selectedClient={selectedClient}
-          onSelectClient={handleSelectClient}
-          error={Boolean(state?.errors?.phone)}
-          hint={state?.errors?.phone?.[0]}
-          disabled={pending}
-        />
-
-        <TextInput
-          type="email"
-          name="email"
-          label="Почта"
-          placeholder="Введите почту"
-          error={Boolean(state?.errors?.email)}
-          hint={state?.errors?.email?.[0]}
-          disabled={pending}
-          required={!selectedClient}
-        />
-        <TextInput
-          type="text"
-          name="firstName"
-          label="Имя"
-          placeholder="Введите имя"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          error={Boolean(state?.errors?.firstName)}
-          hint={state?.errors?.firstName?.[0]}
-          disabled={pending || Boolean(selectedClient)}
-          required={!selectedClient}
-        />
-        <TextInput
-          type="text"
-          name="lastName"
-          label="Фамилия"
-          placeholder="Введите фамилию"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          error={Boolean(state?.errors?.lastName)}
-          hint={state?.errors?.lastName?.[0]}
-          disabled={pending || Boolean(selectedClient)}
-          required={!selectedClient}
-        />
+        {FIELDS_CONFIG.map(({ name, type, label, placeholder }) => (
+          <div
+            key={name}
+            ref={(el) => { fieldRefs.current[name] = el; }}
+            className={styles.searchableField}
+          >
+            <TextInput
+              type={type}
+              name={name}
+              label={label}
+              placeholder={placeholder}
+              value={formValues[name]}
+              onChange={(e) => handleFieldChange(name, e.target.value)}
+              onFocus={() => handleFieldFocus(name)}
+              onBlur={handleFieldBlur}
+              error={Boolean(state?.errors?.[name])}
+              hint={name === 'phone' ? (selectedHint || state?.errors?.phone?.[0]) : state?.errors?.[name]?.[0]}
+              disabled={pending}
+              required={name !== 'phone' && !selectedClient}
+            >
+              {name === 'phone' && selectedClient && (
+                <button
+                  type="button"
+                  className={styles.clearButton}
+                  onClick={handleClearSelection}
+                  aria-label="Очистить выбор"
+                >
+                  ×
+                </button>
+              )}
+            </TextInput>
+            {activeField === name && (
+              <ClientSearchDropdown
+                isOpen={showDropdown}
+                clients={clients}
+                isLoading={isLoading || isFetching}
+                searchQuery={debouncedQuery}
+                onSelectClient={handleSelectClient}
+                onClose={() => setIsDropdownOpen(false)}
+                anchorRef={{ current: fieldRefs.current[name] }}
+              />
+            )}
+          </div>
+        ))}
       </form>
       <Button type="primary" size='l' htmlType='submit' form="addBookingForm" disabled={pending || bookSession.isPending} loading={pending || bookSession.isPending}>
         Записать

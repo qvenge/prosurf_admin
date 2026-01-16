@@ -32,7 +32,7 @@ export function SessionsFilters({
   onClearEvent,
 }: SessionsFiltersProps) {
   const getEventTypeValue = () => {
-    return filters.labels?.[0] || '';
+    return filters['labels.any']?.[0] || '';
   };
 
   const getStatusValue = () => {
@@ -46,7 +46,7 @@ export function SessionsFilters({
         options={eventTypeOptions}
         onChange={(value) =>
           onFilterChange({
-            labels: value === '' ? undefined : [value],
+            'labels.any': value === '' ? undefined : [value],
           })
         }
         placeholder="Тип"
