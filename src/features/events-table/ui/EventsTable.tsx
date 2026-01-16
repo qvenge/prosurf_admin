@@ -30,7 +30,7 @@ export function EventsTable({ className, eventType, handleEdit }: EventsTablePro
   const { data, isLoading, error } = useEventsAdmin({
     page,
     limit: 20,
-    labels: eventType ? [eventType] : undefined,
+    'labels.any': eventType ? [eventType] : undefined,
   });
 
   const deleteEventMutation = useDeleteEvent();
