@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { bookingsClient } from '../clients/bookings';
 import { sessionsKeys } from './sessions';
+import { seasonTicketsKeys } from './season-tickets';
 import { REFRESH_INTERVALS } from '../config/refresh-intervals';
 import type {
   Booking,
@@ -220,6 +221,28 @@ export const useCreateBookingPayment = () => {
     },
     onError: (error) => {
       console.error('Failed to create payment for booking:', error);
+    },
+  });
+};
+
+export const useApplyPassToBooking = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      bookingId,
+      seasonTicketId,
+    }: {
+      bookingId: string;
+      seasonTicketId: string;
+    }) => bookingsClient.applyPassToBooking(bookingId, seasonTicketId),
+    onSuccess: (updatedBooking, variables) => {
+      queryClient.setQueryData(bookingsKeys.detail(variables.bookingId), updatedBooking);
+      queryClient.invalidateQueries({ queryKey: bookingsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: seasonTicketsKeys.tickets() });
+    },
+    onError: (error) => {
+      console.error('Failed to apply pass to booking:', error);
     },
   });
 };

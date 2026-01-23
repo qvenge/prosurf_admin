@@ -192,4 +192,23 @@ export const bookingsClient = {
     const response = await apiClient.post(`/bookings/${encodeURIComponent(id)}/mark-paid`);
     return validateResponse(response.data, BookingSchema);
   },
+
+  /**
+   * Списать посещение с абонемента клиента (только ADMIN).
+   * POST /bookings/{id}/apply-pass
+   *
+   * Работает для бронирований в статусе HOLD или CONFIRMED с isPaid=false.
+   * Абонемент должен принадлежать клиенту бронирования.
+   *
+   * @param id - ID бронирования
+   * @param seasonTicketId - ID абонемента для списания
+   * @returns Обновлённое бронирование
+   */
+  async applyPassToBooking(id: string, seasonTicketId: string): Promise<Booking> {
+    const response = await apiClient.post(
+      `/bookings/${encodeURIComponent(id)}/apply-pass`,
+      { seasonTicketId }
+    );
+    return validateResponse(response.data, BookingSchema);
+  },
 };

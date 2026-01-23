@@ -124,6 +124,7 @@ export const useSeasonTickets = (filters?: SeasonTicketFilters) => {
     queryKey: seasonTicketsKeys.ticketsList(filters),
     queryFn: () => seasonTicketsClient.getSeasonTickets(filters),
     staleTime: 5 * 60 * 1000,
+    enabled: filters !== undefined,
   });
 };
 

@@ -4,6 +4,8 @@ import {
   useMarkBookingAsPaid,
   useConfirmBooking,
   useCancelBooking,
+  useSeasonTickets,
+  useApplyPassToBooking,
   type BookingExtended,
   type PaymentInfoItem
 } from '@/shared/api';
@@ -23,8 +25,28 @@ export function BookingDetails({ booking, onBack }: BookingDetailsProps) {
   const { mutate: markAsPaid, isPending: isMarkingPaid } = useMarkBookingAsPaid();
   const { mutate: confirmBooking, isPending: isConfirming } = useConfirmBooking();
   const { mutate: cancelBooking, isPending: isCancelling } = useCancelBooking();
+  const { mutate: applyPass, isPending: isApplyingPass } = useApplyPassToBooking();
 
-  const isActionPending = isMarkingPaid || isConfirming || isCancelling;
+  // Запрос подходящих абонементов для клиента (только если есть clientId)
+  const { data: applicableTickets } = useSeasonTickets(
+    booking.clientId ? {
+      clientId: booking.clientId,
+      sessionId: booking.sessionId,
+      status: ['ACTIVE'],
+      hasRemainingPasses: true,
+    } : undefined
+  );
+
+  // Выбираем лучший абонемент (истекающие раньше - приоритетнее)
+  const bestTicket = applicableTickets?.items
+    ?.filter(t => t.status === 'ACTIVE' && t.remainingPasses > 0)
+    ?.sort((a, b) => {
+      if (!a.validUntil) return 1;
+      if (!b.validUntil) return -1;
+      return new Date(a.validUntil).getTime() - new Date(b.validUntil).getTime();
+    })[0];
+
+  const isActionPending = isMarkingPaid || isConfirming || isCancelling || isApplyingPass;
 
   const getClientName = () => {
     if (booking.user?.firstName || booking.user?.lastName) {
@@ -147,7 +169,25 @@ export function BookingDetails({ booking, onBack }: BookingDetailsProps) {
     });
   };
 
+  const handleApplyPass = () => {
+    if (bestTicket) {
+      applyPass(
+        { bookingId: booking.id, seasonTicketId: bestTicket.id },
+        { onSuccess: onBack }
+      );
+    }
+  };
+
   const isPaid = booking.status === 'CONFIRMED' && booking.isPaid;
+
+  // Показываем кнопку "Списать с абонемента" если:
+  // - есть clientId (не гостевое бронирование)
+  // - есть подходящий абонемент
+  // - статус HOLD или (CONFIRMED && isPaid=false)
+  const canApplyPass =
+    booking.clientId &&
+    bestTicket &&
+    (booking.status === 'HOLD' || (booking.status === 'CONFIRMED' && !booking.isPaid));
 
   return (
     <div className={styles.container}>
@@ -229,6 +269,18 @@ export function BookingDetails({ booking, onBack }: BookingDetailsProps) {
             loading={isConfirming}
           >
             Подтвердить
+          </Button>
+        )}
+        {canApplyPass && (
+          <Button
+            type="primary"
+            size="l"
+            streched
+            onClick={handleApplyPass}
+            disabled={isActionPending}
+            loading={isApplyingPass}
+          >
+            Списать с абонемента
           </Button>
         )}
         {booking.status === 'CONFIRMED' && !booking.isPaid && (
