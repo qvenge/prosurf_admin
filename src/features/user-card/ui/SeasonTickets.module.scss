@@ -162,3 +162,11 @@
   text-align: center;
   padding: 20px;
 }
+
+.controls {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/M');
+  align-items: stretch;
+}

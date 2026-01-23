@@ -4,6 +4,7 @@
   align-items: center;
   gap: 28px;
   width: 100%;
+  flex-grow: 1;
 }
 
 .avatarSection {
@@ -66,6 +67,7 @@
   flex-direction: column;
   gap: ds.number('paddings & gaps/S');
   width: 100%;
+  flex-grow: 1;
 }
 
 .field {
@@ -98,4 +100,12 @@
   &:hover {
     text-decoration: underline;
   }
+}
+
+.controls {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: ds.number('paddings & gaps/M');
+  align-items: stretch;
 }

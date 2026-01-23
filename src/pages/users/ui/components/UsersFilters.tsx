@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { TextInput } from '@/shared/ui';
+import { TextInput, Select } from '@/shared/ui';
 import type { ClientAdminFilters } from '@/shared/api';
 import { MagnifyingGlassRegular } from '@/shared/ds/icons';
 import { useDebounce } from '@/shared/lib/hooks/useDebounce';
@@ -10,10 +10,17 @@ interface UsersFiltersProps {
   onFilterChange: (filters: Partial<ClientAdminFilters>) => void;
 }
 
+const statusOptions = [
+  { value: 'active', label: 'Активные' },
+  { value: 'deleted', label: 'Удаленные' },
+];
+
 export function UsersFilters({ filters, onFilterChange }: UsersFiltersProps) {
   const [searchValue, setSearchValue] = useState(filters.search || '');
   const debouncedSearch = useDebounce(searchValue, 300);
   const isInternalChange = useRef(false);
+
+  const statusValue = filters.isActive === false ? 'deleted' : 'active';
 
   useEffect(() => {
     if (!isInternalChange.current) {
@@ -29,6 +36,10 @@ export function UsersFilters({ filters, onFilterChange }: UsersFiltersProps) {
     }
   }, [debouncedSearch, filters.search, onFilterChange]);
 
+  const handleStatusChange = (value: string) => {
+    onFilterChange({ isActive: value === 'active' });
+  };
+
   return (
     <div className={styles.filters}>
       <TextInput
@@ -36,6 +47,11 @@ export function UsersFilters({ filters, onFilterChange }: UsersFiltersProps) {
         value={searchValue}
         onChange={(e) => setSearchValue(e.target.value)}
         placeholder="Поиск по имени, телефону или username"
+      />
+      <Select
+        options={statusOptions}
+        value={statusValue}
+        onChange={handleStatusChange}
       />
     </div>
   );

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { type Client, useUpdateClient } from '@/shared/api';
 import { TextInput, Button } from '@/shared/ui';
 import { APP_TIMEZONE } from '@/shared/lib/timezone';
+import { DeactivateButton } from './DeactivateButton';
 import styles from './Profile.module.scss';
 
 export interface ProfileProps {
@@ -258,15 +259,19 @@ export function Profile({ client }: ProfileProps) {
         )}
       </div>
 
-      <Button
-        type="primary"
-        size="l"
-        streched
-        onClick={handleSave}
-        disabled={!hasChanges || !isValid || updateClient.isPending}
-      >
-        {updateClient.isPending ? 'Сохранение...' : 'Сохранить'}
-      </Button>
+      <div className={styles.controls}>
+        <Button
+          type="primary"
+          size="l"
+          streched
+          onClick={handleSave}
+          disabled={!hasChanges || !isValid || updateClient.isPending}
+        >
+          {updateClient.isPending ? 'Сохранение...' : 'Сохранить'}
+        </Button>
+
+        <DeactivateButton client={client} />
+      </div>
     </div>
   );
 }

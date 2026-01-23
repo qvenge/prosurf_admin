@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { type Client, useClientBonus, useAdjustBonus } from '@/shared/api';
 import { Button, TextInput } from '@/shared/ui';
+import { DeactivateButton } from './DeactivateButton';
 import styles from './Bonuses.module.scss';
 
 export interface BonusesProps {
@@ -68,15 +69,20 @@ export function Bonuses({ client }: BonusesProps) {
           min={0}
         />
       </div>
-      <Button
-        type="primary"
-        size="l"
-        streched
-        onClick={handleSave}
-        disabled={!hasChanges || !isValid || adjustBonus.isPending}
-      >
-        {adjustBonus.isPending ? 'Сохранение...' : 'Сохранить'}
-      </Button>
+
+      <div className={styles.controls}>
+        <Button
+          type="primary"
+          size="l"
+          streched
+          onClick={handleSave}
+          disabled={!hasChanges || !isValid || adjustBonus.isPending}
+        >
+          {adjustBonus.isPending ? 'Сохранение...' : 'Сохранить'}
+        </Button>
+
+        <DeactivateButton client={client} />
+      </div>
     </div>
   );
 }

@@ -114,3 +114,20 @@ export const useGrantSeasonTicket = () => {
     },
   });
 };
+
+export const useToggleClientStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
+      clientsClient.toggleClientStatus(id, isActive),
+    onSuccess: (updatedClient, variables) => {
+      queryClient.setQueryData(clientsKeys.detail(variables.id), updatedClient);
+      queryClient.invalidateQueries({ queryKey: clientsKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.clientsAdminBase() });
+    },
+    onError: (error) => {
+      console.error('Failed to toggle client status:', error);
+    },
+  });
+};

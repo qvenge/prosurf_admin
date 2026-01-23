@@ -173,4 +173,19 @@ export const clientsClient = {
     );
     return validateResponse(response.data, SeasonTicketSchema);
   },
+
+  /**
+   * Изменение статуса активности клиента (только ADMIN).
+   * PATCH /admin/clients/{id}/status
+   *
+   * @param id - ID клиента
+   * @param isActive - новый статус активности
+   */
+  async toggleClientStatus(id: string, isActive: boolean): Promise<Client> {
+    const response = await apiClient.patch(
+      `/admin/clients/${encodeURIComponent(id)}/status`,
+      { isActive }
+    );
+    return transformClient(validateResponse(response.data, ClientSchema));
+  },
 };

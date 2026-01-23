@@ -32,6 +32,7 @@ export function UsersPage() {
       limit: Number(searchParams.get('limit')) || 20,
       sort: sort as ClientAdminFilters['sort'],
       search: searchParams.get('search') || undefined,
+      isActive: searchParams.get('isActive') === 'false' ? false : true,
     }),
     [searchParams, sort]
   );

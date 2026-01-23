@@ -4,6 +4,7 @@ import { useClientSeasonTickets, useCancelSeasonTicket, useSeasonTicketPlans, us
 import { Dropdown, Loader, Icon, IconButton, Button } from '@/shared/ui';
 import { PlusBold, CaretDownBold, ArrowCounterClockwiseRegular } from '@/shared/ds/icons';
 import { SeasonTicketCard } from './SeasonTicketCard';
+import { DeactivateButton } from './DeactivateButton';
 import styles from './SeasonTickets.module.scss';
 
 export interface SeasonTicketsProps {
@@ -178,15 +179,19 @@ export function SeasonTickets({ client }: SeasonTicketsProps) {
           </>
         )}
       </div>
-      <Button
-        type="primary"
-        size="l"
-        streched
-        onClick={handleSave}
-        disabled={!hasPendingChanges || isSaving}
-      >
-        Сохранить
-      </Button>
+      <div className={styles.controls}>
+        <Button
+          type="primary"
+          size="l"
+          streched
+          onClick={handleSave}
+          disabled={!hasPendingChanges || isSaving}
+        >
+          Сохранить
+        </Button>
+
+        <DeactivateButton client={client} />
+      </div>
     </div>
   );
 }

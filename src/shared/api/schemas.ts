@@ -68,6 +68,7 @@ export const ClientSchema = z.object({
   lastName: z.string().nullable().optional(),
   photoUrl: z.string().nullable().optional(),
   dateOfBirth: z.string().datetime().nullable().optional(),
+  isActive: z.boolean().optional(),
   createdAt: z.string().datetime(),
   seasonTicketSummary: ClientSeasonTicketSummarySchema.optional(),
 });
@@ -1047,6 +1048,7 @@ export const ClientAdminFiltersSchema = z.object({
   limit: z.number().int().min(1).max(100).optional(),
   search: z.string().optional(),
   sort: z.array(ClientAdminSortCriterionSchema).optional(),
+  isActive: z.boolean().optional(),
 });
 
 // Event sort schemas
