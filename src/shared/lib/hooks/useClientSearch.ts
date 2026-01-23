@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useClientsInfinite, type Client } from '@/shared/api';
+import { useClientsAdmin, type Client } from '@/shared/api';
 import { useDebounce } from './useDebounce';
 
 interface UseClientSearchOptions {
@@ -18,6 +18,13 @@ interface UseClientSearchReturn {
   shouldShowResults: boolean;
 }
 
+/**
+ * Normalize search query: remove formatting characters (spaces, brackets, dashes)
+ * to support phone input with formatting like "+7 (900) 123-45-67"
+ */
+const normalizeSearchQuery = (query: string): string =>
+  query.replace(/[\s\(\)\-]/g, '');
+
 export function useClientSearch({
   query,
   minQueryLength = 2,
@@ -27,25 +34,26 @@ export function useClientSearch({
 }: UseClientSearchOptions): UseClientSearchReturn {
   const debouncedQuery = useDebounce(query, debounceMs);
 
-  const shouldSearch = enabled && debouncedQuery.length >= minQueryLength;
+  const normalizedQuery = normalizeSearchQuery(debouncedQuery);
+  const shouldSearch = enabled && normalizedQuery.length >= minQueryLength;
 
-  const { data, isLoading, isFetching } = useClientsInfinite(
-    shouldSearch ? { q: debouncedQuery, limit } : { limit },
+  const { data, isLoading, isFetching } = useClientsAdmin(
+    { search: normalizedQuery, limit },
     { enabled: shouldSearch }
   );
 
   const clients = useMemo(
-    () => data?.pages.flatMap(page => page.items) ?? [],
+    () => data?.items ?? [],
     [data],
   );
 
-  const shouldShowResults = shouldSearch && (isLoading || isFetching || clients.length > 0 || debouncedQuery.length >= minQueryLength);
+  const shouldShowResults = shouldSearch && (isLoading || isFetching || clients.length > 0 || normalizedQuery.length >= minQueryLength);
 
   return {
     clients,
     isLoading,
     isFetching,
-    debouncedQuery,
+    debouncedQuery: normalizedQuery,
     shouldShowResults,
   };
 }

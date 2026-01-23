@@ -175,13 +175,17 @@ export const useRunSeasonTicketExpiryJob = () => {
   });
 };
 
-export const useClientsAdmin = (filters?: ClientAdminFilters) => {
+export const useClientsAdmin = (
+  filters?: ClientAdminFilters,
+  options?: { enabled?: boolean }
+) => {
   return useQuery({
     queryKey: adminKeys.clientsAdmin(filters),
     queryFn: () => adminClient.getClientsAdmin(filters),
     staleTime: 10 * 1000,
     refetchInterval: REFRESH_INTERVALS.ADMIN_VIEWS,
     refetchIntervalInBackground: false,
+    enabled: options?.enabled ?? true,
   });
 };
 
