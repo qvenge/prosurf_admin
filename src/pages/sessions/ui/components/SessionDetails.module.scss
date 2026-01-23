@@ -225,12 +225,8 @@
 }
 
 .cancelButton {
-  color: ds.color('text/error/primary');
-  border-color: ds.color('border/error');
-
-  &:hover {
-    background: ds.color('background/error');
-  }
+  margin-top: 8px;
+  align-self: center;
 }
 
 .booking + .booking::after,

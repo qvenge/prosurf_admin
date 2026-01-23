@@ -273,7 +273,7 @@ export function BookingDetails({ booking, onBack }: BookingDetailsProps) {
         )}
         {canApplyPass && (
           <Button
-            type="primary"
+            type="secondary"
             size="l"
             streched
             onClick={handleApplyPass}
@@ -285,7 +285,7 @@ export function BookingDetails({ booking, onBack }: BookingDetailsProps) {
         )}
         {booking.status === 'CONFIRMED' && !booking.isPaid && (
           <Button
-            type="primary"
+            type="secondary"
             size="l"
             streched
             onClick={handleMarkAsPaid}
@@ -296,17 +296,15 @@ export function BookingDetails({ booking, onBack }: BookingDetailsProps) {
           </Button>
         )}
         {(booking.status === 'HOLD' || booking.status === 'CONFIRMED') && (
-          <Button
+          <TextButton
             className={styles.cancelButton}
-            type="secondary"
-            size="l"
-            streched
+            type="negative"
+            size='m'
             onClick={handleCancel}
             disabled={isActionPending}
-            loading={isCancelling}
           >
-            Отменить бронирование
-          </Button>
+            {isCancelling ? 'Отмена...' : 'Отменить бронирование'}
+          </TextButton>
         )}
       </div>
     </div>
