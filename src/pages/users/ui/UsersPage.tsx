@@ -24,82 +24,98 @@ export function UsersPage() {
   const clientId = searchParams.get('clientId');
   const { data: clientData } = useClient(clientId ?? '');
 
-  const sort = useMemo(() => parseSort(searchParams.get('sort')), [searchParams]);
+  // Use searchParamsString as dependency instead of searchParams object,
+  // because URLSearchParams reference may not change when URL params update
+  const searchParamsString = searchParams.toString();
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const sort = useMemo(() => parseSort(searchParams.get('sort')), [searchParamsString]);
 
   const filters = useMemo(
     () => ({
       page: Number(searchParams.get('page')) || 1,
-      limit: Number(searchParams.get('limit')) || 20,
+      limit: Number(searchParams.get('limit')) || 10,
       sort: sort as ClientAdminFilters['sort'],
       search: searchParams.get('search') || undefined,
       isActive: searchParams.get('isActive') === 'false' ? false : true,
     }),
-    [searchParams, sort]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [searchParamsString, sort]
   );
 
   const { data, isLoading } = useClientsAdmin(filters);
 
   const handleFilterChange = useCallback(
     (newFilters: Partial<ClientAdminFilters>) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('page', '1');
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('page', '1');
 
-      Object.entries(newFilters).forEach(([key, value]) => {
-        if (value === undefined || value === null || value === '') {
-          params.delete(key);
-        } else if (key === 'sort' && Array.isArray(value)) {
-          if (value.length > 0) {
-            params.set('sort', serializeSort(value));
+        Object.entries(newFilters).forEach(([key, value]) => {
+          if (value === undefined || value === null || value === '') {
+            params.delete(key);
+          } else if (key === 'sort' && Array.isArray(value)) {
+            if (value.length > 0) {
+              params.set('sort', serializeSort(value));
+            } else {
+              params.delete('sort');
+            }
           } else {
-            params.delete('sort');
+            params.set(key, String(value));
           }
-        } else {
-          params.set(key, String(value));
-        }
-      });
+        });
 
-      setSearchParams(params);
+        return params;
+      });
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
   const handleSortChange = useCallback(
     (sort: SortCriterion[]) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('page', '1');
-      if (sort.length > 0) {
-        params.set('sort', serializeSort(sort));
-      } else {
-        params.delete('sort');
-      }
-      setSearchParams(params);
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('page', '1');
+        if (sort.length > 0) {
+          params.set('sort', serializeSort(sort));
+        } else {
+          params.delete('sort');
+        }
+        return params;
+      });
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
   const handlePageChange = useCallback(
     (page: number) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('page', String(page));
-      setSearchParams(params);
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('page', String(page));
+        return params;
+      });
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
   const handleOpen = useCallback(
     (id: string) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('clientId', id);
-      setSearchParams(params);
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('clientId', id);
+        return params;
+      });
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
   const handleClose = useCallback(() => {
-    const params = new URLSearchParams(searchParams);
-    params.delete('clientId');
-    setSearchParams(params);
-  }, [searchParams, setSearchParams]);
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.delete('clientId');
+      return params;
+    });
+  }, [setSearchParams]);
 
   return (
     <>

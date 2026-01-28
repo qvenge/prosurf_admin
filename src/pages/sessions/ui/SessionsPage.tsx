@@ -40,7 +40,12 @@ export function SessionsPage() {
   const [selectedView, setSelectedView] = useState(views[0].value);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const sort = useMemo(() => parseSort(searchParams.get('sort')), [searchParams]);
+  // Use searchParamsString as dependency instead of searchParams object,
+  // because URLSearchParams reference may not change when URL params update
+  const searchParamsString = searchParams.toString();
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const sort = useMemo(() => parseSort(searchParams.get('sort')), [searchParamsString]);
 
   // Get event data for badge
   const { data: event } = useEvent(eventId ?? undefined, !!eventId);
@@ -57,7 +62,8 @@ export function SessionsPage() {
         ? [searchParams.get('labels.any') as string]
         : undefined,
     }),
-    [searchParams, sort, eventId]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [searchParamsString, sort, eventId]
   );
 
   // Fetch sessions for table view (only when list view is active)
@@ -65,72 +71,82 @@ export function SessionsPage() {
 
   const handleFilterChange = useCallback(
     (newFilters: Partial<SessionAdminFilters>) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('page', '1');
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('page', '1');
 
-      Object.entries(newFilters).forEach(([key, value]) => {
-        if (value === undefined || value === null || value === '') {
-          params.delete(key);
-        } else if (key === 'sort' && Array.isArray(value)) {
-          if (value.length > 0) {
-            params.set('sort', serializeSort(value as SortCriterion[]));
+        Object.entries(newFilters).forEach(([key, value]) => {
+          if (value === undefined || value === null || value === '') {
+            params.delete(key);
+          } else if (key === 'sort' && Array.isArray(value)) {
+            if (value.length > 0) {
+              params.set('sort', serializeSort(value as SortCriterion[]));
+            } else {
+              params.delete('sort');
+            }
+          } else if (key === 'labels.any' && Array.isArray(value)) {
+            if (value.length > 0) {
+              params.set('labels.any', value[0] as string);
+            } else {
+              params.delete('labels.any');
+            }
           } else {
-            params.delete('sort');
+            params.set(key, String(value));
           }
-        } else if (key === 'labels.any' && Array.isArray(value)) {
-          if (value.length > 0) {
-            params.set('labels.any', value[0] as string);
-          } else {
-            params.delete('labels.any');
-          }
-        } else {
-          params.set(key, String(value));
-        }
+        });
+
+        return params;
       });
-
-      setSearchParams(params);
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
   const handleSortChange = useCallback(
     (newSort: SortCriterion[]) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('page', '1');
-      if (newSort.length > 0) {
-        params.set('sort', serializeSort(newSort));
-      } else {
-        params.delete('sort');
-      }
-      setSearchParams(params);
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('page', '1');
+        if (newSort.length > 0) {
+          params.set('sort', serializeSort(newSort));
+        } else {
+          params.delete('sort');
+        }
+        return params;
+      });
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
   const handlePageChange = useCallback(
     (page: number) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('page', String(page));
-      setSearchParams(params);
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('page', String(page));
+        return params;
+      });
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
   const handleView = useCallback(
     (id: string) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('sessionId', id);
-      setSearchParams(params);
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('sessionId', id);
+        return params;
+      });
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
   const handleClearEvent = useCallback(() => {
-    const params = new URLSearchParams(searchParams);
-    params.delete('eventId');
-    params.set('page', '1');
-    setSearchParams(params);
-  }, [searchParams, setSearchParams]);
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.delete('eventId');
+      params.set('page', '1');
+      return params;
+    });
+  }, [setSearchParams]);
 
   const handleCreate = () => {
     setIsModalOpen(true);
@@ -140,10 +156,13 @@ export function SessionsPage() {
     setIsModalOpen(false);
   };
 
-  const handleCloseSession = () => {
-    searchParams.delete('sessionId');
-    setSearchParams(searchParams);
-  };
+  const handleCloseSession = useCallback(() => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.delete('sessionId');
+      return params;
+    });
+  }, [setSearchParams]);
 
   return (
     <>

@@ -36,9 +36,13 @@ export function CertificatesFilters({ filters, onFilterChange }: CertificatesFil
   }, [filters.clientSearch]);
 
   useEffect(() => {
-    if (debouncedSearch !== filters.clientSearch) {
+    // Normalize both values: empty string and undefined are treated as the same
+    const normalizedDebounced = debouncedSearch || undefined;
+    const normalizedFilter = filters.clientSearch || undefined;
+
+    if (normalizedDebounced !== normalizedFilter) {
       isInternalChange.current = true;
-      onFilterChange({ clientSearch: debouncedSearch || undefined });
+      onFilterChange({ clientSearch: normalizedDebounced });
     }
   }, [debouncedSearch, filters.clientSearch, onFilterChange]);
 

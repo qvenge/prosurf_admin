@@ -30,9 +30,13 @@ export function UsersFilters({ filters, onFilterChange }: UsersFiltersProps) {
   }, [filters.search]);
 
   useEffect(() => {
-    if (debouncedSearch !== filters.search) {
+    // Normalize both values: empty string and undefined are treated as the same
+    const normalizedDebounced = debouncedSearch || undefined;
+    const normalizedFilter = filters.search || undefined;
+
+    if (normalizedDebounced !== normalizedFilter) {
       isInternalChange.current = true;
-      onFilterChange({ search: debouncedSearch || undefined });
+      onFilterChange({ search: normalizedDebounced });
     }
   }, [debouncedSearch, filters.search, onFilterChange]);
 

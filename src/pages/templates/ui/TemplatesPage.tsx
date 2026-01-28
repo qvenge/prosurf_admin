@@ -32,7 +32,12 @@ export function TemplatesPage() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingEventId, setEditingEventId] = useState<string | undefined>(undefined);
 
-  const sort = useMemo(() => parseSort(searchParams.get('sort')), [searchParams]);
+  // Use searchParamsString as dependency instead of searchParams object,
+  // because URLSearchParams reference may not change when URL params update
+  const searchParamsString = searchParams.toString();
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const sort = useMemo(() => parseSort(searchParams.get('sort')), [searchParamsString]);
 
   const filters = useMemo(
     () => ({
@@ -41,56 +46,63 @@ export function TemplatesPage() {
       sort: sort as EventAdminFilters['sort'],
       status: (searchParams.get('status') as EventAdminFilters['status']) || undefined,
     }),
-    [searchParams, sort]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [searchParamsString, sort]
   );
 
   const { data, isLoading } = useEventsAdmin(filters);
 
   const handleFilterChange = useCallback(
     (newFilters: Partial<EventAdminFilters>) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('page', '1');
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('page', '1');
 
-      Object.entries(newFilters).forEach(([key, value]) => {
-        if (value === undefined || value === null || value === '') {
-          params.delete(key);
-        } else if (key === 'sort' && Array.isArray(value)) {
-          if (value.length > 0) {
-            params.set('sort', serializeSort(value as SortCriterion[]));
+        Object.entries(newFilters).forEach(([key, value]) => {
+          if (value === undefined || value === null || value === '') {
+            params.delete(key);
+          } else if (key === 'sort' && Array.isArray(value)) {
+            if (value.length > 0) {
+              params.set('sort', serializeSort(value as SortCriterion[]));
+            } else {
+              params.delete('sort');
+            }
           } else {
-            params.delete('sort');
+            params.set(key, String(value));
           }
-        } else {
-          params.set(key, String(value));
-        }
-      });
+        });
 
-      setSearchParams(params);
+        return params;
+      });
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
   const handleSortChange = useCallback(
     (sort: SortCriterion[]) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('page', '1');
-      if (sort.length > 0) {
-        params.set('sort', serializeSort(sort));
-      } else {
-        params.delete('sort');
-      }
-      setSearchParams(params);
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('page', '1');
+        if (sort.length > 0) {
+          params.set('sort', serializeSort(sort));
+        } else {
+          params.delete('sort');
+        }
+        return params;
+      });
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
   const handlePageChange = useCallback(
     (page: number) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('page', String(page));
-      setSearchParams(params);
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('page', String(page));
+        return params;
+      });
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
   const handleCreate = () => {

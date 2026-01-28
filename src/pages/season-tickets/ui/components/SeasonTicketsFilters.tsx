@@ -47,9 +47,13 @@ export function SeasonTicketsFilters({
   }, [filters.ownerSearch]);
 
   useEffect(() => {
-    if (debouncedSearch !== filters.ownerSearch) {
+    // Normalize both values: empty string and undefined are treated as the same
+    const normalizedDebounced = debouncedSearch || undefined;
+    const normalizedFilter = filters.ownerSearch || undefined;
+
+    if (normalizedDebounced !== normalizedFilter) {
       isInternalChange.current = true;
-      onFilterChange({ ownerSearch: debouncedSearch || undefined });
+      onFilterChange({ ownerSearch: normalizedDebounced });
     }
   }, [debouncedSearch, filters.ownerSearch, onFilterChange]);
 

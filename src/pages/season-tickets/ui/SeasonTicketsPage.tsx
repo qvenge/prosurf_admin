@@ -51,7 +51,12 @@ export function SeasonTicketsPage() {
   const planId = searchParams.get('planId');
   const clientId = searchParams.get('clientId');
 
-  const sort = useMemo(() => parseSort(searchParams.get('sort')), [searchParams]);
+  // Use searchParamsString as dependency instead of searchParams object,
+  // because URLSearchParams reference may not change when URL params update
+  const searchParamsString = searchParams.toString();
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const sort = useMemo(() => parseSort(searchParams.get('sort')), [searchParamsString]);
 
   // Получить название плана для badge (только если planId есть)
   const { data: plan } = useSeasonTicketPlan(planId || '');
@@ -74,64 +79,71 @@ export function SeasonTicketsPage() {
         ? searchParams.get('hasRemainingPasses') === 'true'
         : undefined,
     }),
-    [searchParams, sort, planId, clientId]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [searchParamsString, sort, planId, clientId]
   );
 
   const { data, isLoading } = useSeasonTicketsAdmin(filters);
 
   const handleFilterChange = useCallback(
     (newFilters: Partial<SeasonTicketAdminFilters>) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('page', '1');
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('page', '1');
 
-      Object.entries(newFilters).forEach(([key, value]) => {
-        if (value === undefined || value === null || value === '') {
-          params.delete(key);
-        } else if (key === 'sort' && Array.isArray(value)) {
-          if (value.length > 0) {
-            params.set('sort', serializeSort(value as SortCriterion[]));
+        Object.entries(newFilters).forEach(([key, value]) => {
+          if (value === undefined || value === null || value === '') {
+            params.delete(key);
+          } else if (key === 'sort' && Array.isArray(value)) {
+            if (value.length > 0) {
+              params.set('sort', serializeSort(value as SortCriterion[]));
+            } else {
+              params.delete('sort');
+            }
+          } else if (key === 'status' && Array.isArray(value)) {
+            if (value.length > 0) {
+              params.set('status', value[0] as string);
+            } else {
+              params.delete('status');
+            }
+          } else if (typeof value === 'boolean') {
+            params.set(key, String(value));
           } else {
-            params.delete('sort');
+            params.set(key, String(value));
           }
-        } else if (key === 'status' && Array.isArray(value)) {
-          if (value.length > 0) {
-            params.set('status', value[0] as string);
-          } else {
-            params.delete('status');
-          }
-        } else if (typeof value === 'boolean') {
-          params.set(key, String(value));
-        } else {
-          params.set(key, String(value));
-        }
+        });
+
+        return params;
       });
-
-      setSearchParams(params);
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
   const handleSortChange = useCallback(
     (sort: SortCriterion[]) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('page', '1');
-      if (sort.length > 0) {
-        params.set('sort', serializeSort(sort));
-      } else {
-        params.delete('sort');
-      }
-      setSearchParams(params);
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('page', '1');
+        if (sort.length > 0) {
+          params.set('sort', serializeSort(sort));
+        } else {
+          params.delete('sort');
+        }
+        return params;
+      });
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
   const handlePageChange = useCallback(
     (page: number) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('page', String(page));
-      setSearchParams(params);
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('page', String(page));
+        return params;
+      });
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
   const handleCancelTicket = useCallback((ticket: SeasonTicketAdmin) => {
@@ -144,28 +156,34 @@ export function SeasonTicketsPage() {
 
   const handlePlanClick = useCallback(
     (planId: string) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('planId', planId);
-      params.set('page', '1');
-      params.delete('ticketId');
-      setSearchParams(params);
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        params.set('planId', planId);
+        params.set('page', '1');
+        params.delete('ticketId');
+        return params;
+      });
     },
-    [searchParams, setSearchParams]
+    [setSearchParams]
   );
 
   const handleClearPlan = useCallback(() => {
-    const params = new URLSearchParams(searchParams);
-    params.delete('planId');
-    params.set('page', '1');
-    setSearchParams(params);
-  }, [searchParams, setSearchParams]);
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.delete('planId');
+      params.set('page', '1');
+      return params;
+    });
+  }, [setSearchParams]);
 
   const handleClearClient = useCallback(() => {
-    const params = new URLSearchParams(searchParams);
-    params.delete('clientId');
-    params.set('page', '1');
-    setSearchParams(params);
-  }, [searchParams, setSearchParams]);
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.delete('clientId');
+      params.set('page', '1');
+      return params;
+    });
+  }, [setSearchParams]);
 
   // Plans tab handlers
   const handleCreatePlan = useCallback(() => {

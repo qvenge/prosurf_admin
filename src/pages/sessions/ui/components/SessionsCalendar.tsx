@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router';
 import clsx from 'clsx';
 import { CaretLeftBold, CaretRightBold } from '@/shared/ds/icons';
@@ -109,7 +109,7 @@ function getSessionType(session: Session): SessionType {
 }
 
 export function SessionsCalendar({ eventType, eventId, status, className }: SessionsCalendarProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [, setSearchParams] = useSearchParams();
   const today = new Date();
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
@@ -194,10 +194,13 @@ export function SessionsCalendar({ eventType, eventId, status, className }: Sess
     }
   };
 
-  const handleSessionClick = (sessionId: string) => {
-    searchParams.set('sessionId', sessionId);
-    setSearchParams(searchParams);
-  };
+  const handleSessionClick = useCallback((sessionId: string) => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.set('sessionId', sessionId);
+      return params;
+    });
+  }, [setSearchParams]);
 
   // Split days into weeks (rows of 7)
   const weeks = useMemo(() => {
