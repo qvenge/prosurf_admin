@@ -996,6 +996,7 @@ export const NotificationTemplateTypeSchema = z.enum([
   'CERTIFICATE_DENOMINATION',
   'CERTIFICATE_PASSES',
   'WAITLIST_SPOT_AVAILABLE',
+  'WELCOME_MESSAGE',
 ]);
 
 export const NotificationTemplateSchema = z.object({

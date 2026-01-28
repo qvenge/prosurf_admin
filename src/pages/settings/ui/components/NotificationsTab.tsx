@@ -16,6 +16,7 @@ const TEMPLATE_LABELS: Record<NotificationTemplateType, string> = {
   CERTIFICATE_DENOMINATION: 'Сертификат (номинал)',
   CERTIFICATE_PASSES: 'Сертификат (занятие)',
   WAITLIST_SPOT_AVAILABLE: 'Освободилось место',
+  WELCOME_MESSAGE: 'Приветственное сообщение',
 };
 
 // Descriptions for each template type
@@ -25,6 +26,7 @@ const TEMPLATE_DESCRIPTIONS: Record<NotificationTemplateType, string> = {
   CERTIFICATE_DENOMINATION: 'Отправляется после покупки сертификата на сумму',
   CERTIFICATE_PASSES: 'Отправляется после покупки сертификата на разовое занятие',
   WAITLIST_SPOT_AVAILABLE: 'Отправляется клиенту из листа ожидания, когда освобождается место',
+  WELCOME_MESSAGE: 'Отправляется новому пользователю при первом нажатии /start в боте',
 };
 
 export function NotificationsTab() {
