@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: "deploy-admin"
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
