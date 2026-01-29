@@ -34,7 +34,7 @@ export function UsersPage() {
   const filters = useMemo(
     () => ({
       page: Number(searchParams.get('page')) || 1,
-      limit: Number(searchParams.get('limit')) || 10,
+      limit: Number(searchParams.get('limit')) || 20,
       sort: sort as ClientAdminFilters['sort'],
       search: searchParams.get('search') || undefined,
       isActive: searchParams.get('isActive') === 'false' ? false : true,

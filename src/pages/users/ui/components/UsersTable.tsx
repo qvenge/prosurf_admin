@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { CaretRightBold } from '@/shared/ds/icons';
 import { DataTable, IconButton, UserCell, type ColumnDef, type SortCriterion } from '@/shared/ui';
 import type { Client, ClientSeasonTicketSummary } from '@/shared/api';
-import { formatDate, formatTime } from '@/shared/lib/format-utils';
+import { formatDate, formatDateUTC, formatTime } from '@/shared/lib/format-utils';
 import styles from './UsersTable.module.scss';
 
 type UserRowData = {
@@ -44,7 +44,7 @@ export function UsersTable({
       username: item.username,
       firstName: item.firstName,
       lastName: item.lastName,
-      dateOfBirth: item.dateOfBirth ? formatDate(item.dateOfBirth) : undefined,
+      dateOfBirth: item.dateOfBirth ? formatDateUTC(item.dateOfBirth) : undefined,
       photoUrl: item.photoUrl,
       phone: item.phone,
       email: item.email,

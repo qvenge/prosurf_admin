@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { type Client, useUpdateClient } from '@/shared/api';
 import { TextInput, Button } from '@/shared/ui';
-import { APP_TIMEZONE } from '@/shared/lib/timezone';
 import { DeactivateButton } from './DeactivateButton';
 import styles from './Profile.module.scss';
 
@@ -18,10 +17,11 @@ interface FormState {
 
 function formatBirthDate(dateString: string | null | undefined): string {
   if (!dateString) return '';
+  // Use UTC methods for birthdate - it's a timezone-agnostic date (no time component)
   const date = new Date(dateString);
-  const day = date.toLocaleDateString('ru-RU', { day: '2-digit', timeZone: APP_TIMEZONE });
-  const month = date.toLocaleDateString('ru-RU', { month: '2-digit', timeZone: APP_TIMEZONE });
-  const year = date.toLocaleDateString('ru-RU', { year: 'numeric', timeZone: APP_TIMEZONE });
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const year = date.getUTCFullYear();
   return `${day}.${month}.${year}г`;
 }
 

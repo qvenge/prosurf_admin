@@ -69,6 +69,7 @@ export const imagesClient = {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      timeout: 120000, // 2 минуты для загрузки больших файлов
     });
     return validateResponse(response.data, z.array(ImageSchema)).map(transformImageUrl);
   },

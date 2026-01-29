@@ -41,6 +41,15 @@ export const formatDate = (date: string | Date) => new Intl.DateTimeFormat(
   { day: '2-digit', month: 'long', year: 'numeric', timeZone: APP_TIMEZONE }
 ).format(date instanceof Date ? date : new Date(date));
 
+/**
+ * Format a date that is timezone-agnostic (like birthdate) using UTC.
+ * This ensures the date displays the same regardless of the viewer's timezone.
+ */
+export const formatDateUTC = (date: string | Date) => new Intl.DateTimeFormat(
+  'ru-RU',
+  { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' }
+).format(date instanceof Date ? date : new Date(date));
+
 export const formatTime = (date: string | Date) => new Intl.DateTimeFormat(
   'ru-RU',
   { hour: '2-digit', minute: '2-digit', timeZone: APP_TIMEZONE }
